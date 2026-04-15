@@ -262,6 +262,9 @@ class Questions extends CI_Controller
 		}
 
 		$stake_amount = round($selected_price * $selected_quantity, 2);
+		$multiplier = isset($selected_question->multiplier) ? (float)$selected_question->multiplier : 1.25;
+
+		$winning_amount = round($selected_price * $selected_quantity * $multiplier, 2);
 
 		if ($stake_amount <= 0) {
 			$this->session->set_flashdata('error', 'Trade amount is invalid.');
@@ -295,7 +298,7 @@ class Questions extends CI_Controller
 			$selected_answer,
 			$selected_price,
 			$selected_quantity,
-			0,
+			$winning_amount,
 			$stake_amount,
 			NULL
 		);

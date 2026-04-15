@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Withdrawals extends CI_Controller {
+class Withdrawals extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -9,7 +10,7 @@ class Withdrawals extends CI_Controller {
 		$this->load->model('User_model');
 		$this->load->model('Wallet_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
@@ -123,7 +124,13 @@ class Withdrawals extends CI_Controller {
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 VERY IMPORTANT
+			));
 			redirect('admin/login');
 		}
 

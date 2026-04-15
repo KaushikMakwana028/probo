@@ -1,24 +1,36 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Profile extends CI_Controller {
+class Profile extends CI_Controller
+{
 
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->model('User_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
 
 	public function index()
 	{
+
+		if (!$this->session->userdata('admin_id')) {
+			redirect('admin/login');
+		}
+		
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 IMPORTANT
+			));
 			redirect('admin/login');
 		}
 
@@ -36,11 +48,21 @@ class Profile extends CI_Controller {
 
 	public function update()
 	{
+		if (!$this->session->userdata('admin_id')) {
+			redirect('admin/login');
+		}
+
 		$admin_id = $this->session->userdata('admin_id');
 		$admin = $this->User_model->get_by_id($admin_id);
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'
+			));
 			redirect('admin/login');
 		}
 
@@ -97,11 +119,21 @@ class Profile extends CI_Controller {
 
 	public function change_password()
 	{
+
+		if (!$this->session->userdata('admin_id')) {
+			redirect('admin/login');
+		}
 		$admin_id = $this->session->userdata('admin_id');
 		$admin = $this->User_model->get_by_id($admin_id);
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'
+			));
 			redirect('admin/login');
 		}
 
@@ -126,7 +158,7 @@ class Profile extends CI_Controller {
 			return NULL;
 		}
 
-		$upload_path = FCPATH.'uploads/profile/';
+		$upload_path = FCPATH . 'uploads/profile/';
 
 		if (!is_dir($upload_path)) {
 			mkdir($upload_path, 0777, TRUE);
@@ -148,10 +180,10 @@ class Profile extends CI_Controller {
 		}
 
 		$upload_data = $this->upload->data();
-		$new_image = 'uploads/profile/'.$upload_data['file_name'];
+		$new_image = 'uploads/profile/' . $upload_data['file_name'];
 
 		if (!empty($admin->profile_image) && strpos($admin->profile_image, 'uploads/profile/') === 0) {
-			$old_file = FCPATH.$admin->profile_image;
+			$old_file = FCPATH . $admin->profile_image;
 
 			if (is_file($old_file)) {
 				@unlink($old_file);

@@ -5,26 +5,26 @@
 			<p>This category is active now. Every question appears in a cleaner single-column layout, so it is easier to scan and open.</p>
 		</div>
 
-		<div class="question-stats">
-			<div class="question-stat">
-				<span>Total Questions</span>
-				<strong><?php echo (int) $total_questions; ?></strong>
+		<div class="q-stats">
+			<div class="q-stat">
+				<span class="q-stat-label">Total Questions</span>
+				<strong class="q-stat-val"><?php echo (int) $total_questions; ?></strong>
 			</div>
-			<div class="question-stat">
-				<span>Answered</span>
-				<strong><?php echo (int) $answered_count; ?></strong>
+			<div class="q-stat stat-pending">
+				<span class="q-stat-label">Answered</span>
+				<strong class="q-stat-val"><?php echo (int) $answered_count; ?></strong>
 			</div>
-			<div class="question-stat">
-				<span>Correct</span>
-				<strong><?php echo (int) $correct_count; ?></strong>
+			<div class="q-stat stat-correct">
+				<span class="q-stat-label">Correct</span>
+				<strong class="q-stat-val"><?php echo (int) $correct_count; ?></strong>
 			</div>
-			<div class="question-stat">
-				<span>Wrong</span>
-				<strong><?php echo (int) $wrong_count; ?></strong>
+			<div class="q-stat stat-wrong">
+				<span class="q-stat-label">Wrong</span>
+				<strong class="q-stat-val"><?php echo (int) $wrong_count; ?></strong>
 			</div>
 		</div>
 
-		<div class="question-grid">
+		<div class="q-list">
 			<?php foreach ($selected_category->questions as $index => $question_item): ?>
 				<?php
 				$answer_state = isset($user_answers[(int) $question_item->id]) ? $user_answers[(int) $question_item->id] : NULL;
@@ -45,32 +45,39 @@
 					}
 				}
 				?>
-				<a class="question-card <?php echo $status; ?>" href="<?php echo site_url('questions/answer/' . (int) $question_item->id); ?>">
-					<div class="question-card-top">
-						<span class="question-card-index"><?php echo $index + 1; ?></span>
-						<span class="question-status <?php echo $status; ?>"><?php echo $status_label; ?></span>
+				<a class="q-card <?php echo $status; ?>" href="<?php echo site_url('questions/answer/' . (int) $question_item->id); ?>">
+					<div class="q-card-top">
+						<div class="q-card-left">
+							<span class="q-idx"><?php echo $index + 1; ?></span>
+							<h4><?php echo html_escape($question_item->question); ?></h4>
+						</div>
+						<span class="q-status <?php echo $status; ?>"><?php echo $status_label; ?></span>
 					</div>
-					<h4><?php echo html_escape($question_item->question); ?></h4>
-					<p>
-						YES: Rs <?php echo number_format((float) $question_item->yes_price, 2); ?>
-						&nbsp;&nbsp;|&nbsp;&nbsp;
-						NO: Rs <?php echo number_format((float) $question_item->no_price, 2); ?>
-					</p>
-					<div class="question-card-foot">
+					<div class="q-bet-options">
+						<span class="q-bet q-bet-yes">
+							<span class="q-dot q-dot-yes"></span>
+							YES: Rs <?php echo number_format((float) $question_item->yes_price, 2); ?>
+						</span>
+						<span class="q-bet q-bet-no">
+							<span class="q-dot q-dot-no"></span>
+							NO: Rs <?php echo number_format((float) $question_item->no_price, 2); ?>
+						</span>
+					</div>
+					<div class="q-card-foot">
 						<span><?php echo $answer_state ? 'Answer locked' : 'Open answer screen'; ?></span>
-						<span class="question-card-amount"><?php echo $amount_text; ?></span>
+						<span class="q-marks"><?php echo $amount_text; ?></span>
 					</div>
 				</a>
 			<?php endforeach; ?>
 		</div>
 	</section>
 <?php elseif ($selected_category): ?>
-	<div class="question-empty">
+	<div class="q-empty">
 		<h3>No Questions Found</h3>
 		<p>This category does not have questions yet. Please choose another category.</p>
 	</div>
 <?php else: ?>
-	<div class="question-empty">
+	<div class="q-empty">
 		<h3>Start With A Category</h3>
 		<p>Select a category capsule above and all questions from that category will load here without refreshing the page.</p>
 	</div>

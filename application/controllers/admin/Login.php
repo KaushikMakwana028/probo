@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Login extends CI_Controller {
+class Login extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -11,7 +12,7 @@ class Login extends CI_Controller {
 
 	public function index()
 	{
-		if ($this->session->userdata('admin_id')) {
+		if ($this->session->userdata('admin_logged_in') === TRUE) {
 			redirect('admin/dashboard');
 		}
 
@@ -46,7 +47,8 @@ class Login extends CI_Controller {
 			'admin_id' => $user->id,
 			'admin_name' => $user->name,
 			'admin_mobile' => $user->mobile,
-			'admin_email' => $user->email
+			'admin_email' => $user->email,
+			'admin_logged_in' => TRUE
 		));
 
 		redirect('admin/dashboard');
@@ -54,7 +56,13 @@ class Login extends CI_Controller {
 
 	public function logout()
 	{
-		$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+		$this->session->unset_userdata(array(
+			'admin_id',
+			'admin_name',
+			'admin_mobile',
+			'admin_email',
+			'admin_logged_in'
+		));
 		redirect('admin/login');
 	}
 }

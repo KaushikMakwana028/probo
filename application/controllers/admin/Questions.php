@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Questions extends CI_Controller {
+class Questions extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -10,7 +11,7 @@ class Questions extends CI_Controller {
 		$this->load->model('Category_model');
 		$this->load->model('Wallet_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
@@ -114,20 +115,21 @@ class Questions extends CI_Controller {
 			$question_text = isset($questions_input[$i]) ? trim($questions_input[$i]) : '';
 			$yes_price = isset($yes_prices[$i]) ? (float) $yes_prices[$i] : 0;
 			$no_price = isset($no_prices[$i]) ? (float) $no_prices[$i] : 0;
+			$multiplier = (float) $this->input->post('multiplier');
 
 			if ($question_text === '') {
 				$this->session->set_flashdata('error', 'Please fill all question textboxes before saving.');
-				redirect('admin/questions/add?category_id='.$category_id.'&question_count='.$question_count);
+				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
 			if ($yes_price < 0 || $no_price < 0) {
 				$this->session->set_flashdata('error', 'Yes price and No price must be zero or greater.');
-				redirect('admin/questions/add?category_id='.$category_id.'&question_count='.$question_count);
+				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
 			if (!$this->is_valid_price_pair($yes_price, $no_price)) {
 				$this->session->set_flashdata('error', 'YES and NO prices must both be greater than zero.');
-				redirect('admin/questions/add?category_id='.$category_id.'&question_count='.$question_count);
+				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
 			$batch[] = array(
@@ -135,6 +137,7 @@ class Questions extends CI_Controller {
 				'question' => $question_text,
 				'yes_price' => $yes_price,
 				'no_price' => $no_price,
+				'multiplier' => $multiplier,
 				'start_time' => $start_time_sql,
 				'end_time' => $end_time_sql,
 				'status' => $status
@@ -155,7 +158,7 @@ class Questions extends CI_Controller {
 		}
 
 		$this->session->set_flashdata('success', 'Questions added successfully.');
-		redirect('admin/questions/view?category_id='.$category_id);
+		redirect('admin/questions/view?category_id=' . $category_id);
 	}
 
 	public function edit($id)
@@ -201,13 +204,14 @@ class Questions extends CI_Controller {
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		$category_id = (int) $this->input->post('category_id');
 		$category = $this->Category_model->get_category($category_id);
 		$yes_price = (float) $this->input->post('yes_price', TRUE);
 		$no_price = (float) $this->input->post('no_price', TRUE);
+		$multiplier = (float) $this->input->post('multiplier', TRUE);
 		$status = strtolower(trim((string) $this->input->post('status', TRUE)));
 		$start_time = trim((string) $this->input->post('start_time', TRUE));
 		$end_time = trim((string) $this->input->post('end_time', TRUE));
@@ -216,27 +220,27 @@ class Questions extends CI_Controller {
 
 		if (!$category) {
 			$this->session->set_flashdata('error', 'Selected category not found.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		if ($yes_price < 0 || $no_price < 0) {
 			$this->session->set_flashdata('error', 'Yes price and No price must be zero or greater.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		if (!$this->is_valid_price_pair($yes_price, $no_price)) {
 			$this->session->set_flashdata('error', 'YES and NO prices must both be greater than zero.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		if (($start_time !== '' && $start_time_sql === NULL) || ($end_time !== '' && $end_time_sql === NULL)) {
 			$this->session->set_flashdata('error', 'Please enter valid start and end time values.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		if (!$this->validate_question_window($start_time_sql, $end_time_sql)) {
 			$this->session->set_flashdata('error', 'Start time must be earlier than end time.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		$updated = $this->Category_model->update_question($id, array(
@@ -244,6 +248,7 @@ class Questions extends CI_Controller {
 			'question' => $this->input->post('question', TRUE),
 			'yes_price' => $yes_price,
 			'no_price' => $no_price,
+			'multiplier' => $multiplier,
 			'answer_key' => '',
 			'start_time' => $start_time_sql,
 			'end_time' => $end_time_sql,
@@ -253,13 +258,13 @@ class Questions extends CI_Controller {
 
 		if (!$updated) {
 			$this->session->set_flashdata('error', 'Question could not be updated.');
-			redirect('admin/questions/edit/'.$id);
+			redirect('admin/questions/edit/' . $id);
 		}
 
 		$this->Category_model->record_price_history($id, $yes_price, $no_price);
 
 		$this->session->set_flashdata('success', 'Question updated successfully. Please save the answer key again from View Questions.');
-		redirect('admin/questions/view?category_id='.$category_id);
+		redirect('admin/questions/view?category_id=' . $category_id);
 	}
 
 	public function save_answer_keys()
@@ -277,7 +282,7 @@ class Questions extends CI_Controller {
 
 		if (!is_array($answer_keys) || !$this->Category_model->save_answer_keys($category_id, $answer_keys)) {
 			$this->session->set_flashdata('error', 'Please select at least one valid Yes or No answer key.');
-			redirect('admin/questions/view?category_id='.$category_id);
+			redirect('admin/questions/view?category_id=' . $category_id);
 		}
 
 		$resolved_any = FALSE;
@@ -305,7 +310,7 @@ class Questions extends CI_Controller {
 		}
 
 		$this->session->set_flashdata('success', $resolved_any ? 'Answer key saved successfully and winning amount credited to user wallets.' : 'Answer key saved successfully.');
-		redirect('admin/questions/view?category_id='.$category_id);
+		redirect('admin/questions/view?category_id=' . $category_id);
 	}
 
 	public function delete($id)
@@ -321,11 +326,11 @@ class Questions extends CI_Controller {
 
 		if (!$this->Category_model->delete_question($id)) {
 			$this->session->set_flashdata('error', 'Question could not be deleted. Please confirm the question table exists.');
-			redirect('admin/questions/view?category_id='.(int) $question->category_id);
+			redirect('admin/questions/view?category_id=' . (int) $question->category_id);
 		}
 
 		$this->session->set_flashdata('success', 'Question deleted successfully.');
-		redirect('admin/questions/view?category_id='.(int) $question->category_id);
+		redirect('admin/questions/view?category_id=' . (int) $question->category_id);
 	}
 
 	public function live_stats($category_id = 0)
@@ -358,7 +363,13 @@ class Questions extends CI_Controller {
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 VERY IMPORTANT
+			));
 			redirect('admin/login');
 		}
 

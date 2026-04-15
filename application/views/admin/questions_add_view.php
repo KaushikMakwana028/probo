@@ -1246,6 +1246,10 @@ foreach ($categories as $category_item) {
 									<label for="no_price_<?php echo $i; ?>">No Price</label>
 									<input type="number" class="js-no-price" id="no_price_<?php echo $i; ?>" name="no_prices[<?php echo $i; ?>]" min="0.01" step="0.01" value="<?php echo set_value('no_prices[' . $i . ']', '10.00'); ?>" required>
 								</div>
+								<div class="form-group">
+									<label>Multiplier</label>
+									<input type="number" step="0.01" name="multiplier" class="form-control" value="1.25" required>
+								</div>
 							</div>
 							<div class="question-price-summary">
 								<div>

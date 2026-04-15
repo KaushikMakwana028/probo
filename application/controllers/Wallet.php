@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Wallet extends CI_Controller {
+class Wallet extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -18,13 +19,13 @@ class Wallet extends CI_Controller {
 	{
 		$user = $this->get_user();
 		$history_filter = strtolower(trim((string) $this->input->get('history')));
-		$allowed_filters = array('all', 'winnings', 'withdrawals', 'deposits', 'trades');
+		$allowed_filters = array('all', 'winnings', 'withdrawals', 'deposits', 'trades', 'refunds');
 
 		if (!in_array($history_filter, $allowed_filters, TRUE)) {
 			$history_filter = 'all';
 		}
 
-		$transactions = $this->Wallet_model->get_transactions_by_user($user->id, $history_filter, 10);
+		$transactions = $this->Wallet_model->get_transactions_by_user($user->id);
 		$withdrawals = $this->Wallet_model->get_withdrawals_by_user($user->id);
 		$bank_details_saved = !empty($user->bank_account_holder_name) && !empty($user->bank_name) && !empty($user->bank_account_number) && !empty($user->bank_ifsc_code);
 
@@ -36,6 +37,7 @@ class Wallet extends CI_Controller {
 			'withdrawals' => $withdrawals,
 			'total_winnings' => $this->Wallet_model->get_total_credited_by_user($user->id),
 			'total_withdrawn' => $this->Wallet_model->get_total_debited_by_user($user->id),
+			'total_deposited' => $this->Wallet_model->get_total_deposited_by_user($user->id),
 			'history_filter' => $history_filter,
 			'bank_details_saved' => $bank_details_saved,
 			'edit_bank_details' => $this->input->get('edit_bank') == '1' || !$bank_details_saved,
@@ -100,44 +102,49 @@ class Wallet extends CI_Controller {
 		redirect('wallet');
 	}
 
-	public function deposit()
+	public function add_balance()
+	{
+		$user = $this->get_user(); // use get_user() for consistency + null check
+
+		$settings = $this->db->get('payment_settings')->row();
+
+		// Always sync session wallet balance with DB value
+		$this->session->set_userdata('wallet_balance', $user->wallet_balance);
+
+		$data = [
+			'title' => 'Add Balance',
+			'user' => $user,
+			'settings' => $settings,
+			'page_type' => 'dashboard'
+		];
+
+		$this->load->view('includes/header', $data);
+		$this->load->view('add_balance_view', $data);
+		$this->load->view('includes/footer');
+	}
+
+	public function request_deposit()
 	{
 		$user = $this->get_user();
 
-		$this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
+		$amount = (float)$this->input->post('amount');
+		$txn_id = $this->input->post('txn_id');
 
-		if ($this->form_validation->run() === FALSE) {
-			$this->session->set_flashdata('error', trim(strip_tags(validation_errors(' ', ' '))));
-			redirect('wallet');
+		if ($amount <= 0) {
+			$this->session->set_flashdata('error', 'Invalid amount');
+			redirect('wallet/add_balance');
 		}
 
-		$amount = round((float) $this->input->post('amount', TRUE), 2);
-
-		if ($amount < 1 || $amount > 100000) {
-			$this->session->set_flashdata('error', 'Deposit amount must be between Rs 1 and Rs 100000.');
-			redirect('wallet');
-		}
-
-		$this->User_model->adjust_wallet_balance((int) $user->id, $amount);
-		$this->Wallet_model->add_transaction(array(
-			'user_id' => (int) $user->id,
-			'source_type' => 'deposit',
-			'source_id' => NULL,
-			'type' => 'credit',
+		$this->db->insert('deposit_requests', [
+			'user_id' => $user->id,
 			'amount' => $amount,
-			'description' => 'Wallet deposit added by user'
-		));
-		$this->User_model->add_notification(array(
-			'user_id' => (int) $user->id,
-			'title' => 'Deposit added',
-			'message' => 'Rs ' . number_format($amount, 2) . ' was added to your wallet balance.',
-			'type' => 'wallet'
-		));
+			'txn_id' => $txn_id,
+			'status' => 'pending'
+		]);
 
-		$this->session->set_flashdata('success', 'Deposit added successfully to your wallet.');
-		redirect('wallet');
+		$this->session->set_flashdata('success', 'Deposit request sent to admin');
+		redirect('wallet/add_balance');
 	}
-
 	public function save_bank_details()
 	{
 		$user = $this->get_user();

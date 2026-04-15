@@ -7,7 +7,7 @@
 	<title><?php echo isset($title) ? html_escape($title) : 'Application'; ?></title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	
+
 	<style>
 		:root {
 			--primary: #2563eb;
@@ -919,6 +919,11 @@
 						<a class="<?php echo (isset($active_page) && $active_page === 'questions') ? 'active' : ''; ?>" href="<?php echo site_url('questions'); ?>">
 							<i class="fa-solid fa-clipboard-question"></i>
 							<span>Questions</span>
+						</a>
+
+						<a href="<?php echo site_url('wallet/add_balance'); ?>">
+							<i class="fas fa-wallet"></i>
+							<span>Add Balance</span>
 						</a>
 
 					</nav>

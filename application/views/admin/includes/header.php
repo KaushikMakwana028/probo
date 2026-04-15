@@ -802,6 +802,26 @@
 							</a>
 						</div>
 					</div>
+
+					<div class="sidebar-group">
+						<button class="sidebar-group-toggle">
+							<span class="sidebar-group-label">
+								<i class="fas fa-money-bill"></i>
+								Deposits
+							</span>
+							<i class="fas fa-chevron-down sidebar-caret"></i>
+						</button>
+
+						<div class="sidebar-subnav">
+							<a href="<?php echo site_url('admin/deposits/settings'); ?>">
+								Payment Settings
+							</a>
+							<a href="<?php echo site_url('admin/deposits/requests'); ?>">
+								Deposit Requests
+							</a>
+						</div>
+					</div>
+					
 					<div class="sidebar-group <?php echo (isset($active_page) && strpos($active_page, 'referrals') === 0) ? 'open' : ''; ?>">
 						<button class="sidebar-group-toggle" type="button">
 							<span class="sidebar-group-label">

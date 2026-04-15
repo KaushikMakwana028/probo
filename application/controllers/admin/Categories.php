@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Categories extends CI_Controller {
+class Categories extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -9,7 +10,7 @@ class Categories extends CI_Controller {
 		$this->load->model('User_model');
 		$this->load->model('Category_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
@@ -82,14 +83,14 @@ class Categories extends CI_Controller {
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
-			redirect('admin/categories?edit_category='.$id);
+			redirect('admin/categories?edit_category=' . $id);
 		}
 
 		$name = $this->input->post('name', TRUE);
 
 		if ($this->Category_model->category_name_exists($name, $id)) {
 			$this->session->set_flashdata('error', 'This category name already exists.');
-			redirect('admin/categories?edit_category='.$id);
+			redirect('admin/categories?edit_category=' . $id);
 		}
 
 		$updated = $this->Category_model->update_category($id, array(
@@ -99,7 +100,7 @@ class Categories extends CI_Controller {
 
 		if (!$updated) {
 			$this->session->set_flashdata('error', 'Category could not be updated. Please confirm the category table exists.');
-			redirect('admin/categories?edit_category='.$id);
+			redirect('admin/categories?edit_category=' . $id);
 		}
 
 		$this->session->set_flashdata('success', 'Category updated successfully.');
@@ -131,7 +132,13 @@ class Categories extends CI_Controller {
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 VERY IMPORTANT
+			));
 			redirect('admin/login');
 		}
 

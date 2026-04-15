@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Wallet_model extends CI_Model {
+class Wallet_model extends CI_Model
+{
 
 	protected $transactions_table = 'wallet_transactions';
 	protected $withdrawals_table = 'withdrawal_requests';
@@ -28,7 +29,8 @@ class Wallet_model extends CI_Model {
 				'winnings' => 'question_result',
 				'withdrawals' => 'withdrawal',
 				'deposits' => 'deposit',
-				'trades' => 'trade_entry'
+				'trades' => 'trade_entry',
+				'refunds' => 'refund'
 			);
 
 			if (isset($source_map[$source_type])) {
@@ -92,7 +94,7 @@ class Wallet_model extends CI_Model {
 	public function get_all_withdrawals()
 	{
 		$this->db->select('w.*, u.name AS user_name, u.email AS user_email, u.mobile AS user_mobile');
-		$this->db->from($this->withdrawals_table.' w');
+		$this->db->from($this->withdrawals_table . ' w');
 		$this->db->join('users u', 'u.id = w.user_id', 'left');
 		$this->db->order_by("FIELD(w.status, 'pending', 'approved', 'rejected')", '', FALSE);
 		$this->db->order_by('w.id', 'DESC');
@@ -116,5 +118,17 @@ class Wallet_model extends CI_Model {
 		$this->db->where('user_id', (int) $user_id);
 		$this->db->where('status', 'pending');
 		return $this->db->count_all_results($this->withdrawals_table) > 0;
+	}
+
+	public function get_total_deposited_by_user($user_id)
+	{
+		$result = $this->db
+			->select_sum('amount')
+			->where('user_id', $user_id)
+			->where('type', 'credit')
+			->where('source_type', 'deposit')
+			->get('wallet_transactions')
+			->row();
+		return $result->amount ?? 0;
 	}
 }

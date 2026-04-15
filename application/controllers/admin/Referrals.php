@@ -1,14 +1,15 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Referrals extends CI_Controller {
+class Referrals extends CI_Controller
+{
 
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->model('User_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
@@ -81,7 +82,13 @@ class Referrals extends CI_Controller {
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 VERY IMPORTANT
+			));
 			redirect('admin/login');
 		}
 

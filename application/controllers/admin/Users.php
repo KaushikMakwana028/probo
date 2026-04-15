@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Users extends CI_Controller {
+class Users extends CI_Controller
+{
 
 	public function __construct()
 	{
@@ -10,7 +11,7 @@ class Users extends CI_Controller {
 		$this->load->model('Category_model');
 		$this->load->model('Wallet_model');
 
-		if (!$this->session->userdata('admin_id')) {
+		if (!$this->session->userdata('admin_logged_in')) {
 			redirect('admin/login');
 		}
 	}
@@ -86,7 +87,7 @@ class Users extends CI_Controller {
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
-			redirect('admin/users/edit/'.$id);
+			redirect('admin/users/edit/' . $id);
 		}
 
 		$mobile = $this->input->post('mobile', TRUE);
@@ -94,12 +95,12 @@ class Users extends CI_Controller {
 
 		if ($this->User_model->mobile_exists($mobile, $id)) {
 			$this->session->set_flashdata('error', 'This mobile number is already used by another user.');
-			redirect('admin/users/edit/'.$id);
+			redirect('admin/users/edit/' . $id);
 		}
 
 		if ($this->User_model->email_exists($email, $id)) {
 			$this->session->set_flashdata('error', 'This email address is already used by another user.');
-			redirect('admin/users/edit/'.$id);
+			redirect('admin/users/edit/' . $id);
 		}
 
 		$update_data = array(
@@ -114,7 +115,7 @@ class Users extends CI_Controller {
 		if ($password !== '') {
 			if (strlen($password) < 6) {
 				$this->session->set_flashdata('error', 'Password must be at least 6 characters long.');
-				redirect('admin/users/edit/'.$id);
+				redirect('admin/users/edit/' . $id);
 			}
 
 			$update_data['password'] = password_hash($password, PASSWORD_DEFAULT);
@@ -145,7 +146,13 @@ class Users extends CI_Controller {
 		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
 
 		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email'));
+			$this->session->unset_userdata(array(
+				'admin_id',
+				'admin_name',
+				'admin_mobile',
+				'admin_email',
+				'admin_logged_in'   // 🔥 VERY IMPORTANT
+			));
 			redirect('admin/login');
 		}
 
