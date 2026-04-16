@@ -34,6 +34,22 @@ class Questions extends CI_Controller
 		}
 		$category_payload = $this->build_category_payload($user, $selected_category);
 
+		// ✅ ADD THIS BLOCK
+		if ($selected_category && !empty($selected_category->questions)) {
+
+			foreach ($selected_category->questions as $q) {
+
+				// real users
+				$real_users = $this->Category_model->get_total_users_by_question($q->id);
+
+				// admin users
+				$admin_users = (int) (isset($q->admin_extra_users) ? $q->admin_extra_users : 0);
+
+				// final total
+				$q->total_users = $real_users + $admin_users;
+			}
+		}
+
 		$data = array(
 			'title' => 'Questions',
 			'page_type' => 'dashboard',
@@ -74,6 +90,17 @@ class Questions extends CI_Controller
 			$selected_category->questions = $this->Category_model->get_visible_questions_by_category_for_user($selected_category->id, $user->id);
 		}
 		$payload = $this->build_category_payload($user, $selected_category);
+
+		if ($selected_category && !empty($selected_category->questions)) {
+
+			foreach ($selected_category->questions as $q) {
+
+				$real_users = $this->Category_model->get_total_users_by_question($q->id);
+				$admin_users = (int) (isset($q->admin_extra_users) ? $q->admin_extra_users : 0);
+
+				$q->total_users = $real_users + $admin_users;
+			}
+		}
 
 		$this->output
 			->set_content_type('application/json')
@@ -147,6 +174,10 @@ class Questions extends CI_Controller
 				}
 			}
 		}
+		// ✅ TOTAL USERS CALCULATION
+		$real_users = $this->Category_model->get_total_users_by_question($question->id);
+		$admin_users = (int) ($question->admin_extra_users ?? 0);
+		$total_users = $real_users + $admin_users;
 
 		$data = array(
 			'title' => 'Answer Question',
@@ -163,6 +194,7 @@ class Questions extends CI_Controller
 			'answered_count' => $answered_count,
 			'correct_count' => $correct_count,
 			'wrong_count' => $wrong_count,
+			'total_users' => $total_users,
 			'active_page' => 'questions'
 		);
 
@@ -319,7 +351,14 @@ class Questions extends CI_Controller
 
 		if ($selected_category && !empty($selected_category->questions)) {
 			foreach ($selected_category->questions as $question_item) {
+
 				$question_id = (int) $question_item->id;
+
+				// ✅ FIXED VARIABLE
+				$counts = $this->Category_model->get_question_user_counts($question_item->id);
+
+				// ✅ ASSIGN TO CORRECT OBJECT
+				$question_item->total_users = (int) $counts + (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
 
 				if (isset($user_answers[$question_id])) {
 					$answered_count++;

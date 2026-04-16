@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Category_model extends CI_Model {
+class Category_model extends CI_Model
+{
 
 	protected $category_table = 'categories';
 	protected $question_table = 'category_questions';
@@ -25,8 +26,8 @@ class Category_model extends CI_Model {
 		}
 
 		$this->db->select('c.*, COUNT(q.id) AS question_count');
-		$this->db->from($this->category_table.' c');
-		$this->db->join($this->question_table.' q', 'q.category_id = c.id', 'left');
+		$this->db->from($this->category_table . ' c');
+		$this->db->join($this->question_table . ' q', 'q.category_id = c.id', 'left');
 		$this->db->group_by('c.id');
 		$this->db->order_by('c.name', 'ASC');
 		return $this->db->get()->result();
@@ -136,8 +137,8 @@ class Category_model extends CI_Model {
 		}
 
 		$this->db->select('q.*, c.name AS category_name');
-		$this->db->from($this->question_table.' q');
-		$this->db->join($this->category_table.' c', 'c.id = q.category_id');
+		$this->db->from($this->question_table . ' q');
+		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->order_by('q.id', 'DESC');
 		return $this->db->get()->result();
 	}
@@ -149,8 +150,8 @@ class Category_model extends CI_Model {
 		}
 
 		$this->db->select('q.*, c.name AS category_name');
-		$this->db->from($this->question_table.' q');
-		$this->db->join($this->category_table.' c', 'c.id = q.category_id');
+		$this->db->from($this->question_table . ' q');
+		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->where('q.category_id', (int) $category_id);
 		$this->db->order_by('q.id', 'ASC');
 		return $this->db->get()->result();
@@ -198,8 +199,8 @@ class Category_model extends CI_Model {
 		}
 
 		$this->db->select('q.*, c.name AS category_name');
-		$this->db->from($this->question_table.' q');
-		$this->db->join($this->category_table.' c', 'c.id = q.category_id');
+		$this->db->from($this->question_table . ' q');
+		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->where('q.id', (int) $id);
 		return $this->db->get()->row();
 	}
@@ -315,8 +316,8 @@ class Category_model extends CI_Model {
 		}
 
 		$this->db->select('a.question_id, a.answer, a.price, a.quantity, a.payout_amount, a.stake_amount, a.settled_at');
-		$this->db->from($this->answer_table.' a');
-		$this->db->join($this->question_table.' q', 'q.id = a.question_id');
+		$this->db->from($this->answer_table . ' a');
+		$this->db->join($this->question_table . ' q', 'q.id = a.question_id');
 		$this->db->where('a.user_id', (int) $user_id);
 		$this->db->where('q.category_id', (int) $category_id);
 		$rows = $this->db->get()->result();
@@ -576,5 +577,28 @@ class Category_model extends CI_Model {
 
 		$timestamp = strtotime($value);
 		return $timestamp ?: FALSE;
+	}
+
+	public function get_total_users_by_question($question_id)
+	{
+		$row = $this->db
+			->select("COUNT(DISTINCT user_id) as total")
+			->from('user_question_answers')
+			->where('question_id', $question_id)
+			->get()
+			->row();
+
+		return (int) ($row->total ?? 0);
+	}
+
+	public function get_question_user_counts($question_id)
+	{
+		if (!$this->db->table_exists('user_question_answers')) {
+			return 0;
+		}
+
+		return (int) $this->db
+			->where('question_id', (int)$question_id)
+			->count_all_results('user_question_answers');
 	}
 }

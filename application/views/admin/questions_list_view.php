@@ -742,6 +742,77 @@
 		color: #9ca3af;
 	}
 
+	/* ===== HEADER USER STATS ===== */
+	.vq-users-pro {
+		display: flex;
+		gap: 8px;
+		margin-top: 6px;
+	}
+
+	.vq-users-pro .chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 10px;
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 600;
+		border: 1px solid transparent;
+	}
+
+	/* total */
+	.vq-users-pro .total {
+		background: #f3f4f6;
+		color: #374151;
+	}
+
+	/* YES */
+	.vq-users-pro .yes {
+		background: #eef2ff;
+		color: #4f46e5;
+	}
+
+	/* NO */
+	.vq-users-pro .no {
+		background: #fff7ed;
+		color: #ea580c;
+	}
+
+	/* ===== CARD STATS ===== */
+	.vq-stats-pro {
+		display: flex;
+		gap: 10px;
+		margin-top: 8px;
+	}
+
+	.vq-stats-pro .mini {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 4px 8px;
+		border-radius: 6px;
+		font-size: 11px;
+		font-weight: 600;
+	}
+
+	/* YES */
+	.vq-stats-pro .yes {
+		background: #eef2ff;
+		color: #4f46e5;
+	}
+
+	/* NO */
+	.vq-stats-pro .no {
+		background: #fff7ed;
+		color: #ea580c;
+	}
+
+	/* trades */
+	.vq-stats-pro .trade {
+		background: #f9fafb;
+		color: #6b7280;
+	}
+
 	/* responsive */
 	@media(max-width:900px) {
 		.vq-topbar {
@@ -870,6 +941,9 @@
 							$saved = in_array(strtolower((string)$q->answer_key), ['yes', 'no'], true);
 							$yes_qty = isset($q->trade_totals['yes_quantity']) ? (int)$q->trade_totals['yes_quantity'] : 0;
 							$no_qty  = isset($q->trade_totals['no_quantity'])  ? (int)$q->trade_totals['no_quantity']  : 0;
+							$yes_users = isset($q->user_counts['yes_users']) ? (int)$q->user_counts['yes_users'] : 0;
+							$no_users  = isset($q->user_counts['no_users'])  ? (int)$q->user_counts['no_users']  : 0;
+							$total_users = $yes_users + $no_users;
 							$total_qty = $yes_qty + $no_qty;
 						?>
 							<div class="vq-card <?php echo $saved ? 'key-saved' : 'key-unsaved'; ?>"
@@ -883,7 +957,19 @@
 										<span class="vq-key-badge <?php echo $saved ? 'saved' : 'unsaved'; ?>">
 											<?php echo $saved ? 'Key saved' : 'Key unsaved'; ?>
 										</span>
-										<small><?php echo $saved ? 'Answer key is set and active.' : 'Assign an answer key for this question.'; ?></small>
+										<small class="vq-users-pro">
+											<span class="chip total js-total-users">
+												<i class="fa-solid fa-users"></i> <?php echo $total_users; ?>
+											</span>
+
+											<span class="chip yes js-yes-users">
+												YES <?php echo $yes_users; ?>
+											</span>
+
+											<span class="chip no js-no-users">
+												NO <?php echo $no_users; ?>
+											</span>
+										</small>
 									</div>
 									<div class="vq-card-actions">
 										<a class="vq-btn-edit" href="<?php echo site_url('admin/questions/edit/' . (int)$q->id); ?>">
@@ -954,12 +1040,26 @@
 											<div class="vq-live-metric yes">
 												<span>Yes price</span>
 												<strong class="js-yes-price">Rs <?php echo number_format((float)$q->yes_price, 2); ?></strong>
-												<small><?php echo $yes_qty; ?> YES trades</small>
+												<small class="vq-stats-pro">
+													<span class="mini yes js-yes-user-mini">
+														<i class="fa-solid fa-user"></i> <?php echo $yes_users; ?>
+													</span>
+													<span class="mini trade">
+														<i class="fa-solid fa-arrow-right-arrow-left"></i> <?php echo $yes_qty; ?>
+													</span>
+												</small>
 											</div>
 											<div class="vq-live-metric no">
 												<span>No price</span>
 												<strong class="js-no-price">Rs <?php echo number_format((float)$q->no_price, 2); ?></strong>
-												<small><?php echo $no_qty; ?> NO trades</small>
+												<small class="vq-stats-pro">
+													<span class="mini no js-no-user-mini">
+														<i class="fa-solid fa-user"></i> <?php echo $no_users; ?>
+													</span>
+													<span class="mini trade">
+														<i class="fa-solid fa-arrow-right-arrow-left"></i> <?php echo $no_qty; ?>
+													</span>
+												</small>
 											</div>
 											<div class="vq-live-metric total">
 												<span>Market total</span>
@@ -1139,6 +1239,9 @@
 						if (!card) return;
 						var yq = q.trade_totals ? q.trade_totals.yes_quantity : 0;
 						var nq = q.trade_totals ? q.trade_totals.no_quantity : 0;
+						var yu = q.trade_totals ? q.trade_totals.yes_users : 0;
+						var nu = q.trade_totals ? q.trade_totals.no_users : 0;
+						var tu = q.trade_totals ? q.trade_totals.total_users : 0;
 						card.querySelectorAll('.js-yes-price').forEach(function(n) {
 							n.textContent = 'Rs ' + Number(q.yes_price || 0).toFixed(2);
 						});
@@ -1159,6 +1262,21 @@
 						});
 						card.querySelectorAll('.js-flow-total').forEach(function(n) {
 							n.textContent = Number(yq) + Number(nq);
+						});
+						card.querySelectorAll('.js-total-users').forEach(function(n) {
+							n.innerHTML = '<i class="fa-solid fa-users"></i> ' + tu;
+						});
+						card.querySelectorAll('.js-yes-users').forEach(function(n) {
+							n.textContent = 'YES ' + yu;
+						});
+						card.querySelectorAll('.js-no-users').forEach(function(n) {
+							n.textContent = 'NO ' + nu;
+						});
+						card.querySelectorAll('.js-yes-user-mini').forEach(function(n) {
+							n.innerHTML = '<i class="fa-solid fa-user"></i> ' + yu;
+						});
+						card.querySelectorAll('.js-no-user-mini').forEach(function(n) {
+							n.innerHTML = '<i class="fa-solid fa-user"></i> ' + nu;
 						});
 						card.querySelectorAll('.js-spread').forEach(function(n) {
 							n.textContent = 'Rs ' + Math.abs(Number(q.yes_price || 0) - Number(q.no_price || 0)).toFixed(2);

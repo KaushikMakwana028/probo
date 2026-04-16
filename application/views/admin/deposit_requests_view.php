@@ -1,5 +1,4 @@
 <?php
-// Separate requests by status — pending always first
 $pending_requests  = array_filter($requests ?? [], fn($r) => $r->status === 'pending');
 $approved_requests = array_filter($requests ?? [], fn($r) => $r->status === 'approved');
 $rejected_requests = array_filter($requests ?? [], fn($r) => $r->status === 'rejected');
@@ -10,353 +9,645 @@ $all_sorted = array_merge(
 );
 ?>
 
-<div class="dr-wrapper">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Header -->
-    <div class="dr-header">
-        <div class="dr-title">
-            <i class="fas fa-money-bill-wave"></i>
+<div class="dr-wrap">
+
+    <!-- Page Title -->
+    <div class="dr-topbar">
+        <div class="dr-heading">
+            <div class="dr-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+            </div>
             <div>
-                <h2>Deposit Requests</h2>
-                <p>Pending requests are shown first</p>
+                <h1>Deposit Requests</h1>
+                <p>Review and manage incoming deposit requests</p>
             </div>
         </div>
-        <div class="dr-header-actions">
-            <a href="<?php echo site_url('admin/deposits/requests?status=pending'); ?>"
-                class="filter-btn <?php echo ($status_filter == 'pending') ? 'active' : ''; ?>">
-                <i class="fas fa-clock"></i> Pending
-                <?php if (!empty($stats['pending'])): ?>
-                    <span class="count-badge"><?php echo $stats['pending']; ?></span>
-                <?php endif; ?>
-            </a>
-            <a href="<?php echo site_url('admin/deposits/requests?status=approved'); ?>"
-                class="filter-btn <?php echo ($status_filter == 'approved') ? 'active success' : ''; ?>">
-                <i class="fas fa-check-circle"></i> Approved
-            </a>
-            <a href="<?php echo site_url('admin/deposits/requests?status=rejected'); ?>"
-                class="filter-btn <?php echo ($status_filter == 'rejected') ? 'active danger' : ''; ?>">
-                <i class="fas fa-times-circle"></i> Rejected
-            </a>
-            <a href="<?php echo site_url('admin/deposits/requests'); ?>"
-                class="filter-btn <?php echo (!$status_filter) ? 'active' : ''; ?>">
-                <i class="fas fa-list"></i> All
-            </a>
-            <button class="refresh-btn" onclick="location.reload()">
-                <i class="fas fa-sync-alt"></i>
+        <div class="dr-topbar-right">
+            <button class="refresh-pill" onclick="location.reload()" title="Refresh">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+                Refresh
             </button>
         </div>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="dr-stats">
-        <div class="stat-pill pending">
-            <i class="fas fa-hourglass-half"></i>
-            <span><?php echo $stats['pending']; ?> Pending</span>
+    <!-- Stats Row -->
+    <div class="dr-stats-row">
+        <div class="stat-card pending-card">
+            <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </div>
+            <div class="stat-body">
+                <span class="stat-num"><?php echo $stats['pending']; ?></span>
+                <span class="stat-lbl">Pending</span>
+            </div>
         </div>
-        <div class="stat-pill approved">
-            <i class="fas fa-check-circle"></i>
-            <span><?php echo $stats['approved']; ?> Approved</span>
+        <div class="stat-card approved-card">
+            <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+            </div>
+            <div class="stat-body">
+                <span class="stat-num"><?php echo $stats['approved']; ?></span>
+                <span class="stat-lbl">Approved</span>
+            </div>
         </div>
-        <div class="stat-pill rejected">
-            <i class="fas fa-times-circle"></i>
-            <span><?php echo $stats['rejected']; ?> Rejected</span>
+        <div class="stat-card rejected-card">
+            <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+            </div>
+            <div class="stat-body">
+                <span class="stat-num"><?php echo $stats['rejected']; ?></span>
+                <span class="stat-lbl">Rejected</span>
+            </div>
         </div>
-        <div class="stat-pill amount">
-            <i class="fas fa-rupee-sign"></i>
-            <span>₹<?php echo number_format($stats['approved_amount'], 2); ?> Approved</span>
+        <div class="stat-card amount-card">
+            <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23" />
+                    <path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6" />
+                </svg>
+            </div>
+            <div class="stat-body">
+                <span class="stat-num">₹<?php echo number_format($stats['approved_amount'], 0); ?></span>
+                <span class="stat-lbl">Approved Total</span>
+            </div>
         </div>
-        <div class="stat-pill total">
-            <i class="fas fa-layer-group"></i>
-            <span><?php echo $stats['total']; ?> Total</span>
-        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="dr-tabs">
+        <a href="<?php echo site_url('admin/deposits/requests'); ?>"
+            class="tab-item <?php echo (!$status_filter) ? 'active' : ''; ?>">
+            All
+            <span class="tab-count"><?php echo $stats['total']; ?></span>
+        </a>
+        <a href="<?php echo site_url('admin/deposits/requests?status=pending'); ?>"
+            class="tab-item <?php echo ($status_filter == 'pending') ? 'active active-pending' : ''; ?>">
+            Pending
+            <?php if (!empty($stats['pending'])): ?>
+                <span class="tab-count hot"><?php echo $stats['pending']; ?></span>
+            <?php endif; ?>
+        </a>
+        <a href="<?php echo site_url('admin/deposits/requests?status=approved'); ?>"
+            class="tab-item <?php echo ($status_filter == 'approved') ? 'active active-approved' : ''; ?>">
+            Approved
+            <span class="tab-count"><?php echo $stats['approved']; ?></span>
+        </a>
+        <a href="<?php echo site_url('admin/deposits/requests?status=rejected'); ?>"
+            class="tab-item <?php echo ($status_filter == 'rejected') ? 'active active-rejected' : ''; ?>">
+            Rejected
+            <span class="tab-count"><?php echo $stats['rejected']; ?></span>
+        </a>
     </div>
 
     <!-- Flash Messages -->
     <?php if ($this->session->flashdata('success')): ?>
-        <div class="flash flash-success">
-            <i class="fas fa-check-circle"></i>
+        <div class="flash-msg success-msg" id="flashMsg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
             <?php echo $this->session->flashdata('success'); ?>
         </div>
     <?php endif; ?>
     <?php if ($this->session->flashdata('error')): ?>
-        <div class="flash flash-error">
-            <i class="fas fa-exclamation-circle"></i>
+        <div class="flash-msg error-msg" id="flashMsg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             <?php echo $this->session->flashdata('error'); ?>
         </div>
     <?php endif; ?>
 
-    <!-- Table Card -->
-    <div class="dr-card">
-        <div class="table-responsive">
-            <table class="dr-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th><i class="fas fa-user"></i> User</th>
-                        <th><i class="fas fa-rupee-sign"></i> Amount</th>
-                        <th><i class="fas fa-receipt"></i> Txn ID</th>
-                        <th><i class="fas fa-calendar"></i> Date</th>
-                        <th><i class="fas fa-info-circle"></i> Status</th>
-                        <th><i class="fas fa-cog"></i> Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($all_sorted)): ?>
+    <!-- Table -->
+    <div class="dr-table-card">
+        <?php if (!empty($all_sorted)): ?>
+
+            <!-- Mobile Cards View -->
+            <div class="mobile-cards">
+                <?php
+                $prev_status = null;
+                $row_num = 1;
+                foreach ($all_sorted as $r):
+                    if ($prev_status !== null && $prev_status !== $r->status):
+                ?>
+                        <div class="mobile-section-divider">
+                            <?php if ($r->status === 'approved'): ?>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg> Approved
+                            <?php elseif ($r->status === 'rejected'): ?>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg> Rejected
+                            <?php endif; ?>
+                        </div>
+                    <?php
+                    endif;
+                    $prev_status = $r->status;
+                    $avatar_color = '#' . substr(md5($r->name), 0, 6);
+                    $initials = strtoupper(substr($r->name, 0, 2));
+                    ?>
+                    <div class="mobile-card status-border-<?php echo $r->status; ?>" id="mcard-<?php echo $r->id; ?>">
+                        <div class="mc-header">
+                            <div class="mc-user">
+                                <div class="mc-avatar" style="background:<?php echo $avatar_color; ?>"><?php echo $initials; ?></div>
+                                <div>
+                                    <div class="mc-name"><?php echo htmlspecialchars($r->name); ?></div>
+                                    <div class="mc-email"><?php echo htmlspecialchars($r->email ?? ''); ?></div>
+                                </div>
+                            </div>
+                            <div class="mc-right">
+                                <div class="mc-amount">₹<?php echo number_format($r->amount, 2); ?></div>
+                                <?php if ($r->status === 'pending'): ?>
+                                    <span class="badge badge-pending"><span class="pulse"></span>Pending</span>
+                                <?php elseif ($r->status === 'approved'): ?>
+                                    <span class="badge badge-approved">Approved</span>
+                                <?php else: ?>
+                                    <span class="badge badge-rejected">Rejected</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="mc-meta">
+                            <div class="mc-meta-item">
+                                <span class="mc-meta-label">Date</span>
+                                <span class="mc-meta-val"><?php echo isset($r->created_at) ? date('d M Y, h:i A', strtotime($r->created_at)) : 'N/A'; ?></span>
+                            </div>
+                            <?php if (!empty($r->receipt)): ?>
+                                <div class="mc-meta-item">
+                                    <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="mc-receipt-link">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        View Receipt
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($r->status === 'pending'): ?>
+                            <div class="mc-actions">
+                                <button class="mc-btn-approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    Approve
+                                </button>
+                                <button class="mc-btn-reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                    Reject
+                                </button>
+                            </div>
+                        <?php elseif ($r->status === 'approved'): ?>
+                            <div class="mc-processed approved-proc">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                                Approved <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : ''; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="mc-processed rejected-proc">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
+                                Rejected <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : ''; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php $row_num++;
+                endforeach; ?>
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="desktop-table">
+                <table class="dr-tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:44px">#</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         <?php
                         $prev_status = null;
                         $row_num = 1;
                         foreach ($all_sorted as $r):
-                            // Insert a section divider when status group changes
                             if ($prev_status !== null && $prev_status !== $r->status):
                         ?>
-                                <tr class="section-divider">
+                                <tr class="tbl-divider">
                                     <td colspan="7">
-                                        <span class="divider-label">
+                                        <div class="divider-inner">
                                             <?php if ($r->status === 'approved'): ?>
-                                                <i class="fas fa-check-circle"></i> Approved Requests
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                                </svg> Approved Requests
                                             <?php elseif ($r->status === 'rejected'): ?>
-                                                <i class="fas fa-times-circle"></i> Rejected Requests
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                                </svg> Rejected Requests
                                             <?php endif; ?>
-                                        </span>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php
                             endif;
                             $prev_status = $r->status;
+                            $avatar_color = '#' . substr(md5($r->name), 0, 6);
                             ?>
-
-                            <tr id="row-<?php echo $r->id; ?>"
-                                class="dr-row status-<?php echo $r->status; ?> <?php echo ($r->status === 'pending') ? 'row-pending' : ''; ?>">
-
-                                <td class="row-num"><?php echo $row_num++; ?></td>
-
+                            <tr class="dr-tbl-row <?php echo 'tbl-row-' . $r->status; ?>" id="row-<?php echo $r->id; ?>">
+                                <td class="tbl-num"><?php echo $row_num++; ?></td>
                                 <td>
-                                    <div class="user-cell">
-                                        <div class="avatar" style="background: <?php echo '#' . substr(md5($r->name), 0, 6); ?>">
+                                    <div class="tbl-user">
+                                        <div class="tbl-avatar" style="background:<?php echo $avatar_color; ?>">
                                             <?php echo strtoupper(substr($r->name, 0, 1)); ?>
                                         </div>
-                                        <div class="user-meta">
-                                            <span class="user-name"><?php echo htmlspecialchars($r->name); ?></span>
-                                            <span class="user-email"><?php echo htmlspecialchars($r->email ?? ''); ?></span>
+                                        <div>
+                                            <div class="tbl-name"><?php echo htmlspecialchars($r->name); ?></div>
+                                            <div class="tbl-email"><?php echo htmlspecialchars($r->email ?? ''); ?></div>
                                         </div>
                                     </div>
                                 </td>
-
                                 <td>
-                                    <span class="amount-cell">₹<?php echo number_format($r->amount, 2); ?></span>
+                                    <span class="tbl-amount">₹<?php echo number_format($r->amount, 2); ?></span>
                                 </td>
-
                                 <td>
-                                    <code class="txn-cell"><?php echo htmlspecialchars($r->txn_id ?? 'N/A'); ?></code>
+                                    <?php if (!empty($r->receipt)): ?>
+                                        <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="tbl-view-btn">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                            View
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="tbl-nofile">—</span>
+                                    <?php endif; ?>
                                 </td>
-
                                 <td>
-                                    <div class="date-cell">
-                                        <span class="date-main">
-                                            <?php echo isset($r->created_at) ? date('d M Y', strtotime($r->created_at)) : 'N/A'; ?>
-                                        </span>
-                                        <span class="date-time">
-                                            <?php echo isset($r->created_at) ? date('h:i A', strtotime($r->created_at)) : ''; ?>
-                                        </span>
+                                    <div class="tbl-date">
+                                        <?php echo isset($r->created_at) ? date('d M Y', strtotime($r->created_at)) : 'N/A'; ?>
+                                        <span class="tbl-time"><?php echo isset($r->created_at) ? date('h:i A', strtotime($r->created_at)) : ''; ?></span>
                                     </div>
                                 </td>
-
                                 <td>
                                     <?php if ($r->status === 'pending'): ?>
-                                        <span class="status-badge pending">
-                                            <span class="pulse-dot"></span>
-                                            Pending
-                                        </span>
+                                        <span class="badge badge-pending"><span class="pulse"></span>Pending</span>
                                     <?php elseif ($r->status === 'approved'): ?>
-                                        <span class="status-badge approved">
-                                            <i class="fas fa-check"></i> Approved
+                                        <span class="badge badge-approved">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            Approved
                                         </span>
                                     <?php else: ?>
-                                        <span class="status-badge rejected">
-                                            <i class="fas fa-times"></i> Rejected
+                                        <span class="badge badge-rejected">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                            </svg>
+                                            Rejected
                                         </span>
                                     <?php endif; ?>
                                 </td>
-
                                 <td>
                                     <?php if ($r->status === 'pending'): ?>
-                                        <div class="action-btns">
-                                            <button class="btn-approve"
-                                                onclick="handleAction('approve', <?php echo $r->id; ?>, this)"
-                                                title="Approve this deposit">
-                                                <i class="fas fa-check"></i> Approve
+                                        <div class="tbl-action-btns">
+                                            <button class="tbl-approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                                Approve
                                             </button>
-                                            <button class="btn-reject"
-                                                onclick="handleAction('reject', <?php echo $r->id; ?>, this)"
-                                                title="Reject this deposit">
-                                                <i class="fas fa-times"></i> Reject
+                                            <button class="tbl-reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                                </svg>
+                                                Reject
                                             </button>
                                         </div>
                                     <?php elseif ($r->status === 'approved'): ?>
-                                        <div class="processed-info">
-                                            <i class="fas fa-check-circle" style="color:#22c55e"></i>
-                                            <span>
-                                                <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : 'Processed'; ?>
-                                            </span>
+                                        <div class="tbl-processed tbl-proc-approved">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : 'Processed'; ?>
                                         </div>
                                     <?php else: ?>
-                                        <div class="processed-info">
-                                            <i class="fas fa-times-circle" style="color:#ef4444"></i>
-                                            <span>
-                                                <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : 'Processed'; ?>
-                                            </span>
+                                        <div class="tbl-processed tbl-proc-rejected">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <line x1="15" y1="9" x2="9" y2="15" />
+                                                <line x1="9" y1="9" x2="15" y2="15" />
+                                            </svg>
+                                            <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : 'Processed'; ?>
                                         </div>
                                     <?php endif; ?>
                                 </td>
                             </tr>
-
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                                    <p>No deposit requests found</p>
-                                    <small>New requests will appear here</small>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 
-        <?php if (!empty($all_sorted)): ?>
-            <div class="dr-footer">
-                <span>
-                    Showing <strong><?php echo count($all_sorted); ?></strong> request(s)
+            <!-- Footer -->
+            <div class="dr-table-footer">
+                <span class="tbl-footer-text">
+                    Showing <strong><?php echo count($all_sorted); ?></strong> record(s)
                     <?php if ($status_filter): ?>
-                        — filtered by <strong><?php echo ucfirst($status_filter); ?></strong>
+                        &mdash; filtered by <strong><?php echo ucfirst($status_filter); ?></strong>
                     <?php endif; ?>
                 </span>
                 <?php if ($status_filter): ?>
-                    <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="clear-filter">
-                        <i class="fas fa-times"></i> Clear Filter
+                    <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="clear-filter-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                        Clear filter
                     </a>
                 <?php endif; ?>
+            </div>
+
+        <?php else: ?>
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                </div>
+                <p>No deposit requests found</p>
+                <span>New requests will appear here automatically</span>
             </div>
         <?php endif; ?>
     </div>
 </div>
 
 <!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay" style="display:none;">
-    <div class="loading-box">
-        <div class="spinner"></div>
+<div id="loadingOverlay" style="display:none;" class="ld-overlay">
+    <div class="ld-box">
+        <div class="ld-spinner"></div>
         <p id="loadingText">Processing...</p>
     </div>
 </div>
 
 <style>
-    .dr-wrapper {
-        padding: 0;
-        font-family: 'Segoe UI', system-ui, sans-serif;
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
     }
 
-    /* ── Header ── */
-    .dr-header {
+    .dr-wrap {
+        font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+        padding: 0 0 40px;
+        max-width: 1300px;
+    }
+
+    /* ─── Topbar ─── */
+    .dr-topbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 18px;
-        gap: 16px;
+        margin-bottom: 24px;
+        gap: 12px;
         flex-wrap: wrap;
     }
 
-    .dr-title {
+    .dr-heading {
         display: flex;
         align-items: center;
         gap: 14px;
     }
 
-    .dr-title i {
-        font-size: 1.8rem;
-        color: #667eea;
-        background: #eef0fd;
-        width: 54px;
-        height: 54px;
-        border-radius: 14px;
+    .dr-icon-box {
+        width: 48px;
+        height: 48px;
+        background: #EEF2FF;
+        color: #4F46E5;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
 
-    .dr-title h2 {
+    .dr-heading h1 {
         margin: 0;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: #111827;
+        letter-spacing: -0.3px;
     }
 
-    .dr-title p {
+    .dr-heading p {
         margin: 2px 0 0;
         font-size: 0.82rem;
-        color: #94a3b8;
+        color: #9CA3AF;
     }
 
-    /* ── Filter Buttons ── */
-    .dr-header-actions {
-        display: flex;
+    .refresh-pill {
+        display: inline-flex;
         align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .filter-btn {
-        padding: 7px 14px;
+        gap: 7px;
+        padding: 8px 16px;
+        background: #fff;
+        border: 1px solid #E5E7EB;
         border-radius: 8px;
         font-size: 0.83rem;
         font-weight: 500;
-        color: #64748b;
-        background: #f1f5f9;
-        border: 1.5px solid transparent;
-        text-decoration: none;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.18s;
+        font-family: inherit;
+    }
+
+    .refresh-pill:hover {
+        background: #F9FAFB;
+        border-color: #D1D5DB;
+    }
+
+    /* ─── Stats ─── */
+    .dr-stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #F3F4F6;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .pending-card .stat-icon {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+
+    .approved-card .stat-icon {
+        background: #D1FAE5;
+        color: #059669;
+    }
+
+    .rejected-card .stat-icon {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+
+    .amount-card .stat-icon {
+        background: #EEF2FF;
+        color: #4F46E5;
+    }
+
+    .stat-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        overflow: hidden;
+    }
+
+    .stat-num {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stat-lbl {
+        font-size: 0.78rem;
+        color: #9CA3AF;
+        font-weight: 500;
+    }
+
+    /* ─── Tabs ─── */
+    .dr-tabs {
+        display: flex;
+        gap: 2px;
+        background: #F3F4F6;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 18px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .dr-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-item {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-        position: relative;
+        gap: 7px;
+        padding: 7px 16px;
+        border-radius: 7px;
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: #6B7280;
+        text-decoration: none;
+        transition: all 0.18s;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
-    .filter-btn:hover {
-        background: #e2e8f0;
-        color: #334155;
+    .tab-item:hover {
+        color: #374151;
+        background: rgba(255, 255, 255, 0.6);
     }
 
-    .filter-btn.active {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
+    .tab-item.active {
+        background: #fff;
+        color: #111827;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .filter-btn.active.success {
-        background: #22c55e;
-        border-color: #22c55e;
+    .tab-item.active-pending {
+        color: #D97706;
     }
 
-    .filter-btn.active.danger {
-        background: #ef4444;
-        border-color: #ef4444;
+    .tab-item.active-approved {
+        color: #059669;
     }
 
-    .count-badge {
-        background: #ef4444;
-        color: white;
-        border-radius: 10px;
-        padding: 1px 7px;
+    .tab-item.active-rejected {
+        color: #DC2626;
+    }
+
+    .tab-count {
+        background: #E5E7EB;
+        color: #6B7280;
+        border-radius: 20px;
+        padding: 1px 8px;
         font-size: 0.75rem;
-        font-weight: 700;
+        font-weight: 600;
         min-width: 20px;
         text-align: center;
-        animation: pulse-badge 2s infinite;
     }
 
-    @keyframes pulse-badge {
+    .tab-count.hot {
+        background: #FEE2E2;
+        color: #DC2626;
+        animation: hotpulse 2s infinite;
+    }
+
+    @keyframes hotpulse {
 
         0%,
         100% {
@@ -364,91 +655,27 @@ $all_sorted = array_merge(
         }
 
         50% {
-            transform: scale(1.15);
+            transform: scale(1.12);
         }
     }
 
-    .refresh-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: #f1f5f9;
-        border: 1.5px solid #e2e8f0;
-        color: #64748b;
-        cursor: pointer;
+    /* ─── Flash ─── */
+    .flash-msg {
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .refresh-btn:hover {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
-        transform: rotate(90deg);
-    }
-
-    /* ── Stats Bar ── */
-    .dr-stats {
-        display: flex;
         gap: 10px;
-        margin-bottom: 18px;
-        flex-wrap: wrap;
-    }
-
-    .stat-pill {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .stat-pill.pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .stat-pill.approved {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .stat-pill.rejected {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .stat-pill.amount {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .stat-pill.total {
-        background: #f3f4f6;
-        color: #374151;
-    }
-
-    /* ── Flash Messages ── */
-    .flash {
         padding: 13px 18px;
         border-radius: 10px;
         margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        font-size: 0.88rem;
         font-weight: 500;
-        font-size: 0.9rem;
-        animation: slideDown 0.3s ease;
+        animation: fadeSlide 0.3s ease;
     }
 
-    @keyframes slideDown {
+    @keyframes fadeSlide {
         from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(-6px);
         }
 
         to {
@@ -457,227 +684,220 @@ $all_sorted = array_merge(
         }
     }
 
-    .flash-success {
-        background: #dcfce7;
-        color: #166534;
-        border-left: 4px solid #22c55e;
+    .success-msg {
+        background: #D1FAE5;
+        color: #065F46;
+        border-left: 3px solid #059669;
     }
 
-    .flash-error {
-        background: #fee2e2;
-        color: #991b1b;
-        border-left: 4px solid #ef4444;
+    .error-msg {
+        background: #FEE2E2;
+        color: #7F1D1D;
+        border-left: 3px solid #DC2626;
     }
 
-    /* ── Card ── */
-    .dr-card {
-        background: white;
+    /* ─── Table Card ─── */
+    .dr-table-card {
+        background: #fff;
         border-radius: 14px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+        border: 1px solid #F3F4F6;
         overflow: hidden;
     }
 
-    .table-responsive {
+    /* ─── Desktop Table ─── */
+    .desktop-table {
         overflow-x: auto;
     }
 
-    /* ── Table ── */
-    .dr-table {
+    .dr-tbl {
         width: 100%;
         border-collapse: collapse;
+        min-width: 720px;
     }
 
-    .dr-table thead tr {
-        background: #f8fafc;
-        border-bottom: 2px solid #e2e8f0;
+    .dr-tbl thead tr {
+        background: #F9FAFB;
+        border-bottom: 1px solid #F3F4F6;
     }
 
-    .dr-table thead th {
-        padding: 13px 16px;
+    .dr-tbl thead th {
+        padding: 12px 16px;
         text-align: left;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        color: #64748b;
+        color: #9CA3AF;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.05em;
         white-space: nowrap;
     }
 
-    .dr-table thead th i {
-        margin-right: 5px;
-        color: #94a3b8;
+    .dr-tbl-row {
+        border-bottom: 1px solid #F9FAFB;
+        transition: background 0.12s;
     }
 
-    /* Pending rows get a subtle left accent */
-    .dr-row {
-        border-bottom: 1px solid #f1f5f9;
-        transition: background 0.15s;
+    .dr-tbl-row:hover {
+        background: #FAFAFA;
     }
 
-    .dr-row:hover {
-        background: #f8fafc;
+    .dr-tbl-row:last-child {
+        border-bottom: none;
     }
 
-    .dr-row.row-pending {
-        border-left: 3px solid #f59e0b;
-        background: #fffbeb;
+    .tbl-row-pending {
+        border-left: 3px solid #F59E0B;
     }
 
-    .dr-row.row-pending:hover {
-        background: #fef3c7;
+    .tbl-row-approved {
+        border-left: 3px solid #10B981;
     }
 
-    .dr-row.status-approved {
-        border-left: 3px solid #22c55e;
+    .tbl-row-rejected {
+        border-left: 3px solid #EF4444;
+        opacity: 0.8;
     }
 
-    .dr-row.status-rejected {
-        border-left: 3px solid #ef4444;
-        opacity: 0.75;
-    }
-
-    .dr-table td {
+    .dr-tbl td {
         padding: 13px 16px;
         vertical-align: middle;
+        font-size: 0.875rem;
+        color: #374151;
     }
 
-    /* Section divider between status groups */
-    .section-divider td {
-        padding: 6px 16px;
-        background: #f8fafc;
-        border-top: 2px solid #e2e8f0;
-        border-bottom: 2px solid #e2e8f0;
+    .tbl-divider td {
+        padding: 5px 16px;
+        background: #F9FAFB;
+        border-top: 1px solid #F3F4F6;
+        border-bottom: 1px solid #F3F4F6;
     }
 
-    .divider-label {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
+    .divider-inner {
         display: flex;
         align-items: center;
         gap: 6px;
-    }
-
-    .row-num {
-        color: #cbd5e1;
-        font-size: 0.82rem;
+        font-size: 0.72rem;
         font-weight: 600;
-        width: 32px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #9CA3AF;
     }
 
-    /* User cell */
-    .user-cell {
+    .tbl-num {
+        color: #D1D5DB;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .tbl-user {
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .avatar {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        color: white;
+    .tbl-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 15px;
+        font-weight: 600;
+        font-size: 14px;
         flex-shrink: 0;
     }
 
-    .user-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
+    .tbl-name {
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: #111827;
     }
 
-    .user-name {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #1e293b;
-    }
-
-    .user-email {
+    .tbl-email {
         font-size: 0.78rem;
-        color: #94a3b8;
+        color: #9CA3AF;
+        margin-top: 1px;
     }
 
-    /* Amount */
-    .amount-cell {
-        font-weight: 700;
-        font-size: 1rem;
-        color: #166534;
-    }
-
-    /* Txn ID */
-    .txn-cell {
-        background: #f8fafc;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.82rem;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-        font-family: 'Courier New', monospace;
-    }
-
-    /* Date */
-    .date-cell {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .date-main {
-        font-size: 0.88rem;
+    .tbl-amount {
         font-weight: 600;
-        color: #334155;
+        font-size: 0.95rem;
+        color: #065F46;
+        font-family: 'DM Mono', monospace;
     }
 
-    .date-time {
-        font-size: 0.78rem;
-        color: #94a3b8;
-    }
-
-    /* Status Badges */
-    .status-badge {
+    .tbl-view-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 5px 12px;
-        border-radius: 50px;
-        font-size: 0.82rem;
+        gap: 5px;
+        padding: 5px 10px;
+        background: #EEF2FF;
+        color: #4F46E5;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+
+    .tbl-view-btn:hover {
+        background: #E0E7FF;
+    }
+
+    .tbl-nofile {
+        color: #D1D5DB;
+        font-size: 1rem;
+    }
+
+    .tbl-date {
+        font-size: 0.85rem;
+        color: #374151;
+        line-height: 1.4;
+    }
+
+    .tbl-time {
+        display: block;
+        font-size: 0.76rem;
+        color: #9CA3AF;
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
         font-weight: 600;
         white-space: nowrap;
     }
 
-    .status-badge.pending {
-        background: #fef3c7;
-        color: #92400e;
+    .badge-pending {
+        background: #FEF3C7;
+        color: #92400E;
     }
 
-    .status-badge.approved {
-        background: #dcfce7;
-        color: #166534;
+    .badge-approved {
+        background: #D1FAE5;
+        color: #065F46;
     }
 
-    .status-badge.rejected {
-        background: #fee2e2;
-        color: #991b1b;
+    .badge-rejected {
+        background: #FEE2E2;
+        color: #7F1D1D;
     }
 
-    /* Pulsing dot for pending */
-    .pulse-dot {
-        width: 7px;
-        height: 7px;
-        background: #f59e0b;
+    .pulse {
+        width: 6px;
+        height: 6px;
+        background: #F59E0B;
         border-radius: 50%;
         display: inline-block;
-        animation: pulse-dot 1.5s infinite;
+        animation: blink 1.4s ease infinite;
     }
 
-    @keyframes pulse-dot {
+    @keyframes blink {
 
         0%,
         100% {
@@ -686,145 +906,363 @@ $all_sorted = array_merge(
         }
 
         50% {
-            opacity: 0.5;
+            opacity: 0.4;
             transform: scale(0.7);
         }
     }
 
-    /* Action Buttons */
-    .action-btns {
+    /* ─── Action Buttons ─── */
+    .tbl-action-btns {
         display: flex;
-        gap: 7px;
-        align-items: center;
+        gap: 6px;
     }
 
-    .btn-approve,
-    .btn-reject {
-        padding: 6px 14px;
-        border: none;
-        border-radius: 7px;
-        font-size: 0.82rem;
-        font-weight: 600;
-        cursor: pointer;
+    .tbl-approve,
+    .tbl-reject {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        transition: all 0.2s;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 7px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.18s;
+        font-family: inherit;
         white-space: nowrap;
     }
 
-    .btn-approve {
-        background: #22c55e;
-        color: white;
+    .tbl-approve {
+        background: #10B981;
+        color: #fff;
     }
 
-    .btn-approve:hover {
-        background: #16a34a;
+    .tbl-approve:hover {
+        background: #059669;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
     }
 
-    .btn-reject {
-        background: #fee2e2;
-        color: #ef4444;
-    }
-
-    .btn-reject:hover {
-        background: #ef4444;
-        color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-approve:disabled,
-    .btn-reject:disabled {
+    .tbl-approve:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-        transform: none !important;
+        transform: none;
     }
 
-    .processed-info {
+    .tbl-reject {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+
+    .tbl-reject:hover {
+        background: #DC2626;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .tbl-reject:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .tbl-processed {
         display: flex;
         align-items: center;
-        gap: 7px;
-        font-size: 0.82rem;
-        color: #94a3b8;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: #9CA3AF;
     }
 
-    /* Footer */
-    .dr-footer {
-        padding: 12px 18px;
-        background: #f8fafc;
-        border-top: 1px solid #e2e8f0;
+    .tbl-proc-approved {
+        color: #059669;
+    }
+
+    .tbl-proc-rejected {
+        color: #DC2626;
+    }
+
+    /* ─── Table Footer ─── */
+    .dr-table-footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 0.85rem;
-        color: #64748b;
+        padding: 12px 20px;
+        background: #F9FAFB;
+        border-top: 1px solid #F3F4F6;
+        font-size: 0.83rem;
+        color: #6B7280;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
-    .clear-filter {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 500;
-        display: flex;
+    .clear-filter-link {
+        display: inline-flex;
         align-items: center;
         gap: 5px;
+        color: #4F46E5;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.82rem;
     }
 
-    .clear-filter:hover {
+    .clear-filter-link:hover {
         text-decoration: underline;
     }
 
-    /* Empty state */
+    /* ─── Empty State ─── */
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
-        color: #94a3b8;
+        padding: 64px 24px;
+        color: #9CA3AF;
     }
 
     .empty-icon {
-        font-size: 3rem;
-        margin-bottom: 14px;
-        opacity: 0.3;
+        width: 64px;
+        height: 64px;
+        background: #F3F4F6;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        color: #D1D5DB;
     }
 
     .empty-state p {
         font-size: 1rem;
         font-weight: 600;
-        color: #64748b;
-        margin: 0 0 4px;
+        color: #374151;
+        margin: 0 0 6px;
     }
 
-    .empty-state small {
-        font-size: 0.83rem;
+    .empty-state span {
+        font-size: 0.85rem;
     }
 
-    /* Loading Overlay */
-    .loading-overlay {
+    /* ─── Mobile Cards ─── */
+    .mobile-cards {
+        display: none;
+    }
+
+    .mobile-card {
+        padding: 16px;
+        border-bottom: 1px solid #F3F4F6;
+        border-left: 3px solid transparent;
+        transition: background 0.15s;
+    }
+
+    .mobile-card:last-child {
+        border-bottom: none;
+    }
+
+    .status-border-pending {
+        border-left-color: #F59E0B;
+    }
+
+    .status-border-approved {
+        border-left-color: #10B981;
+    }
+
+    .status-border-rejected {
+        border-left-color: #EF4444;
+    }
+
+    .mobile-section-divider {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 16px;
+        background: #F9FAFB;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9CA3AF;
+        border-top: 1px solid #F3F4F6;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .mc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .mc-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .mc-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .mc-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #111827;
+    }
+
+    .mc-email {
+        font-size: 0.76rem;
+        color: #9CA3AF;
+        margin-top: 2px;
+    }
+
+    .mc-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .mc-amount {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #065F46;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .mc-meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .mc-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .mc-meta-label {
+        font-size: 0.72rem;
+        color: #9CA3AF;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .mc-meta-val {
+        font-size: 0.82rem;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .mc-receipt-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.8rem;
+        color: #4F46E5;
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .mc-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .mc-btn-approve,
+    .mc-btn-reject {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.18s;
+    }
+
+    .mc-btn-approve {
+        background: #10B981;
+        color: #fff;
+    }
+
+    .mc-btn-approve:hover {
+        background: #059669;
+    }
+
+    .mc-btn-reject {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+
+    .mc-btn-reject:hover {
+        background: #DC2626;
+        color: #fff;
+    }
+
+    .mc-processed {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        padding: 7px 10px;
+        border-radius: 7px;
+    }
+
+    .approved-proc {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .rejected-proc {
+        background: #FEE2E2;
+        color: #7F1D1D;
+    }
+
+    /* ─── Loading Overlay ─── */
+    .ld-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.5);
+        background: rgba(17, 24, 39, 0.5);
         z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(3px);
+        backdrop-filter: blur(4px);
     }
 
-    .loading-box {
-        background: white;
+    .ld-box {
+        background: #fff;
         border-radius: 16px;
         padding: 36px 48px;
         text-align: center;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        min-width: 200px;
     }
 
-    .spinner {
-        width: 42px;
-        height: 42px;
-        border: 3px solid #e2e8f0;
-        border-top-color: #667eea;
+    .ld-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #F3F4F6;
+        border-top-color: #4F46E5;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
         margin: 0 auto 16px;
@@ -836,76 +1274,62 @@ $all_sorted = array_merge(
         }
     }
 
-    .loading-box p {
+    .ld-box p {
         margin: 0;
         font-weight: 600;
-        color: #334155;
+        color: #374151;
         font-size: 0.95rem;
+        font-family: 'DM Sans', sans-serif;
     }
 
-    /* Row flash after action */
-    @keyframes rowFlashGreen {
-        0% {
-            background: #dcfce7;
-        }
-
-        100% {
-            background: transparent;
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+        .dr-stats-row {
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 
-    @keyframes rowFlashRed {
-        0% {
-            background: #fee2e2;
+    @media (max-width: 700px) {
+        .desktop-table {
+            display: none;
         }
 
-        100% {
-            background: transparent;
+        .mobile-cards {
+            display: block;
+        }
+
+        .dr-stats-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .stat-card {
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
+        .stat-num {
+            font-size: 1.1rem;
+        }
+
+        .dr-heading h1 {
+            font-size: 1.15rem;
+        }
+
+        .dr-icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
         }
     }
 
-    .flash-green {
-        animation: rowFlashGreen 1.5s ease forwards;
-    }
-
-    .flash-red {
-        animation: rowFlashRed 1.5s ease forwards;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .dr-header {
-            flex-direction: column;
-            align-items: flex-start;
+    @media (max-width: 420px) {
+        .dr-stats-row {
+            grid-template-columns: 1fr 1fr;
         }
 
-        .dr-header-actions {
-            width: 100%;
-        }
-
-        .filter-btn {
-            flex: 1;
-            justify-content: center;
-            font-size: 0.78rem;
-        }
-
-        .action-btns {
-            flex-direction: column;
-        }
-
-        .btn-approve,
-        .btn-reject {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .dr-stats {
-            gap: 6px;
-        }
-
-        .stat-pill {
-            font-size: 0.78rem;
-            padding: 6px 12px;
+        .amount-card {
+            grid-column: 1 / -1;
         }
     }
 </style>
@@ -913,38 +1337,27 @@ $all_sorted = array_merge(
 <script>
     function handleAction(action, id, btnEl) {
         const isApprove = action === 'approve';
-        const confirmMsg = isApprove ?
-            '✅ Approve this deposit and credit the user\'s wallet?' :
-            '❌ Reject this deposit request?';
+        if (!confirm(isApprove ? 'Approve this deposit and credit wallet?' : 'Reject this deposit request?')) return;
 
-        if (!confirm(confirmMsg)) return;
+        const rowEl = document.getElementById('row-' + id) || document.getElementById('mcard-' + id);
+        if (rowEl) {
+            rowEl.querySelectorAll('button').forEach(b => {
+                b.disabled = true;
+                b.style.opacity = '0.5';
+            });
+        }
 
-        // Disable both buttons in this row to prevent double-click
-        const row = document.getElementById('row-' + id);
-        row.querySelectorAll('.btn-approve, .btn-reject').forEach(b => {
-            b.disabled = true;
-            b.style.opacity = '0.5';
-        });
-
-        // Show loading overlay
-        const overlay = document.getElementById('loadingOverlay');
-        const loadText = document.getElementById('loadingText');
-        loadText.textContent = isApprove ? 'Approving deposit...' : 'Rejecting request...';
-        overlay.style.display = 'flex';
-
-        // Navigate to action URL
-        const url = '<?php echo site_url("admin/deposits/"); ?>' + action + '/' + id;
-        window.location.href = url;
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        document.getElementById('loadingText').textContent = isApprove ? 'Approving...' : 'Rejecting...';
+        window.location.href = '<?php echo site_url("admin/deposits/"); ?>' + action + '/' + id;
     }
 
-    // Auto-dismiss flash messages after 4 seconds
     setTimeout(function() {
-        document.querySelectorAll('.flash').forEach(function(el) {
-            el.style.transition = 'opacity 0.4s';
-            el.style.opacity = '0';
-            setTimeout(function() {
-                el.remove();
-            }, 400);
-        });
-    }, 4000);
+        const msg = document.getElementById('flashMsg');
+        if (msg) {
+            msg.style.transition = 'opacity 0.4s';
+            msg.style.opacity = '0';
+            setTimeout(() => msg && msg.remove(), 400);
+        }
+    }, 4500);
 </script>

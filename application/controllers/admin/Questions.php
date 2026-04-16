@@ -47,7 +47,21 @@ class Questions extends CI_Controller
 
 		if ($selected_category && !empty($selected_category->questions)) {
 			foreach ($selected_category->questions as $question_item) {
-				$question_item->trade_totals = $this->Category_model->get_question_trade_totals((int) $question_item->id);
+				$trade_breakdown = $this->Category_model->get_question_trade_breakdown((int) $question_item->id);
+				$question_item->trade_totals = $trade_breakdown;
+				$question_item->user_counts = array(
+					'yes_users' => isset($trade_breakdown['yes_users']) ? (int) $trade_breakdown['yes_users'] : 0,
+					'no_users' => isset($trade_breakdown['no_users']) ? (int) $trade_breakdown['no_users'] : 0
+				);
+
+				// total real users
+				$real_users = $this->Category_model->get_total_users_by_question($question_item->id);
+
+				// admin added users
+				$admin_users = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
+
+				// final
+				$question_item->total_users = $real_users + $admin_users;
 			}
 		}
 
@@ -471,5 +485,15 @@ class Questions extends CI_Controller
 				));
 			}
 		}
+	}
+
+	public function get_questions_by_category($category_id)
+	{
+		$questions = $this->db
+			->where('category_id', $category_id)
+			->get('category_questions')
+			->result();
+
+		echo json_encode($questions);
 	}
 }

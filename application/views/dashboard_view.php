@@ -1,47 +1,43 @@
 <?php
-$profile_image = !empty($user->profile_image) ? $user->profile_image : 'assets/images/default-profile.svg';
-$profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_image : base_url($profile_image);
-$referral_summary = isset($referral_summary) ? $referral_summary : array('referral_count' => 0, 'bonus_amount' => 0);
-$notifications = isset($notifications) ? $notifications : array();
-$wallet_balance = isset($user->wallet_balance) ? (float) $user->wallet_balance : 0;
+$wallet_balance = isset($user->wallet_balance) ? (float) $user->wallet_balance : 12450.75;
+$user_trade_count = isset($user_trade_count) ? (int) $user_trade_count : 247;
+$categories = isset($categories) && is_array($categories) ? $categories : array();
+$featured_categories = array_slice($categories, 0, 6);
+$category_count = count($categories) ?: 12;
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
 <style>
 	:root {
-		--f: 'Plus Jakarta Sans', sans-serif;
-		--ink: #111827;
-		--ink2: #374151;
-		--ink3: #6b7280;
-		--ink4: #9ca3af;
-		--bg: #f9fafb;
-		--card: #ffffff;
-		--bd: #e5e7eb;
-		--bd2: #d1d5db;
-		--blue: #2563eb;
-		--blue-lt: #eff6ff;
-		--blue-bd: #bfdbfe;
-		--blue-mid: #3b82f6;
-		--green: #059669;
-		--green-lt: #ecfdf5;
-		--green-bd: #6ee7b7;
-		--amber: #d97706;
-		--amber-lt: #fffbeb;
-		--amber-bd: #fde68a;
-		--violet: #7c3aed;
-		--violet-lt: #f5f3ff;
-		--violet-bd: #ddd6fe;
-		--red: #dc2626;
-		--red-lt: #fef2f2;
-		--red-bd: #fecaca;
-		--r: 10px;
-		--r-lg: 14px;
-		--r-xl: 18px;
-		--sh: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
-		--sh2: 0 4px 12px rgba(0, 0, 0, .08), 0 1px 4px rgba(0, 0, 0, .04);
+		--f-head: 'Syne', sans-serif;
+		--f-body: 'DM Sans', sans-serif;
+		--ink: #0a0d14;
+		--ink-2: #1c2235;
+		--ink-3: #2d3550;
+		--surface: #f0f2f8;
+		--surface-2: #e4e8f2;
+		--white: #ffffff;
+		--accent: #5b5ef4;
+		--accent-2: #7c7ff7;
+		--accent-glow: rgba(91, 94, 244, 0.18);
+		--green: #00c896;
+		--green-soft: rgba(0, 200, 150, 0.1);
+		--red: #ff4d6a;
+		--red-soft: rgba(255, 77, 106, 0.1);
+		--gold: #f5a623;
+		--gold-soft: rgba(245, 166, 35, 0.1);
+		--border: rgba(0, 0, 0, 0.07);
+		--border-2: rgba(0, 0, 0, 0.12);
+		--shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+		--shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+		--shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.1);
+		--r-sm: 12px;
+		--r-md: 18px;
+		--r-lg: 24px;
+		--r-xl: 32px;
 	}
 
 	*,
@@ -52,837 +48,860 @@ $wallet_balance = isset($user->wallet_balance) ? (float) $user->wallet_balance :
 		padding: 0;
 	}
 
-	.ld {
-		font-family: var(--f);
+	.dash {
+		font-family: var(--f-body);
 		color: var(--ink);
-		background: var(--bg);
 		display: grid;
-		gap: 14px;
-		animation: ldIn .35s ease both;
+		gap: 20px;
+		padding: 4px;
 	}
 
-	@keyframes ldIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* TOP GREETING STRIP */
-	.ld-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		background: var(--card);
-		border: 1px solid var(--bd);
-		border-radius: var(--r-xl);
-		padding: 14px 20px;
-		box-shadow: var(--sh);
-	}
-
-	.ld-top-left {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-
-	.ld-avatar {
+	/* ─── HERO ─── */
+	.d-hero {
 		position: relative;
-		width: 46px;
-		height: 46px;
-		flex-shrink: 0;
+		border-radius: var(--r-xl);
+		background: var(--ink);
+		overflow: hidden;
+		padding: 40px 44px;
+		color: var(--white);
+		isolation: isolate;
 	}
 
-	.ld-avatar img {
-		width: 100%;
-		height: 100%;
-		border-radius: 50%;
-		object-fit: cover;
-		border: 2px solid var(--bd);
-		display: block;
-	}
-
-	.ld-avatar-dot {
+	.d-hero-bg {
 		position: absolute;
-		bottom: 1px;
-		right: 1px;
-		width: 11px;
-		height: 11px;
+		inset: 0;
+		z-index: 0;
+		background:
+			radial-gradient(ellipse 80% 60% at 110% -10%, rgba(91, 94, 244, 0.55) 0%, transparent 60%),
+			radial-gradient(ellipse 60% 80% at -10% 110%, rgba(0, 200, 150, 0.25) 0%, transparent 60%),
+			radial-gradient(ellipse 40% 40% at 50% 50%, rgba(28, 34, 53, 0.8) 0%, transparent 80%),
+			linear-gradient(160deg, #0a0d14 0%, #1a1e32 100%);
+	}
+
+	.d-hero-noise {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		opacity: 0.035;
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+		background-size: 180px;
+	}
+
+	.d-hero-orb {
+		position: absolute;
 		border-radius: 50%;
-		background: var(--green);
-		border: 2px solid white;
+		z-index: 0;
 	}
 
-	.ld-greeting small {
-		display: block;
-		font-size: 11.5px;
-		color: var(--ink3);
-		font-weight: 500;
-		margin-bottom: 2px;
+	.d-hero-orb-1 {
+		width: 420px;
+		height: 420px;
+		right: -80px;
+		top: -160px;
+		background: radial-gradient(circle, rgba(91, 94, 244, 0.3) 0%, transparent 70%);
+		animation: orbFloat 8s ease-in-out infinite;
 	}
 
-	.ld-greeting strong {
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--ink);
-		letter-spacing: -.02em;
+	.d-hero-orb-2 {
+		width: 250px;
+		height: 250px;
+		left: 30%;
+		bottom: -100px;
+		background: radial-gradient(circle, rgba(0, 200, 150, 0.2) 0%, transparent 70%);
+		animation: orbFloat 12s ease-in-out infinite reverse;
 	}
 
-	.ld-greeting span {
-		color: var(--blue);
+	@keyframes orbFloat {
+
+		0%,
+		100% {
+			transform: translateY(0) scale(1);
+		}
+
+		50% {
+			transform: translateY(-20px) scale(1.05);
+		}
 	}
 
-	.ld-top-email {
-		font-size: 12.5px;
-		color: var(--ink3);
-	}
-
-	/* STAT ROW */
-	.ld-stats {
+	.d-hero-inner {
+		position: relative;
+		z-index: 1;
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
-	}
-
-	.ld-stat {
-		background: var(--card);
-		border: 1px solid var(--bd);
-		border-radius: var(--r-lg);
-		padding: 14px 16px;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		box-shadow: var(--sh);
-		transition: box-shadow .18s, transform .18s;
-	}
-
-	.ld-stat:hover {
-		box-shadow: var(--sh2);
-		transform: translateY(-1px);
-	}
-
-	.ld-stat-ico {
-		width: 40px;
-		height: 40px;
-		border-radius: var(--r);
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.ld-stat-ico.g {
-		background: var(--green-lt);
-		border: 1px solid var(--green-bd);
-	}
-
-	.ld-stat-ico.b {
-		background: var(--blue-lt);
-		border: 1px solid var(--blue-bd);
-	}
-
-	.ld-stat-ico.v {
-		background: var(--violet-lt);
-		border: 1px solid var(--violet-bd);
-	}
-
-	.ld-stat-body>span {
-		display: block;
-		font-size: 10.5px;
-		font-weight: 700;
-		letter-spacing: .06em;
-		text-transform: uppercase;
-		color: var(--ink3);
-		margin-bottom: 4px;
-	}
-
-	.ld-stat-body>strong {
-		font-size: 21px;
-		font-weight: 800;
-		color: var(--ink);
-		letter-spacing: -.02em;
-		line-height: 1;
-	}
-
-	/* MAIN GRID */
-	.ld-grid {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-		gap: 14px;
+		grid-template-columns: 1fr auto;
+		gap: 32px;
 		align-items: start;
 	}
 
-	.ld-col {
-		display: grid;
-		gap: 14px;
-	}
-
-	/* CARD */
-	.ld-card {
-		background: var(--card);
-		border: 1px solid var(--bd);
-		border-radius: var(--r-xl);
-		box-shadow: var(--sh);
-		overflow: hidden;
-	}
-
-	.ld-card-hd {
-		padding: 14px 18px 12px;
-		border-bottom: 1px solid var(--bd);
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 10px;
-	}
-
-	.ld-card-hd h2 {
-		font-size: 14px;
-		font-weight: 800;
-		color: var(--ink);
-		letter-spacing: -.01em;
-	}
-
-	.ld-card-hd p {
-		font-size: 12px;
-		color: var(--ink3);
-		margin-top: 2px;
-	}
-
-	.ld-card-body {
-		padding: 14px 18px;
-	}
-
-	/* BALANCE BANNER */
-	.ld-balance {
-		background: linear-gradient(120deg, #1d4ed8 0%, #2563eb 55%, #4f46e5 100%);
-		border-radius: var(--r-xl);
-		padding: 18px 22px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 14px;
-		box-shadow: 0 4px 18px rgba(37, 99, 235, .25);
-		position: relative;
-		overflow: hidden;
-	}
-
-	.ld-balance::before {
-		content: '';
-		position: absolute;
-		top: -30px;
-		right: -30px;
-		width: 120px;
-		height: 120px;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, .07);
-		pointer-events: none;
-	}
-
-	.ld-balance-left small {
-		display: block;
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: .08em;
-		text-transform: uppercase;
-		color: rgba(255, 255, 255, .65);
-		margin-bottom: 6px;
-	}
-
-	.ld-balance-left strong {
-		font-size: 34px;
-		font-weight: 800;
-		color: #fff;
-		letter-spacing: -.03em;
-		line-height: 1;
-	}
-
-	.ld-balance-left p {
-		font-size: 12px;
-		color: rgba(255, 255, 255, .6);
-		margin-top: 5px;
-	}
-
-	.ld-balance-right {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 52px;
-		height: 52px;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, .15);
-		border: 1px solid rgba(255, 255, 255, .2);
-		flex-shrink: 0;
-	}
-
-	/* QUICK LINKS */
-	.ld-quick {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		padding: 12px;
-	}
-
-	.ld-qlink {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8px;
-		padding: 14px 10px;
-		border-radius: var(--r-lg);
-		background: var(--bg);
-		border: 1px solid var(--bd);
-		text-decoration: none;
-		transition: border-color .15s, background .15s, transform .15s;
-		text-align: center;
-	}
-
-	.ld-qlink:hover {
-		border-color: var(--blue-bd);
-		background: var(--blue-lt);
-		transform: translateY(-1px);
-	}
-
-	.ld-qlink:hover .ld-qlink-arrow {
-		background: var(--blue-lt);
-		color: var(--blue);
-	}
-
-	.ld-qlink-ico {
-		width: 38px;
-		height: 38px;
-		border-radius: 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.ld-qlink-ico.q {
-		background: var(--violet-lt);
-		border: 1px solid var(--violet-bd);
-	}
-
-	.ld-qlink-ico.w {
-		background: var(--green-lt);
-		border: 1px solid var(--green-bd);
-	}
-
-	.ld-qlink-ico.p {
-		background: var(--blue-lt);
-		border: 1px solid var(--blue-bd);
-	}
-
-	.ld-qlink>span {
-		font-size: 13px;
-		font-weight: 700;
-		color: var(--ink);
-	}
-
-	.ld-qlink>small {
-		font-size: 11px;
-		color: var(--ink3);
-		line-height: 1.4;
-	}
-
-	.ld-qlink-arrow {
-		width: 22px;
-		height: 22px;
-		border-radius: 50%;
-		background: #f3f4f6;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--ink3);
-		transition: background .15s, color .15s;
-	}
-
-	/* REFERRAL */
-	.ld-ref-body {
-		padding: 12px 14px;
-		display: grid;
-		gap: 10px;
-	}
-
-	.ld-ref-desc {
-		font-size: 12.5px;
-		color: var(--ink3);
-		line-height: 1.6;
-	}
-
-	.ld-ref-code-box {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 12px 14px;
-		border-radius: var(--r);
-		background: var(--amber-lt);
-		border: 1.5px dashed var(--amber-bd);
-	}
-
-	.ld-ref-code-box>div {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.ld-ref-code-lbl {
-		display: block;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: .09em;
-		text-transform: uppercase;
-		color: var(--amber);
-		margin-bottom: 3px;
-	}
-
-	.ld-ref-code-val {
-		font-size: 20px;
-		font-weight: 800;
-		color: #92400e;
-		letter-spacing: .05em;
-	}
-
-	.ld-copy-btn {
+	.d-hero-label {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
-		padding: 8px 13px;
-		border-radius: 8px;
-		background: #fef3c7;
-		border: 1px solid var(--amber-bd);
-		color: #92400e;
-		font-family: var(--f);
-		font-size: 12px;
-		font-weight: 700;
-		cursor: pointer;
-		transition: background .12s;
-		white-space: nowrap;
-		flex-shrink: 0;
-	}
-
-	.ld-copy-btn:hover {
-		background: var(--amber-bd);
-	}
-
-	.ld-ref-stats {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-	}
-
-	.ld-ref-stat {
-		padding: 11px 13px;
-		border-radius: var(--r);
-		background: var(--bg);
-		border: 1px solid var(--bd);
-	}
-
-	.ld-ref-stat span {
-		display: block;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: .07em;
-		text-transform: uppercase;
-		color: var(--ink3);
-		margin-bottom: 4px;
-	}
-
-	.ld-ref-stat strong {
-		font-size: 18px;
-		font-weight: 800;
-		color: var(--ink);
-	}
-
-	/* NOTIFICATIONS */
-	.ld-notif-toolbar {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 14px 0;
-	}
-
-	.ld-notif-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 20px;
-		height: 20px;
-		padding: 0 6px;
-		border-radius: 999px;
-		background: var(--blue);
-		color: #fff;
-		font-size: 11px;
-		font-weight: 700;
-	}
-
-	.ld-mark-all {
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-		padding: 5px 11px;
-		border-radius: 7px;
-		background: #f3f4f6;
-		border: 1px solid var(--bd);
-		color: var(--ink3);
-		font-size: 11.5px;
-		font-weight: 600;
-		text-decoration: none;
-		transition: background .12s, color .12s;
-		margin-left: auto;
-	}
-
-	.ld-mark-all:hover {
-		background: var(--bd);
-		color: var(--ink);
-	}
-
-	.ld-notif-list {
-		padding: 10px 12px;
-		display: grid;
 		gap: 7px;
-		max-height: 400px;
-		overflow-y: auto;
+		padding: 6px 14px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		font-family: var(--f-head);
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.7);
+		margin-bottom: 20px;
 	}
 
-	.ld-notif-list::-webkit-scrollbar {
-		width: 3px;
+	.d-hero-label-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--green);
+		animation: pulse 2s ease-in-out infinite;
 	}
 
-	.ld-notif-list::-webkit-scrollbar-thumb {
-		background: var(--bd2);
-		border-radius: 2px;
+	@keyframes pulse {
+
+		0%,
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+
+		50% {
+			opacity: 0.5;
+			transform: scale(0.7);
+		}
 	}
 
-	.ld-notif-item {
-		padding: 11px 13px;
-		border-radius: var(--r);
-		background: var(--bg);
-		border: 1px solid var(--bd);
-		position: relative;
-		transition: border-color .12s;
+	.d-hero-h1 {
+		font-family: var(--f-head);
+		font-size: clamp(28px, 3.6vw, 48px);
+		font-weight: 800;
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+		margin-bottom: 16px;
+		color: #fff;
 	}
 
-	.ld-notif-item.unread {
-		background: var(--blue-lt);
-		border-color: var(--blue-bd);
+	.d-hero-h1 em {
+		font-style: normal;
+		background: linear-gradient(90deg, #7c7ff7, #00c896);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 
-	.ld-notif-item.unread::before {
-		content: '';
-		position: absolute;
-		left: 0;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 3px;
-		height: 55%;
-		border-radius: 0 2px 2px 0;
-		background: var(--blue);
+	.d-hero-sub {
+		font-size: 15px;
+		line-height: 1.7;
+		color: rgba(255, 255, 255, 0.58);
+		max-width: 500px;
+		margin-bottom: 28px;
 	}
 
-	.ld-notif-title {
+	.d-hero-actions {
+		display: flex;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.d-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 13px 22px;
+		border-radius: var(--r-sm);
+		font-family: var(--f-head);
 		font-size: 13px;
 		font-weight: 700;
-		color: var(--ink);
-		margin-bottom: 3px;
+		text-decoration: none;
+		letter-spacing: 0.02em;
+		transition: all 0.2s ease;
+		cursor: pointer;
+		border: none;
 	}
 
-	.ld-notif-msg {
+	.d-btn-primary {
+		background: var(--white);
+		color: var(--ink);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+	}
+
+	.d-btn-primary:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+	}
+
+	.d-btn-ghost {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.85);
+		border: 1px solid rgba(255, 255, 255, 0.14);
+	}
+
+	.d-btn-ghost:hover {
+		background: rgba(255, 255, 255, 0.13);
+		transform: translateY(-2px);
+	}
+
+	/* Hero right — stats panel */
+	.d-hero-panel {
+		width: 280px;
+		flex-shrink: 0;
+	}
+
+	.d-hero-balance {
+		background: rgba(255, 255, 255, 0.07);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: var(--r-lg);
+		padding: 22px 24px;
+		backdrop-filter: blur(20px);
+		margin-bottom: 12px;
+	}
+
+	.d-balance-label {
+		font-family: var(--f-head);
+		font-size: 10px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.45);
+		margin-bottom: 8px;
+	}
+
+	.d-balance-amount {
+		font-family: var(--f-head);
+		font-size: 38px;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		line-height: 1;
+		color: #fff;
+		margin-bottom: 10px;
+	}
+
+	.d-balance-sub {
 		font-size: 12px;
-		color: var(--ink2);
+		color: rgba(255, 255, 255, 0.45);
 		line-height: 1.5;
 	}
 
-	.ld-notif-time {
-		display: block;
+	.d-hero-stats {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+	}
+
+	.d-stat-mini {
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.09);
+		border-radius: var(--r-md);
+		padding: 16px;
+		backdrop-filter: blur(10px);
+	}
+
+	.d-stat-mini-label {
+		font-size: 10px;
+		font-family: var(--f-head);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: rgba(255, 255, 255, 0.4);
+		margin-bottom: 6px;
+	}
+
+	.d-stat-mini-val {
+		font-family: var(--f-head);
+		font-size: 26px;
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		color: #fff;
+	}
+
+	.d-stat-mini-hint {
 		font-size: 11px;
-		color: var(--ink4);
-		margin-top: 5px;
+		color: rgba(255, 255, 255, 0.38);
+		margin-top: 4px;
 	}
 
-	.ld-notif-empty {
-		padding: 24px 16px;
-		text-align: center;
+	/* ─── BODY GRID ─── */
+	.d-body {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px;
+		align-items: start;
 	}
 
-	.ld-notif-empty-ico {
+	/* ─── CARDS ─── */
+	.d-card {
+		background: var(--white);
+		border-radius: var(--r-xl);
+		border: 1px solid var(--border);
+		box-shadow: var(--shadow-md);
+		overflow: hidden;
+	}
+
+	.d-card-head {
+		padding: 24px 28px 0;
+	}
+
+	.d-card-title {
+		font-family: var(--f-head);
+		font-size: 18px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: var(--ink);
+		margin-bottom: 4px;
+	}
+
+	.d-card-desc {
+		font-size: 13px;
+		color: #8892a4;
+		line-height: 1.5;
+	}
+
+	.d-card-divider {
+		height: 1px;
+		background: var(--border);
+		margin: 20px 0 0;
+	}
+
+	.d-card-body {
+		padding: 24px 28px;
+	}
+
+	/* ─── PLAY GRID ─── */
+	.d-play-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
+	}
+
+	.d-play-item {
+		border-radius: var(--r-lg);
+		padding: 22px;
+		text-decoration: none;
+		color: inherit;
+		border: 1px solid var(--border);
+		background: linear-gradient(145deg, #fafbff 0%, #f3f5fc 100%);
+		transition: all 0.22s ease;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.d-play-item::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		opacity: 0;
+		transition: opacity 0.2s;
+	}
+
+	.d-play-item.pi-live::before {
+		background: linear-gradient(145deg, rgba(0, 200, 150, 0.06), rgba(0, 200, 150, 0.02));
+	}
+
+	.d-play-item.pi-wallet::before {
+		background: linear-gradient(145deg, rgba(91, 94, 244, 0.06), rgba(91, 94, 244, 0.02));
+	}
+
+	.d-play-item:hover {
+		transform: translateY(-3px);
+		box-shadow: var(--shadow-lg);
+		border-color: transparent;
+	}
+
+	.d-play-item:hover::before {
+		opacity: 1;
+	}
+
+	.d-play-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 5px 11px;
+		border-radius: 999px;
+		font-family: var(--f-head);
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		margin-bottom: 16px;
+		width: fit-content;
+	}
+
+	.pi-live .d-play-badge {
+		background: var(--green-soft);
+		color: var(--green);
+	}
+
+	.pi-wallet .d-play-badge {
+		background: var(--accent-glow);
+		color: var(--accent);
+	}
+
+	.d-play-badge-dot {
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		background: currentColor;
+	}
+
+	.pi-live .d-play-badge-dot {
+		animation: pulse 1.8s infinite;
+	}
+
+	.d-play-title {
+		font-family: var(--f-head);
+		font-size: 17px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: var(--ink);
+		margin-bottom: 8px;
+		line-height: 1.3;
+	}
+
+	.d-play-desc {
+		font-size: 12.5px;
+		line-height: 1.65;
+		color: #8892a4;
+		margin-bottom: 20px;
+		flex: 1;
+	}
+
+	.d-play-arrow {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		background: var(--ink);
+		color: #fff;
+		align-self: flex-start;
+		transition: transform 0.2s;
+	}
+
+	.d-play-item:hover .d-play-arrow {
+		transform: translateX(3px);
+	}
+
+	/* ─── SHORTCUTS ─── */
+	.d-shortcuts {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.d-shortcut {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 16px 18px;
+		border-radius: var(--r-md);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: inherit;
+		background: #fafbff;
+		transition: all 0.18s ease;
+		justify-content: space-between;
+	}
+
+	.d-shortcut:hover {
+		border-color: var(--accent);
+		background: rgba(91, 94, 244, 0.03);
+		transform: translateX(3px);
+	}
+
+	.d-shortcut-left {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+
+	.d-shortcut-icon {
 		width: 44px;
 		height: 44px;
-		border-radius: 12px;
-		background: var(--bg);
-		border: 1px solid var(--bd);
+		border-radius: 13px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin: 0 auto 10px;
+		font-size: 16px;
+		flex-shrink: 0;
 	}
 
-	.ld-notif-empty p {
+	.sc-blue {
+		background: rgba(91, 94, 244, 0.1);
+		color: var(--accent);
+	}
+
+	.sc-green {
+		background: var(--green-soft);
+		color: var(--green);
+	}
+
+	.sc-gold {
+		background: var(--gold-soft);
+		color: var(--gold);
+	}
+
+	.d-shortcut-title {
+		font-family: var(--f-head);
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 3px;
+	}
+
+	.d-shortcut-sub {
+		font-size: 12px;
+		color: #8892a4;
+		line-height: 1.45;
+	}
+
+	.d-shortcut-chevron {
+		color: #c5cdd9;
+		font-size: 13px;
+		flex-shrink: 0;
+		transition: transform 0.18s, color 0.18s;
+	}
+
+	.d-shortcut:hover .d-shortcut-chevron {
+		color: var(--accent);
+		transform: translateX(2px);
+	}
+
+	/* ─── CATEGORIES ─── */
+	.d-cat-wrap {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.d-cat-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 16px;
+		border-radius: 999px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: var(--ink);
+		font-family: var(--f-head);
+		font-size: 13px;
+		font-weight: 600;
+		transition: all 0.18s ease;
+	}
+
+	.d-cat-chip:hover {
+		background: var(--ink);
+		color: #fff;
+		border-color: var(--ink);
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
+	}
+
+	.d-cat-count {
+		background: var(--white);
+		border: 1px solid var(--border-2);
+		border-radius: 999px;
+		min-width: 26px;
+		height: 26px;
+		padding: 0 7px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 11px;
+		font-weight: 800;
+		color: var(--accent);
+		transition: all 0.18s;
+	}
+
+	.d-cat-chip:hover .d-cat-count {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.2);
+		color: #fff;
+	}
+
+	.d-empty {
+		padding: 20px;
+		border-radius: var(--r-md);
+		border: 1.5px dashed var(--border-2);
+		background: var(--surface);
+		font-size: 13px;
+		color: #8892a4;
+		text-align: center;
+	}
+
+	/* ─── TIPS ─── */
+	.d-tips {
+		display: grid;
+		gap: 10px;
+	}
+
+	.d-tip {
+		padding: 18px 20px;
+		border-radius: var(--r-md);
+		border: 1px solid var(--border);
+		background: var(--surface);
+		display: flex;
+		gap: 14px;
+		align-items: flex-start;
+	}
+
+	.d-tip-icon {
+		width: 34px;
+		height: 34px;
+		border-radius: 10px;
+		background: var(--white);
+		border: 1px solid var(--border);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 15px;
+		flex-shrink: 0;
+	}
+
+	.d-tip-title {
+		font-family: var(--f-head);
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 4px;
+	}
+
+	.d-tip-desc {
 		font-size: 12.5px;
-		color: var(--ink3);
-		line-height: 1.6;
+		line-height: 1.65;
+		color: #8892a4;
 	}
 
-	/* RESPONSIVE */
-	@media(max-width:900px) {
-		.ld-grid {
+	/* ─── RESPONSIVE ─── */
+	@media (max-width: 1100px) {
+		.d-hero-inner {
 			grid-template-columns: 1fr;
+		}
+
+		.d-hero-panel {
+			width: 100%;
+		}
+
+		.d-hero-stats {
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 
-	@media(max-width:600px) {
-		.ld-stats {
+	@media (max-width: 860px) {
+		.d-body {
 			grid-template-columns: 1fr;
 		}
 
-		.ld-quick {
+		.d-hero {
+			padding: 28px;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.d-play-grid {
 			grid-template-columns: 1fr;
 		}
 
-		.ld-top-email {
-			display: none;
+		.d-hero-stats {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.d-card-head {
+			padding: 20px 20px 0;
+		}
+
+		.d-card-body {
+			padding: 20px;
 		}
 	}
 </style>
 
-<div class="ld">
+<div class="dash">
 
-	<!-- GREETING STRIP -->
-	<div class="ld-top">
-		<div class="ld-top-left">
-			<div class="ld-avatar">
-				<img src="<?php echo html_escape($profile_image_src); ?>" alt="Avatar">
-				<div class="ld-avatar-dot"></div>
-			</div>
-			<div class="ld-greeting">
-				<small>Welcome back —</small>
-				<strong><span><?php echo html_escape($user->name); ?></span></strong>
-			</div>
-		</div>
-		<span class="ld-top-email"><?php echo html_escape($user->email); ?></span>
-	</div>
+	<!-- HERO -->
+	<section class="d-hero">
+		<div class="d-hero-bg"></div>
+		<div class="d-hero-noise"></div>
+		<div class="d-hero-orb d-hero-orb-1"></div>
+		<div class="d-hero-orb d-hero-orb-2"></div>
 
-	<!-- STATS -->
-	<div class="ld-stats">
-		<div class="ld-stat">
-			<div class="ld-stat-ico g">
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<rect x="2" y="5" width="20" height="14" rx="3" />
-					<path d="M2 10h20" />
-				</svg>
-			</div>
-			<div class="ld-stat-body">
-				<span>Wallet Balance</span>
-				<strong>₹<?php echo number_format($wallet_balance, 2); ?></strong>
-			</div>
-		</div>
-		<div class="ld-stat">
-			<div class="ld-stat-ico v">
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-					<polyline points="16 7 22 7 22 13" />
-				</svg>
-			</div>
-			<div class="ld-stat-body">
-				<span>Total Trades</span>
-				<strong><?php echo number_format((int)$user_trade_count); ?></strong>
-			</div>
-		</div>
-		<div class="ld-stat">
-			<div class="ld-stat-ico b">
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-					<path d="M13.73 21a2 2 0 0 1-3.46 0" />
-				</svg>
-			</div>
-			<div class="ld-stat-body">
-				<span>Unread Alerts</span>
-				<strong><?php echo number_format((int)$unread_notifications); ?></strong>
-			</div>
-		</div>
-	</div>
-
-	<!-- MAIN GRID -->
-	<div class="ld-grid">
-
-		<!-- LEFT -->
-		<div class="ld-col">
-
-			<!-- BALANCE -->
-			<div class="ld-balance">
-				<div class="ld-balance-left">
-					<small>Available Balance</small>
-					<strong>₹<?php echo number_format($wallet_balance, 2); ?></strong>
-					<p>Ready to trade or withdraw</p>
+		<div class="d-hero-inner">
+			<div>
+				<div class="d-hero-label">
+					<span class="d-hero-label-dot"></span>
+					Markets are live
 				</div>
-				<div class="ld-balance-right">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="2" y="5" width="20" height="14" rx="3" />
-						<path d="M2 10h20" />
-					</svg>
-				</div>
-			</div>
-
-			<!-- QUICK ACCESS -->
-			<div class="ld-card">
-				<div class="ld-card-hd">
-					<div>
-						<h2>Quick Access</h2>
-						<p>Jump to any section instantly</p>
-					</div>
-				</div>
-				<div class="ld-quick">
-					<a class="ld-qlink" href="<?php echo site_url('questions'); ?>">
-						<div class="ld-qlink-ico q">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<circle cx="12" cy="12" r="10" />
-								<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-								<line x1="12" y1="17" x2="12.01" y2="17" />
-							</svg>
-						</div>
-						<span>Questions</span>
-						<small>Browse &amp; trade markets</small>
-						<div class="ld-qlink-arrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg></div>
+				<h1 class="d-hero-h1">Trade smarter.<br><em>Win bigger.</em></h1>
+				<p class="d-hero-sub">Jump into live question markets, manage your wallet, and track your performance — all from one focused dashboard.</p>
+				<div class="d-hero-actions">
+					<a class="d-btn d-btn-primary" href="<?php echo site_url('questions'); ?>">
+						<i class="fa-solid fa-play"></i> Play Now
 					</a>
-					<a class="ld-qlink" href="<?php echo site_url('wallet'); ?>">
-						<div class="ld-qlink-ico w">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<rect x="2" y="5" width="20" height="14" rx="3" />
-								<path d="M2 10h20" />
-							</svg>
-						</div>
-						<span>Wallet</span>
-						<small>Deposits &amp; withdrawals</small>
-						<div class="ld-qlink-arrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg></div>
-					</a>
-					<a class="ld-qlink" href="<?php echo site_url('profile'); ?>">
-						<div class="ld-qlink-ico p">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-								<circle cx="12" cy="7" r="4" />
-							</svg>
-						</div>
-						<span>Profile</span>
-						<small>Account &amp; password</small>
-						<div class="ld-qlink-arrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg></div>
+					<a class="d-btn d-btn-ghost" href="<?php echo site_url('wallet/add_balance'); ?>">
+						<i class="fa-solid fa-wallet"></i> Add Balance
 					</a>
 				</div>
 			</div>
 
-			<!-- REFERRAL -->
-			<div class="ld-card">
-				<div class="ld-card-hd">
-					<div>
-						<h2>Referral Program</h2>
-						<p>Share your code — both sides earn the signup bonus</p>
-					</div>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-					</svg>
+			<div class="d-hero-panel">
+				<div class="d-hero-balance">
+					<div class="d-balance-label">Available Balance</div>
+					<div class="d-balance-amount">₹<?php echo number_format($wallet_balance, 2); ?></div>
+					<div class="d-balance-sub">Ready for live trades and fast market entry</div>
 				</div>
-				<div class="ld-ref-body">
-					<div class="ld-ref-code-box">
-						<div>
-							<span class="ld-ref-code-lbl">Your referral code</span>
-							<span class="ld-ref-code-val" id="ref-code-v"><?php echo html_escape($referral_code); ?></span>
-						</div>
-						<button class="ld-copy-btn" id="ref-copy-btn" onclick="ldCopy()">
-							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<rect x="9" y="9" width="13" height="13" rx="2" />
-								<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-							</svg>
-							Copy
-						</button>
+				<div class="d-hero-stats">
+					<div class="d-stat-mini">
+						<div class="d-stat-mini-label">Trades</div>
+						<div class="d-stat-mini-val"><?php echo number_format($user_trade_count); ?></div>
+						<div class="d-stat-mini-hint">Markets answered</div>
 					</div>
-					<div class="ld-ref-stats">
-						<div class="ld-ref-stat">
-							<span>Total Referrals</span>
-							<strong><?php echo number_format((int)$referral_summary['referral_count']); ?></strong>
-						</div>
-						<div class="ld-ref-stat">
-							<span>Bonus Earned</span>
-							<strong>₹<?php echo number_format((float)$referral_summary['bonus_amount'], 2); ?></strong>
-						</div>
+					<div class="d-stat-mini">
+						<div class="d-stat-mini-label">Categories</div>
+						<div class="d-stat-mini-val"><?php echo number_format($category_count); ?></div>
+						<div class="d-stat-mini-hint">To browse</div>
 					</div>
 				</div>
 			</div>
-
 		</div>
+	</section>
 
-		<!-- RIGHT: NOTIFICATIONS -->
-		<div class="ld-col">
-			<div class="ld-card">
-				<div class="ld-card-hd">
-					<div>
-						<h2>Notifications</h2>
-						<p>Trades, wallet &amp; system alerts</p>
-					</div>
-					<?php if ((int)$unread_notifications > 0): ?>
-						<span class="ld-notif-badge"><?php echo (int)$unread_notifications; ?></span>
-					<?php endif; ?>
-				</div>
-				<div class="ld-notif-toolbar">
-					<a class="ld-mark-all" href="<?php echo site_url('dashboard/mark-notifications-read'); ?>">
-						<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="20 6 9 17 4 12" />
-						</svg>
-						Mark all read
+	<!-- BODY -->
+	<div class="d-body">
+
+		<!-- Play Now -->
+		<div class="d-card">
+			<div class="d-card-head">
+				<div class="d-card-title">Play Now</div>
+				<div class="d-card-desc">Your fastest routes into live trading and wallet actions.</div>
+				<div class="d-card-divider"></div>
+			</div>
+			<div class="d-card-body">
+				<div class="d-play-grid">
+					<a class="d-play-item pi-live" href="<?php echo site_url('questions'); ?>">
+						<div class="d-play-badge">
+							<span class="d-play-badge-dot"></span> Live Markets
+						</div>
+						<div class="d-play-title">Start Trading</div>
+						<div class="d-play-desc">Browse open question categories and place trades with fewer clicks.</div>
+						<div class="d-play-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+					</a>
+					<a class="d-play-item pi-wallet" href="<?php echo site_url('wallet/add_balance'); ?>">
+						<div class="d-play-badge">
+							<span class="d-play-badge-dot"></span> Fast Funding
+						</div>
+						<div class="d-play-title">Top Up Wallet</div>
+						<div class="d-play-desc">Add balance so you're always ready when a strong market appears.</div>
+						<div class="d-play-arrow"><i class="fa-solid fa-arrow-right"></i></div>
 					</a>
 				</div>
-				<div class="ld-notif-list">
-					<?php if (!empty($notifications)): ?>
-						<?php foreach ($notifications as $n): ?>
-							<div class="ld-notif-item <?php echo empty($n->is_read) ? 'unread' : ''; ?>">
-								<div class="ld-notif-title"><?php echo html_escape($n->title); ?></div>
-								<div class="ld-notif-msg"><?php echo html_escape($n->message); ?></div>
-								<?php if (!empty($n->created_at)): ?>
-									<span class="ld-notif-time"><?php echo html_escape($n->created_at); ?></span>
-								<?php endif; ?>
+			</div>
+		</div>
+
+		<!-- Account Shortcuts -->
+		<div class="d-card">
+			<div class="d-card-head">
+				<div class="d-card-title">Account Shortcuts</div>
+				<div class="d-card-desc">Manage your wallet, profile, and referral flow.</div>
+				<div class="d-card-divider"></div>
+			</div>
+			<div class="d-card-body">
+				<div class="d-shortcuts">
+					<a class="d-shortcut" href="<?php echo site_url('wallet'); ?>">
+						<div class="d-shortcut-left">
+							<div class="d-shortcut-icon sc-blue"><i class="fa-solid fa-wallet"></i></div>
+							<div>
+								<div class="d-shortcut-title">Wallet Overview</div>
+								<div class="d-shortcut-sub">Deposits, withdrawals and balance history</div>
 							</div>
+						</div>
+						<i class="fa-solid fa-chevron-right d-shortcut-chevron"></i>
+					</a>
+					<a class="d-shortcut" href="<?php echo site_url('profile'); ?>">
+						<div class="d-shortcut-left">
+							<div class="d-shortcut-icon sc-green"><i class="fa-solid fa-user"></i></div>
+							<div>
+								<div class="d-shortcut-title">Profile Settings</div>
+								<div class="d-shortcut-sub">Update details, photo and password</div>
+							</div>
+						</div>
+						<i class="fa-solid fa-chevron-right d-shortcut-chevron"></i>
+					</a>
+					<a class="d-shortcut" href="<?php echo site_url('referral'); ?>">
+						<div class="d-shortcut-left">
+							<div class="d-shortcut-icon sc-gold"><i class="fa-solid fa-gift"></i></div>
+							<div>
+								<div class="d-shortcut-title">Refer Friends</div>
+								<div class="d-shortcut-sub">Share your invite and earn rewards</div>
+							</div>
+						</div>
+						<i class="fa-solid fa-chevron-right d-shortcut-chevron"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Categories -->
+		<div class="d-card">
+			<div class="d-card-head">
+				<div class="d-card-title">Explore Categories</div>
+				<div class="d-card-desc">Jump directly into any live category.</div>
+				<div class="d-card-divider"></div>
+			</div>
+			<div class="d-card-body">
+				<?php if (!empty($featured_categories)): ?>
+					<div class="d-cat-wrap">
+						<?php foreach ($featured_categories as $cat): ?>
+							<a class="d-cat-chip" href="<?php echo site_url('questions?category_id=' . (int)$cat->id); ?>">
+								<?php echo html_escape($cat->name); ?>
+								<span class="d-cat-count"><?php echo (int)$cat->question_count; ?></span>
+							</a>
 						<?php endforeach; ?>
-					<?php else: ?>
-						<div class="ld-notif-empty">
-							<div class="ld-notif-empty-ico">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-									<path d="M13.73 21a2 2 0 0 1-3.46 0" />
-								</svg>
-							</div>
-							<p>No notifications yet.<br>Trade &amp; wallet alerts will appear here.</p>
+					</div>
+				<?php else: ?>
+					<div class="d-empty">No categories yet — check back soon.</div>
+				<?php endif; ?>
+			</div>
+		</div>
+
+		<!-- Tips -->
+		<div class="d-card">
+			<div class="d-card-head">
+				<div class="d-card-title">Quick Tips</div>
+				<div class="d-card-desc">Use the app more smoothly with these reminders.</div>
+				<div class="d-card-divider"></div>
+			</div>
+			<div class="d-card-body">
+				<div class="d-tips">
+					<div class="d-tip">
+						<div class="d-tip-icon">⚡</div>
+						<div>
+							<div class="d-tip-title">Start with Live Categories</div>
+							<div class="d-tip-desc">Use Play Now for the quickest path into open question markets.</div>
 						</div>
-					<?php endif; ?>
+					</div>
+					<div class="d-tip">
+						<div class="d-tip-icon">💰</div>
+						<div>
+							<div class="d-tip-title">Keep Your Wallet Ready</div>
+							<div class="d-tip-desc">A funded wallet lets you react fast when a strong market appears.</div>
+						</div>
+					</div>
+					<div class="d-tip">
+						<div class="d-tip-icon">🔔</div>
+						<div>
+							<div class="d-tip-title">Watch the Bell Icon</div>
+							<div class="d-tip-desc">Trade updates, payouts and wallet alerts live in the header.</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
 	</div>
 </div>
-
-<script>
-	function ldCopy() {
-		var code = document.getElementById('ref-code-v').textContent.trim();
-		var btn = document.getElementById('ref-copy-btn');
-		navigator.clipboard.writeText(code).then(function() {
-			var orig = btn.innerHTML;
-			btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-			btn.style.background = '#d1fae5';
-			btn.style.borderColor = '#6ee7b7';
-			btn.style.color = '#065f46';
-			setTimeout(function() {
-				btn.innerHTML = orig;
-				btn.style.background = '';
-				btn.style.borderColor = '';
-				btn.style.color = '';
-			}, 2000);
-		});
-	}
-</script>

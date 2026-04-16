@@ -176,4 +176,53 @@ class Users extends CI_Controller
 		$error_message = trim(strip_tags(validation_errors(' ', ' ')));
 		$this->session->set_flashdata('error', $error_message !== '' ? $error_message : 'Please check the form fields and try again.');
 	}
+
+	public function add_users_to_question()
+	{
+		$admin = $this->get_admin();
+
+		$data = array(
+			'title' => 'Add Users',
+			'page_type' => 'dashboard',
+			'admin' => $admin,
+			'active_page' => 'users_add',
+			'categories' => $this->Category_model->get_all_categories()
+		);
+
+		$this->load->view('admin/includes/header', $data);
+		$this->load->view('admin/add_users_question', $data);
+		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function save_users_to_question()
+	{
+		$this->get_admin();
+		$question_id = (int)$this->input->post('question_id');
+		$count = (int)$this->input->post('user_count');
+
+		if ($question_id <= 0 || $count <= 0) {
+			$this->session->set_flashdata('error', 'Please select a valid question and enter a user count greater than zero.');
+			redirect('admin/users/add_users_to_question');
+		}
+
+		$question = $this->Category_model->get_question($question_id);
+
+		if (!$question) {
+			$this->session->set_flashdata('error', 'Selected question was not found.');
+			redirect('admin/users/add_users_to_question');
+		}
+
+		$this->db->set('admin_extra_users', 'COALESCE(admin_extra_users,0) + ' . $count, FALSE);
+		$this->db->where('id', $question_id);
+		$updated = $this->db->update('category_questions');
+
+		if (!$updated) {
+			$this->session->set_flashdata('error', 'Users could not be added right now. Please try again.');
+			redirect('admin/users/add_users_to_question');
+		}
+
+		$this->session->set_flashdata('success', $count . ' users added successfully to "' . $question->question . '".');
+
+		redirect('admin/users/add_users_to_question');
+	}
 }

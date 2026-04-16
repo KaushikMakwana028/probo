@@ -1,324 +1,482 @@
-<div class="settings-container">
-    <!-- Header -->
-    <div class="page-header">
-        <div>
-            <h2><i class="fas fa-cog"></i> Payment Settings</h2>
-            <p class="subtitle">Configure your payment gateway and bank details</p>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="ps-wrap">
+
+    <!-- Page Header -->
+    <div class="ps-header">
+        <div class="ps-header-left">
+            <div class="ps-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                    <path d="M4.93 4.93a10 10 0 0 0 0 14.14" />
+                </svg>
+            </div>
+            <div>
+                <h1>Payment Settings</h1>
+                <p>Configure UPI, bank details and QR code</p>
+            </div>
         </div>
-        <div class="header-actions">
-            <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="btn btn-outline">
-                <i class="fas fa-list"></i> View Requests
-            </a>
-        </div>
+        <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="ps-view-requests-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            View Requests
+        </a>
     </div>
 
     <!-- Flash Messages -->
     <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i>
+        <div class="ps-flash ps-success" id="psFlash">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
             <?php echo $this->session->flashdata('success'); ?>
-            <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+            <button class="ps-flash-close" onclick="this.parentElement.remove()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
         </div>
     <?php endif; ?>
-
     <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-circle"></i>
+        <div class="ps-flash ps-error" id="psFlash">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             <?php echo $this->session->flashdata('error'); ?>
-            <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+            <button class="ps-flash-close" onclick="this.parentElement.remove()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
         </div>
     <?php endif; ?>
 
-    <!-- Main Content -->
-    <div class="settings-grid">
-        <!-- Settings Form -->
-        <div class="card">
-            <div class="card-header">
-                <h3><i class="fas fa-university"></i> Payment Information</h3>
-            </div>
-            <div class="card-body">
-                <form method="post" action="<?php echo site_url('admin/deposits/save_settings'); ?>" enctype="multipart/form-data" id="settingsForm">
+    <!-- Main Grid -->
+    <div class="ps-grid">
 
-                    <!-- UPI Section -->
-                    <div class="form-section">
-                        <h4><i class="fab fa-google-pay"></i> UPI Details</h4>
-                        <div class="form-group">
-                            <label for="upi_id">
-                                UPI ID <span class="required">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-at"></i>
+        <!-- Left: Form -->
+        <div class="ps-form-col">
+            <form method="post" action="<?php echo site_url('admin/deposits/save_settings'); ?>" enctype="multipart/form-data" id="settingsForm">
+
+                <!-- UPI Section -->
+                <div class="ps-card">
+                    <div class="ps-card-head">
+                        <div class="ps-card-head-icon upi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>UPI Details</h2>
+                            <p>Accept payments via any UPI app</p>
+                        </div>
+                    </div>
+                    <div class="ps-card-body">
+                        <div class="ps-field">
+                            <label for="upi_id">UPI ID <span class="req">*</span></label>
+                            <div class="ps-input-wrap">
+                                <span class="ps-input-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="4" />
+                                        <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94" />
+                                    </svg>
                                 </span>
                                 <input
                                     type="text"
                                     name="upi_id"
                                     id="upi_id"
                                     value="<?php echo htmlspecialchars($settings->upi_id ?? ''); ?>"
-                                    placeholder="example@upi"
+                                    placeholder="yourname@upi"
                                     required>
                             </div>
-                            <small class="form-hint">Enter your UPI ID for payments</small>
+                            <span class="ps-hint">Users can send payments directly to this UPI ID</span>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Bank Details Section -->
-                    <div class="form-section">
-                        <h4><i class="fas fa-building"></i> Bank Account Details</h4>
-
-                        <div class="form-group">
+                <!-- Bank Section -->
+                <div class="ps-card">
+                    <div class="ps-card-head">
+                        <div class="ps-card-head-icon bank-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="22" x2="21" y2="22" />
+                                <line x1="6" y1="18" x2="6" y2="11" />
+                                <line x1="10" y1="18" x2="10" y2="11" />
+                                <line x1="14" y1="18" x2="14" y2="11" />
+                                <line x1="18" y1="18" x2="18" y2="11" />
+                                <polygon points="12 2 20 7 4 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Bank Account</h2>
+                            <p>For direct bank transfers</p>
+                        </div>
+                    </div>
+                    <div class="ps-card-body">
+                        <div class="ps-field">
                             <label for="bank_name">Bank Name</label>
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-landmark"></i>
+                            <div class="ps-input-wrap">
+                                <span class="ps-input-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="3" y1="22" x2="21" y2="22" />
+                                        <polygon points="12 2 20 7 4 7" />
+                                    </svg>
                                 </span>
-                                <input
-                                    type="text"
-                                    name="bank_name"
-                                    id="bank_name"
+                                <input type="text" name="bank_name" id="bank_name"
                                     value="<?php echo htmlspecialchars($settings->bank_name ?? ''); ?>"
-                                    placeholder="e.g., State Bank of India">
+                                    placeholder="e.g. State Bank of India">
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
+                        <div class="ps-field-row">
+                            <div class="ps-field">
                                 <label for="account_number">Account Number</label>
-                                <div class="input-group">
-                                    <span class="input-icon">
-                                        <i class="fas fa-credit-card"></i>
+                                <div class="ps-input-wrap">
+                                    <span class="ps-input-icon">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                            <line x1="1" y1="10" x2="23" y2="10" />
+                                        </svg>
                                     </span>
-                                    <input
-                                        type="text"
-                                        name="account_number"
-                                        id="account_number"
+                                    <input type="text" name="account_number" id="account_number"
                                         value="<?php echo htmlspecialchars($settings->account_number ?? ''); ?>"
-                                        placeholder="Enter account number">
+                                        placeholder="Account number">
                                 </div>
                             </div>
-
-                            <div class="form-group">
+                            <div class="ps-field">
                                 <label for="ifsc">IFSC Code</label>
-                                <div class="input-group">
-                                    <span class="input-icon">
-                                        <i class="fas fa-code"></i>
+                                <div class="ps-input-wrap">
+                                    <span class="ps-input-icon">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="16 18 22 12 16 6" />
+                                            <polyline points="8 6 2 12 8 18" />
+                                        </svg>
                                     </span>
-                                    <input
-                                        type="text"
-                                        name="ifsc"
-                                        id="ifsc"
+                                    <input type="text" name="ifsc" id="ifsc"
                                         value="<?php echo htmlspecialchars($settings->ifsc ?? ''); ?>"
-                                        placeholder="e.g., SBIN0001234"
-                                        style="text-transform: uppercase;">
+                                        placeholder="e.g. SBIN0001234"
+                                        style="text-transform:uppercase">
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- QR Code Section -->
-                    <div class="form-section">
-                        <h4><i class="fas fa-qrcode"></i> QR Code</h4>
-
-                        <div class="form-group">
-                            <label for="qr_image">Upload QR Code</label>
-                            <div class="file-upload-wrapper">
-                                <input
-                                    type="file"
-                                    name="qr_image"
-                                    id="qr_image"
-                                    accept="image/*"
-                                    onchange="previewImage(event)">
-                                <label for="qr_image" class="file-upload-label">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span>Choose Image</span>
-                                    <small>JPG, PNG or GIF (Max 2MB)</small>
-                                </label>
-                            </div>
+                <!-- QR Code Section -->
+                <div class="ps-card">
+                    <div class="ps-card-head">
+                        <div class="ps-card-head-icon qr-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                                <path d="M21 21h-4v-4" />
+                                <path d="M14 17h3" />
+                                <path d="M17 14h4" />
+                            </svg>
                         </div>
-
-                        <!-- Current QR Code Display -->
+                        <div>
+                            <h2>QR Code</h2>
+                            <p>Scan to pay — fast and easy</p>
+                        </div>
+                    </div>
+                    <div class="ps-card-body">
+                        <!-- Current QR -->
                         <?php if (!empty($settings->qr_image)): ?>
-                            <div class="current-qr" id="currentQR">
-                                <div class="qr-header">
-                                    <span>Current QR Code</span>
+                            <div class="current-qr-block">
+                                <div class="cqr-label-row">
+                                    <span class="cqr-label">Current QR Code</span>
                                     <a href="<?php echo site_url('admin/deposits/delete_qr'); ?>"
-                                        class="btn-delete-qr"
-                                        onclick="return confirm('Are you sure you want to delete this QR code?')">
-                                        <i class="fas fa-trash"></i> Delete
+                                        class="cqr-delete-btn"
+                                        onclick="return confirm('Delete this QR code?')">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6" />
+                                            <path d="M19 6l-1 14H6L5 6" />
+                                            <path d="M10 11v6" />
+                                            <path d="M14 11v6" />
+                                            <path d="M9 6V4h6v2" />
+                                        </svg>
+                                        Remove
                                     </a>
                                 </div>
-                                <div class="qr-preview">
+                                <div class="cqr-preview">
                                     <img src="<?php echo base_url('uploads/qr/' . $settings->qr_image); ?>" alt="QR Code">
+                                    <div class="cqr-overlay">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         <?php endif; ?>
 
+                        <!-- Upload Zone -->
+                        <div class="ps-upload-zone" id="uploadZone" onclick="document.getElementById('qr_image').click()">
+                            <input type="file" name="qr_image" id="qr_image" accept="image/*" style="display:none" onchange="handleFileChange(event)">
+                            <div class="upload-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 16 12 12 8 16" />
+                                    <line x1="12" y1="12" x2="12" y2="21" />
+                                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                                </svg>
+                            </div>
+                            <p class="upload-title" id="uploadTitle">Click to upload QR image</p>
+                            <p class="upload-hint">JPG, PNG or GIF — max 2MB</p>
+                        </div>
+
                         <!-- New QR Preview -->
-                        <div class="qr-preview-new" id="qrPreview" style="display: none;">
-                            <p>New QR Code Preview:</p>
+                        <div class="new-qr-preview" id="newQrPreview" style="display:none">
+                            <div class="nqr-label">New QR — Preview</div>
                             <img id="previewImg" src="" alt="Preview">
+                            <button type="button" class="nqr-remove" onclick="removePreview()">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                                Remove
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Submit Button -->
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Settings
-                        </button>
-                        <button type="reset" class="btn btn-secondary" onclick="resetPreview()">
-                            <i class="fas fa-undo"></i> Reset
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- Submit Row -->
+                <div class="ps-submit-row">
+                    <button type="submit" class="ps-save-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                            <polyline points="17 21 17 13 7 13 7 21" />
+                            <polyline points="7 3 7 8 15 8" />
+                        </svg>
+                        Save Settings
+                    </button>
+                    <button type="reset" class="ps-reset-btn" onclick="removePreview()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 .49-3.21" />
+                        </svg>
+                        Reset
+                    </button>
+                </div>
+
+            </form>
         </div>
 
-        <!-- Info Panel -->
-        <div class="info-panel">
-            <!-- Quick Info -->
-            <div class="card info-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-info-circle"></i> Information</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-item">
-                        <i class="fas fa-check-circle text-success"></i>
-                        <div>
-                            <strong>UPI Payments</strong>
-                            <p>Users can pay via any UPI app</p>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-qrcode text-primary"></i>
-                        <div>
-                            <strong>QR Code</strong>
-                            <p>Quick scan and pay option</p>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-shield-alt text-warning"></i>
-                        <div>
-                            <strong>Secure</strong>
-                            <p>All transactions are encrypted</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Right: Sidebar -->
+        <div class="ps-sidebar">
 
-            <!-- Payment Status -->
-            <div class="card status-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
+            <!-- Quick Stats -->
+            <div class="ps-side-card">
+                <div class="ps-side-card-head">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Quick Stats
                 </div>
-                <div class="card-body">
+                <div class="ps-side-card-body">
                     <?php
                     $pending = $this->db->where('status', 'pending')->count_all_results('deposit_requests');
                     $today_deposits = $this->db->where('DATE(created_at)', date('Y-m-d'))
                         ->where('status', 'approved')
                         ->count_all_results('deposit_requests');
                     ?>
-                    <div class="stat-item">
-                        <div class="stat-icon pending">
-                            <i class="fas fa-clock"></i>
+                    <div class="ps-stat-row">
+                        <div class="ps-stat-icon pending-ico">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
                         </div>
-                        <div class="stat-details">
-                            <span class="stat-value"><?php echo $pending; ?></span>
-                            <span class="stat-label">Pending Requests</span>
+                        <div class="ps-stat-info">
+                            <span class="ps-stat-num"><?php echo $pending; ?></span>
+                            <span class="ps-stat-lbl">Pending Requests</span>
                         </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-icon success">
-                            <i class="fas fa-calendar-day"></i>
+                    <div class="ps-stat-row">
+                        <div class="ps-stat-icon today-ico">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
                         </div>
-                        <div class="stat-details">
-                            <span class="stat-value"><?php echo $today_deposits; ?></span>
-                            <span class="stat-label">Today's Deposits</span>
+                        <div class="ps-stat-info">
+                            <span class="ps-stat-num"><?php echo $today_deposits; ?></span>
+                            <span class="ps-stat-lbl">Today's Approvals</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Help Card -->
-            <div class="card help-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-question-circle"></i> Need Help?</h3>
+            <!-- Info -->
+            <div class="ps-side-card">
+                <div class="ps-side-card-head">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    How It Works
                 </div>
-                <div class="card-body">
-                    <p>Having trouble setting up payment methods?</p>
-                    <a href="#" class="btn btn-help">
-                        <i class="fas fa-book"></i> View Documentation
+                <div class="ps-side-card-body">
+                    <div class="ps-info-step">
+                        <div class="ps-step-num">1</div>
+                        <div>
+                            <strong>User initiates deposit</strong>
+                            <p>User sends payment to your UPI ID or scans the QR code</p>
+                        </div>
+                    </div>
+                    <div class="ps-info-step">
+                        <div class="ps-step-num">2</div>
+                        <div>
+                            <strong>Receipt uploaded</strong>
+                            <p>User uploads proof of payment and submits the request</p>
+                        </div>
+                    </div>
+                    <div class="ps-info-step">
+                        <div class="ps-step-num">3</div>
+                        <div>
+                            <strong>Admin approves</strong>
+                            <p>You verify and approve — wallet is credited instantly</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="ps-side-card help-side-card">
+                <div class="ps-side-card-head">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Need Help?
+                </div>
+                <div class="ps-side-card-body">
+                    <p class="ps-help-text">Having trouble setting up payment details?</p>
+                    <a href="#" class="ps-help-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                        </svg>
+                        View Documentation
                     </a>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 <style>
-    .settings-container {
-        padding: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
     }
 
-    .page-header {
+    .ps-wrap {
+        font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+        padding: 0 0 48px;
+        max-width: 1200px;
+    }
+
+    /* ─── Header ─── */
+    .ps-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 24px;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
-    .page-header h2 {
-        margin: 0;
-        color: #2c3e50;
-        font-size: 2rem;
+    .ps-header-left {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 14px;
     }
 
-    .subtitle {
-        color: #6c757d;
-        margin: 5px 0 0 0;
-        font-size: 0.95rem;
+    .ps-icon-box {
+        width: 48px;
+        height: 48px;
+        background: #F0FDF4;
+        color: #059669;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
     }
 
-    .header-actions .btn-outline {
-        background: white;
-        border: 2px solid #667eea;
-        color: #667eea;
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.3s;
+    .ps-header h1 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: #111827;
+        letter-spacing: -0.3px;
+    }
+
+    .ps-header p {
+        margin: 2px 0 0;
+        font-size: 0.82rem;
+        color: #9CA3AF;
+    }
+
+    .ps-view-requests-btn {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
+        padding: 9px 18px;
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 9px;
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        transition: all 0.18s;
+        white-space: nowrap;
     }
 
-    .header-actions .btn-outline:hover {
-        background: #667eea;
-        color: white;
+    .ps-view-requests-btn:hover {
+        background: #F9FAFB;
+        border-color: #D1D5DB;
     }
 
-    /* Alerts */
-    .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+    /* ─── Flash ─── */
+    .ps-flash {
         display: flex;
         align-items: center;
         gap: 10px;
+        padding: 13px 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        animation: psSlide 0.3s ease;
         position: relative;
-        animation: slideDown 0.3s ease;
     }
 
-    @keyframes slideDown {
+    @keyframes psSlide {
         from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-6px);
         }
 
         to {
@@ -327,449 +485,571 @@
         }
     }
 
-    .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border-left: 4px solid #28a745;
+    .ps-success {
+        background: #D1FAE5;
+        color: #065F46;
+        border-left: 3px solid #059669;
     }
 
-    .alert-danger {
-        background: #f8d7da;
-        color: #721c24;
-        border-left: 4px solid #dc3545;
+    .ps-error {
+        background: #FEE2E2;
+        color: #7F1D1D;
+        border-left: 3px solid #DC2626;
     }
 
-    .alert-close {
-        position: absolute;
-        right: 15px;
+    .ps-flash-close {
+        margin-left: auto;
         background: none;
         border: none;
-        font-size: 24px;
         cursor: pointer;
+        color: inherit;
         opacity: 0.5;
-        transition: opacity 0.3s;
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        transition: opacity 0.15s;
     }
 
-    .alert-close:hover {
+    .ps-flash-close:hover {
         opacity: 1;
     }
 
-    /* Grid Layout */
-    .settings-grid {
+    /* ─── Grid ─── */
+    .ps-grid {
         display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 30px;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+        align-items: start;
     }
 
-    /* Cards */
-    .card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    /* ─── Cards (form) ─── */
+    .ps-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #F3F4F6;
+        margin-bottom: 16px;
         overflow: hidden;
     }
 
-    .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px 25px;
-    }
-
-    .card-header h3 {
-        margin: 0;
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .card-body {
-        padding: 30px;
-    }
-
-    /* Form Sections */
-    .form-section {
-        margin-bottom: 35px;
-        padding-bottom: 25px;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .form-section:last-child {
-        border-bottom: none;
+    .ps-card:last-of-type {
         margin-bottom: 0;
     }
 
-    .form-section h4 {
-        color: #495057;
-        margin: 0 0 20px 0;
-        font-size: 1.1rem;
+    .ps-card-head {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #F9FAFB;
+        background: #FAFAFA;
     }
 
-    /* Form Groups */
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 8px;
-        color: #495057;
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
-
-    .required {
-        color: #dc3545;
-    }
-
-    .input-group {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .input-icon {
-        position: absolute;
-        left: 15px;
-        color: #667eea;
-        z-index: 1;
-    }
-
-    input[type="text"],
-    input[type="file"] {
-        width: 100%;
-        padding: 12px 15px 12px 45px;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: all 0.3s;
-    }
-
-    input[type="text"]:focus {
-        border-color: #667eea;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-hint {
-        display: block;
-        margin-top: 5px;
-        color: #6c757d;
-        font-size: 0.85rem;
-    }
-
-    /* File Upload */
-    .file-upload-wrapper {
-        position: relative;
-    }
-
-    .file-upload-wrapper input[type="file"] {
-        position: absolute;
-        opacity: 0;
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-    }
-
-    .file-upload-label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 30px;
-        border: 2px dashed #667eea;
-        border-radius: 8px;
-        background: #f8f9ff;
-        cursor: pointer;
-        transition: all 0.3s;
-        margin: 0;
-    }
-
-    .file-upload-label:hover {
-        background: #f0f2ff;
-        border-color: #5568d3;
-    }
-
-    .file-upload-label i {
-        font-size: 2.5rem;
-        color: #667eea;
-        margin-bottom: 10px;
-    }
-
-    .file-upload-label span {
-        color: #495057;
-        font-weight: 500;
-    }
-
-    .file-upload-label small {
-        color: #6c757d;
-        font-size: 0.85rem;
-        margin-top: 5px;
-    }
-
-    /* QR Code Display */
-    .current-qr {
-        margin-top: 20px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    .qr-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .qr-header span {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    .btn-delete-qr {
-        color: #dc3545;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: all 0.3s;
-    }
-
-    .btn-delete-qr:hover {
-        color: #c82333;
-    }
-
-    .qr-preview {
-        text-align: center;
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-    }
-
-    .qr-preview img {
-        max-width: 250px;
-        border: 2px solid #dee2e6;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .qr-preview-new {
-        margin-top: 20px;
-        padding: 20px;
-        background: #e7f3ff;
-        border-radius: 8px;
-        text-align: center;
-    }
-
-    .qr-preview-new p {
-        margin: 0 0 15px 0;
-        color: #495057;
-        font-weight: 500;
-    }
-
-    .qr-preview-new img {
-        max-width: 250px;
-        border: 2px solid #667eea;
-        border-radius: 8px;
-    }
-
-    /* Buttons */
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
-    }
-
-    .btn {
-        padding: 12px 30px;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: #5a6268;
-    }
-
-    /* Info Panel */
-    .info-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .info-card .card-body {
-        padding: 20px;
-    }
-
-    .info-item {
-        display: flex;
-        gap: 15px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 10px;
-    }
-
-    .info-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .info-item i {
-        font-size: 1.5rem;
-        margin-top: 2px;
-    }
-
-    .info-item strong {
-        display: block;
-        color: #2c3e50;
-        margin-bottom: 3px;
-    }
-
-    .info-item p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: #6c757d;
-    }
-
-    /* Status Card */
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-
-    .stat-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
+    .ps-card-head-icon {
+        width: 38px;
+        height: 38px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        flex-shrink: 0;
     }
 
-    .stat-icon.pending {
-        background: #fff3cd;
-        color: #856404;
+    .upi-icon {
+        background: #EEF2FF;
+        color: #4F46E5;
     }
 
-    .stat-icon.success {
-        background: #d4edda;
-        color: #155724;
+    .bank-icon {
+        background: #FFF7ED;
+        color: #C2410C;
     }
 
-    .stat-details {
+    .qr-icon {
+        background: #F0FDF4;
+        color: #059669;
+    }
+
+    .ps-card-head h2 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .ps-card-head p {
+        margin: 2px 0 0;
+        font-size: 0.78rem;
+        color: #9CA3AF;
+    }
+
+    .ps-card-body {
+        padding: 22px;
+    }
+
+    /* ─── Fields ─── */
+    .ps-field {
+        margin-bottom: 18px;
+    }
+
+    .ps-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .ps-field label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .req {
+        color: #DC2626;
+    }
+
+    .ps-input-wrap {
+        position: relative;
+    }
+
+    .ps-input-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
     }
 
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2c3e50;
+    .ps-input-wrap input[type="text"] {
+        width: 100%;
+        padding: 10px 12px 10px 38px;
+        border: 1px solid #E5E7EB;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        color: #111827;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.18s, box-shadow 0.18s;
+        outline: none;
     }
 
-    .stat-label {
-        font-size: 0.85rem;
-        color: #6c757d;
+    .ps-input-wrap input[type="text"]:focus {
+        border-color: #818CF8;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 
-    /* Help Card */
-    .help-card .card-body {
+    .ps-hint {
+        display: block;
+        font-size: 0.77rem;
+        color: #9CA3AF;
+        margin-top: 6px;
+    }
+
+    .ps-field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    /* ─── Upload Zone ─── */
+    .ps-upload-zone {
+        border: 1.5px dashed #D1D5DB;
+        border-radius: 12px;
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #FAFAFA;
+    }
+
+    .ps-upload-zone:hover {
+        border-color: #818CF8;
+        background: #F5F3FF;
+    }
+
+    .upload-icon {
+        width: 48px;
+        height: 48px;
+        background: #EEF2FF;
+        color: #4F46E5;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+    }
+
+    .upload-title {
+        margin: 0 0 4px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .upload-hint {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #9CA3AF;
+    }
+
+    /* ─── Current QR ─── */
+    .current-qr-block {
+        background: #F9FAFB;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 16px;
+        border: 1px solid #F3F4F6;
+    }
+
+    .cqr-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .cqr-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .cqr-delete-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.78rem;
+        color: #DC2626;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.15s;
+    }
+
+    .cqr-delete-btn:hover {
+        opacity: 0.7;
+    }
+
+    .cqr-preview {
+        position: relative;
+        display: inline-block;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .cqr-preview img {
+        display: block;
+        max-width: 180px;
+        border-radius: 10px;
+        border: 1px solid #E5E7EB;
+    }
+
+    .cqr-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+        border-radius: 10px;
+    }
+
+    .cqr-preview:hover .cqr-overlay {
+        opacity: 1;
+    }
+
+    /* ─── New QR Preview ─── */
+    .new-qr-preview {
+        margin-top: 14px;
+        background: #EEF2FF;
+        border-radius: 10px;
+        padding: 16px;
         text-align: center;
     }
 
-    .help-card p {
-        color: #6c757d;
-        margin-bottom: 15px;
+    .nqr-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #4F46E5;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 10px;
     }
 
-    .btn-help {
-        background: #17a2b8;
-        color: white;
-        text-decoration: none;
-        padding: 10px 20px;
+    .new-qr-preview img {
+        max-width: 160px;
         border-radius: 8px;
+        border: 2px solid #818CF8;
+        display: block;
+        margin: 0 auto 10px;
+    }
+
+    .nqr-remove {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: none;
+        border: none;
+        font-size: 0.78rem;
+        color: #6B7280;
+        cursor: pointer;
+        font-family: inherit;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background 0.15s;
+    }
+
+    .nqr-remove:hover {
+        background: rgba(0, 0, 0, 0.06);
+    }
+
+    /* ─── Submit Row ─── */
+    .ps-submit-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .ps-save-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.3s;
+        padding: 11px 24px;
+        background: #4F46E5;
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.18s;
     }
 
-    .btn-help:hover {
-        background: #138496;
-        transform: translateY(-2px);
+    .ps-save-btn:hover {
+        background: #4338CA;
+        transform: translateY(-1px);
     }
 
-    /* Responsive */
-    @media (max-width: 992px) {
-        .settings-grid {
+    .ps-reset-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 20px;
+        background: #fff;
+        color: #6B7280;
+        border: 1px solid #E5E7EB;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.18s;
+    }
+
+    .ps-reset-btn:hover {
+        background: #F9FAFB;
+    }
+
+    /* ─── Sidebar ─── */
+    .ps-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .ps-side-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #F3F4F6;
+        overflow: hidden;
+    }
+
+    .ps-side-card-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 18px;
+        background: #F9FAFB;
+        border-bottom: 1px solid #F3F4F6;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .ps-side-card-body {
+        padding: 16px 18px;
+    }
+
+    /* Stats */
+    .ps-stat-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #F9FAFB;
+    }
+
+    .ps-stat-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .ps-stat-row:first-child {
+        padding-top: 0;
+    }
+
+    .ps-stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .pending-ico {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+
+    .today-ico {
+        background: #D1FAE5;
+        color: #059669;
+    }
+
+    .ps-stat-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .ps-stat-num {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .ps-stat-lbl {
+        font-size: 0.76rem;
+        color: #9CA3AF;
+    }
+
+    /* How it works steps */
+    .ps-info-step {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 14px;
+    }
+
+    .ps-info-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .ps-step-num {
+        width: 24px;
+        height: 24px;
+        background: #EEF2FF;
+        color: #4F46E5;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .ps-info-step strong {
+        display: block;
+        font-size: 0.83rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 2px;
+    }
+
+    .ps-info-step p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #9CA3AF;
+        line-height: 1.5;
+    }
+
+    /* Help */
+    .ps-help-text {
+        font-size: 0.84rem;
+        color: #6B7280;
+        margin: 0 0 12px;
+    }
+
+    .ps-help-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 16px;
+        background: #0891B2;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 0.83rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.18s;
+    }
+
+    .ps-help-btn:hover {
+        background: #0E7490;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+        .ps-grid {
             grid-template-columns: 1fr;
         }
 
-        .form-row {
+        .ps-sidebar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .ps-field-row {
             grid-template-columns: 1fr;
         }
 
-        .page-header {
+        .ps-sidebar {
+            grid-template-columns: 1fr;
+        }
+
+        .ps-submit-row {
+            flex-direction: column;
+        }
+
+        .ps-save-btn,
+        .ps-reset-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .ps-header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 15px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .settings-container {
-            padding: 10px;
         }
 
-        .card-body {
-            padding: 20px;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
-
-        .btn {
+        .ps-view-requests-btn {
             width: 100%;
             justify-content: center;
         }
@@ -777,48 +1057,46 @@
 </style>
 
 <script>
-    // Image Preview
-    function previewImage(event) {
+    function handleFileChange(event) {
         const file = event.target.files[0];
-        const preview = document.getElementById('qrPreview');
-        const previewImg = document.getElementById('previewImg');
+        const preview = document.getElementById('newQrPreview');
+        const img = document.getElementById('previewImg');
+        const title = document.getElementById('uploadTitle');
 
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
+            reader.onload = e => {
+                img.src = e.target.result;
                 preview.style.display = 'block';
-            }
+                title.textContent = file.name;
+            };
             reader.readAsDataURL(file);
-        } else {
-            preview.style.display = 'none';
         }
     }
 
-    // Reset Preview
-    function resetPreview() {
-        document.getElementById('qrPreview').style.display = 'none';
+    function removePreview() {
+        document.getElementById('newQrPreview').style.display = 'none';
         document.getElementById('previewImg').src = '';
+        document.getElementById('qr_image').value = '';
+        document.getElementById('uploadTitle').textContent = 'Click to upload QR image';
     }
 
-    // Auto-hide alerts after 5 seconds
     setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 300);
-        });
+        const flash = document.getElementById('psFlash');
+        if (flash) {
+            flash.style.transition = 'opacity 0.4s';
+            flash.style.opacity = '0';
+            setTimeout(() => flash && flash.remove(), 400);
+        }
     }, 5000);
 
-    // Form validation
     document.getElementById('settingsForm').addEventListener('submit', function(e) {
-        const upiId = document.getElementById('upi_id').value.trim();
-
-        if (!upiId) {
+        const upi = document.getElementById('upi_id').value.trim();
+        if (!upi) {
             e.preventDefault();
-            alert('UPI ID is required!');
             document.getElementById('upi_id').focus();
-            return false;
+            document.getElementById('upi_id').style.borderColor = '#DC2626';
+            document.getElementById('upi_id').style.boxShadow = '0 0 0 3px rgba(220,38,38,0.1)';
         }
     });
 </script>

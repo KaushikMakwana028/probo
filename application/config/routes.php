@@ -65,6 +65,7 @@ $route['login/update-password'] = 'login/update_password';
 $route['logout'] = 'login/logout';
 
 $route['dashboard'] = 'dashboard';
+$route['referral'] = 'dashboard/referral';
 $route['dashboard/mark-notifications-read'] = 'dashboard/mark_notifications_read';
 $route['questions'] = 'questions';
 $route['questions/category-data/(:num)'] = 'questions/category_data/$1';
@@ -110,3 +111,4 @@ $route['admin/referrals/list'] = 'admin/referrals/list';
 $route['admin/profile'] = 'admin/profile';
 $route['admin/profile/update'] = 'admin/profile/update';
 $route['admin/profile/change-password'] = 'admin/profile/change_password';
+$route['admin/questions/get_questions_by_category/(:num)'] = 'admin/questions/get_questions_by_category/$1';

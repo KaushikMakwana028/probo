@@ -642,6 +642,44 @@
 			display: block;
 		}
 
+		.sidebar-group {
+			margin-bottom: 8px;
+		}
+
+		.sidebar-group-toggle {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			cursor: pointer;
+			padding: 10px 12px;
+			border-radius: 8px;
+		}
+
+		.sidebar-group.open .sidebar-subnav {
+			display: block;
+		}
+
+		.sidebar-subnav {
+			display: none;
+			padding-left: 20px;
+		}
+
+		.sidebar-subnav a {
+			display: block;
+			padding: 8px 10px;
+			border-radius: 6px;
+			font-size: 14px;
+		}
+
+		.sidebar-subnav a.active {
+			background: #3b82f6;
+			color: #fff;
+		}
+
+		.arrow {
+			font-size: 12px;
+		}
+
 		/* ═══════════════════════════════════════════════════════
 	   BREAKPOINTS
 	   ═══════════════════════════════════════════════════════ */
@@ -756,6 +794,8 @@
 	<?php if (isset($page_type) && $page_type === 'dashboard' && isset($admin)):
 		$_av = !empty($admin->profile_image) ? $admin->profile_image : 'assets/images/default-profile.svg';
 		$_av_src = preg_match('/^https?:\/\//i', $_av) ? $_av : base_url($_av);
+		$active_page = isset($active_page) ? $active_page : '';
+		$isUsersOpen = in_array($active_page, ['users', 'users_extra']);
 	?>
 
 		<div class="app-layout">
@@ -774,10 +814,40 @@
 						href="<?php echo site_url('admin/dashboard'); ?>">
 						<i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
 					</a>
-					<a class="<?php echo (isset($active_page) && $active_page === 'users') ? 'active' : ''; ?>"
-						href="<?php echo site_url('admin/users'); ?>">
-						<i class="fa-solid fa-users"></i><span>Users</span>
-					</a>
+
+					<?php
+					$isUsersOpen = in_array($active_page ?? '', ['users', 'users_add']);
+					?>
+
+					<div class="sidebar-group <?= $isUsersOpen ? 'open' : '' ?>">
+
+						<button class="sidebar-group-toggle" type="button">
+							<span class="sidebar-group-label">
+								<i class="fa fa-users"></i>
+								<span>Users</span>
+							</span>
+							<span class="sidebar-caret">
+								<i class="fa fa-chevron-down"></i>
+							</span>
+						</button>
+
+						<div class="sidebar-subnav">
+
+							<a class="<?= ($active_page ?? '') == 'users' ? 'active' : '' ?>"
+								href="<?= site_url('admin/users') ?>">
+								<i class="fa fa-list"></i>
+								<span>All Users</span>
+							</a>
+
+							<a class="<?= ($active_page ?? '') == 'users_add' ? 'active' : '' ?>"
+								href="<?= site_url('admin/users/add_users_to_question') ?>">
+								<i class="fa fa-user-plus"></i>
+								<span>Add Users</span>
+							</a>
+
+						</div>
+
+					</div>
 
 					<a class="<?php echo (isset($active_page) && $active_page === 'categories') ? 'active' : ''; ?>"
 						href="<?php echo site_url('admin/categories'); ?>">
@@ -803,7 +873,7 @@
 						</div>
 					</div>
 
-					<div class="sidebar-group">
+					<div class="sidebar-group <?php echo (isset($active_page) && strpos($active_page, 'deposits') === 0) ? 'open' : ''; ?>">
 						<button class="sidebar-group-toggle">
 							<span class="sidebar-group-label">
 								<i class="fas fa-money-bill"></i>
@@ -813,15 +883,20 @@
 						</button>
 
 						<div class="sidebar-subnav">
-							<a href="<?php echo site_url('admin/deposits/settings'); ?>">
-								Payment Settings
+							<a class="<?php echo (isset($active_page) && $active_page === 'deposits_settings') ? 'active' : ''; ?>"
+								href="<?php echo site_url('admin/deposits/settings'); ?>">
+								<i class="fa-solid fa-gear"></i>
+								<span>Payment Settings</span>
 							</a>
-							<a href="<?php echo site_url('admin/deposits/requests'); ?>">
-								Deposit Requests
+
+							<a class="<?php echo (isset($active_page) && $active_page === 'deposits_requests') ? 'active' : ''; ?>"
+								href="<?php echo site_url('admin/deposits/requests'); ?>">
+								<i class="fa-solid fa-file-invoice-dollar"></i>
+								<span>Deposit Requests</span>
 							</a>
 						</div>
 					</div>
-					
+
 					<div class="sidebar-group <?php echo (isset($active_page) && strpos($active_page, 'referrals') === 0) ? 'open' : ''; ?>">
 						<button class="sidebar-group-toggle" type="button">
 							<span class="sidebar-group-label">
@@ -894,3 +969,17 @@
 				<div class="page-grid">
 
 				<?php endif; ?>
+
+				<script>
+					document.querySelectorAll('.sidebar-group-toggle').forEach(btn => {
+						btn.addEventListener('click', function() {
+							const parent = this.closest('.sidebar-group');
+
+							document.querySelectorAll('.sidebar-group').forEach(g => {
+								if (g !== parent) g.classList.remove('open');
+							});
+
+							parent.classList.toggle('open');
+						});
+					});
+				</script>

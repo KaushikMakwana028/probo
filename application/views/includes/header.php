@@ -1,3 +1,28 @@
+<?php
+if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
+	$CI = &get_instance();
+
+	if (!isset($CI->User_model)) {
+		$CI->load->model('User_model');
+	}
+
+	if (!isset($notifications)) {
+		$notifications = $CI->User_model->get_notifications_by_user($user->id, 6);
+	}
+
+	if (!isset($unread_notifications)) {
+		$unread_notifications = $CI->User_model->count_unread_notifications($user->id);
+	}
+
+	if (!isset($referral_code)) {
+		$referral_code = $CI->User_model->ensure_referral_code($user->id);
+	}
+
+	if (!isset($referral_summary)) {
+		$referral_summary = $CI->User_model->get_referral_summary($user->id);
+	}
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -454,6 +479,184 @@
 		}
 
 		/* Profile Menu */
+		.topbar-actions {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.notification-menu {
+			position: relative;
+		}
+
+		.notification-trigger {
+			position: relative;
+			width: 46px;
+			height: 46px;
+			border-radius: 14px;
+			border: 1px solid var(--border);
+			background: var(--white);
+			color: var(--dark);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: all 0.2s;
+			box-shadow: var(--shadow-xs);
+		}
+
+		.notification-trigger:hover {
+			border-color: var(--primary);
+			color: var(--primary);
+			box-shadow: var(--shadow-sm);
+		}
+
+		.notification-badge {
+			position: absolute;
+			top: -5px;
+			right: -4px;
+			min-width: 22px;
+			height: 22px;
+			padding: 0 6px;
+			border-radius: 999px;
+			background: linear-gradient(135deg, #ef4444, #f97316);
+			color: #fff;
+			font-size: 11px;
+			font-weight: 800;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 8px 18px rgba(239, 68, 68, 0.28);
+			border: 2px solid var(--white);
+		}
+
+		.notification-dropdown {
+			position: absolute;
+			right: 0;
+			top: calc(100% + 10px);
+			width: min(380px, calc(100vw - 32px));
+			max-height: 480px;
+			overflow: hidden;
+			background: var(--white);
+			border-radius: 18px;
+			border: 1px solid var(--border);
+			box-shadow: var(--shadow-xl);
+			display: none;
+			z-index: 60;
+		}
+
+		.notification-menu.open .notification-dropdown {
+			display: block;
+			animation: dropdownSlide 0.2s ease;
+		}
+
+		.notification-head {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 18px 18px 14px;
+			border-bottom: 1px solid var(--border);
+		}
+
+		.notification-head h3 {
+			font-size: 16px;
+			font-weight: 700;
+			color: var(--dark);
+			margin-bottom: 3px;
+		}
+
+		.notification-head p {
+			font-size: 12px;
+			color: var(--text-light);
+			margin: 0;
+		}
+
+		.notification-mark {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			padding: 8px 12px;
+			border-radius: 999px;
+			background: #eff6ff;
+			color: var(--primary);
+			border: 1px solid #bfdbfe;
+			text-decoration: none;
+			font-size: 12px;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		.notification-list {
+			max-height: 390px;
+			overflow-y: auto;
+			padding: 12px;
+			display: grid;
+			gap: 10px;
+			background: linear-gradient(180deg, #ffffff, #f8fafc);
+		}
+
+		.notification-list::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		.notification-list::-webkit-scrollbar-thumb {
+			background: #cbd5e1;
+			border-radius: 999px;
+		}
+
+		.notification-item {
+			padding: 14px;
+			border-radius: 14px;
+			background: var(--white);
+			border: 1px solid var(--border);
+			transition: transform 0.18s, border-color 0.18s;
+		}
+
+		.notification-item.unread {
+			background: #eff6ff;
+			border-color: #bfdbfe;
+			box-shadow: inset 3px 0 0 var(--primary);
+		}
+
+		.notification-item:hover {
+			transform: translateY(-1px);
+			border-color: #cbd5e1;
+		}
+
+		.notification-item strong {
+			display: block;
+			font-size: 14px;
+			color: var(--dark);
+			margin-bottom: 4px;
+		}
+
+		.notification-item p {
+			font-size: 13px;
+			line-height: 1.55;
+			color: var(--text);
+			margin: 0;
+		}
+
+		.notification-item span {
+			display: block;
+			margin-top: 6px;
+			font-size: 11px;
+			color: var(--text-lighter);
+		}
+
+		.notification-empty {
+			padding: 28px 20px;
+			text-align: center;
+			color: var(--text-light);
+		}
+
+		.notification-empty i {
+			font-size: 22px;
+			color: var(--text-lighter);
+			margin-bottom: 10px;
+		}
+
 		.profile-menu {
 			position: relative;
 		}
@@ -854,12 +1057,27 @@
 				display: none;
 			}
 
+			.topbar-actions {
+				gap: 8px;
+			}
+
 			.profile-trigger {
 				padding: 0;
 				width: 40px;
 				height: 40px;
 				border-radius: 50%;
 				justify-content: center;
+			}
+
+			.notification-trigger {
+				width: 40px;
+				height: 40px;
+				border-radius: 12px;
+			}
+
+			.notification-dropdown {
+				right: -46px;
+				width: min(360px, calc(100vw - 20px));
 			}
 
 			.page-grid {
@@ -904,9 +1122,6 @@
 						<div class="brand-text">
 							<h2>PROBO</h2>
 							<!-- <p>Assessment</p> -->
-						</div>
-					</div>
-				</div>
 
 				<div class="sidebar-section">
 					<div class="sidebar-label">Navigation</div>
@@ -924,6 +1139,11 @@
 						<a href="<?php echo site_url('wallet/add_balance'); ?>">
 							<i class="fas fa-wallet"></i>
 							<span>Add Balance</span>
+						</a>
+
+						<a class="<?php echo (isset($active_page) && $active_page === 'referral') ? 'active' : ''; ?>" href="<?php echo site_url('referral'); ?>">
+							<i class="fa-solid fa-gift"></i>
+							<span>Referral Program</span>
 						</a>
 
 					</nav>
@@ -944,31 +1164,73 @@
 						</div>
 					</div>
 
-					<div class="profile-menu" id="profileMenu">
-						<button class="profile-trigger" id="profileTrigger" type="button">
-							<img class="avatar-circle" <?php echo (isset($active_page) && $active_page === 'profile') ? 'id="profilePreviewTop"' : ''; ?> src="<?php echo html_escape($header_profile_image_src); ?>" alt="Profile">
-							<div class="profile-meta-mini">
-								<strong><?php echo html_escape($user->name); ?></strong>
-								<span><?php echo (isset($user->role) && (int) $user->role === 1) ? 'Admin' : 'User'; ?></span>
+					<div class="topbar-actions">
+						<div class="notification-menu" id="notificationMenu">
+							<button class="notification-trigger" id="notificationTrigger" type="button" aria-label="Notifications">
+								<i class="fa-regular fa-bell"></i>
+								<?php if ((int) $unread_notifications > 0): ?>
+									<span class="notification-badge"><?php echo (int) $unread_notifications; ?></span>
+								<?php endif; ?>
+							</button>
+							<div class="notification-dropdown">
+								<div class="notification-head">
+									<div>
+										<h3>Notifications</h3>
+										<p>Trades, wallet and system updates</p>
+									</div>
+									<a class="notification-mark" href="<?php echo site_url('dashboard/mark-notifications-read'); ?>">
+										<i class="fa-solid fa-check"></i>
+										Mark all read
+									</a>
+								</div>
+								<div class="notification-list">
+									<?php if (!empty($notifications)): ?>
+										<?php foreach ($notifications as $n): ?>
+											<div class="notification-item <?php echo empty($n->is_read) ? 'unread' : ''; ?>">
+												<strong><?php echo html_escape($n->title); ?></strong>
+												<p><?php echo html_escape($n->message); ?></p>
+												<?php if (!empty($n->created_at)): ?>
+													<span><?php echo html_escape($n->created_at); ?></span>
+												<?php endif; ?>
+											</div>
+										<?php endforeach; ?>
+									<?php else: ?>
+										<div class="notification-empty">
+											<i class="fa-regular fa-bell-slash"></i>
+											<p>No notifications yet. Your latest market and wallet alerts will appear here.</p>
+										</div>
+									<?php endif; ?>
+								</div>
 							</div>
-						</button>
+						</div>
 
-						<div class="profile-dropdown">
-							<a href="<?php echo site_url('wallet'); ?>">
-								<span class="profile-dropdown-icon"><i class="fa-solid fa-wallet"></i></span>
-								<span>Wallet</span>
-							</a>
-							<a href="<?php echo site_url('profile'); ?>">
-								<span class="profile-dropdown-icon"><i class="fa-solid fa-user"></i></span>
-								<span>Profile</span>
-							</a>
-							<a class="danger-link" href="<?php echo site_url('logout'); ?>">
-								<span class="profile-dropdown-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
-								<span>Logout</span>
-							</a>
+						<div class="profile-menu" id="profileMenu">
+							<button class="profile-trigger" id="profileTrigger" type="button">
+								<img class="avatar-circle" <?php echo (isset($active_page) && $active_page === 'profile') ? 'id="profilePreviewTop"' : ''; ?> src="<?php echo html_escape($header_profile_image_src); ?>" alt="Profile">
+								<div class="profile-meta-mini">
+									<strong><?php echo html_escape($user->name); ?></strong>
+									<span><?php echo (isset($user->role) && (int) $user->role === 1) ? 'Admin' : 'User'; ?></span>
+								</div>
+							</button>
+
+							<div class="profile-dropdown">
+								<a href="<?php echo site_url('wallet'); ?>">
+									<span class="profile-dropdown-icon"><i class="fa-solid fa-wallet"></i></span>
+									<span>Wallet</span>
+								</a>
+								<a href="<?php echo site_url('profile'); ?>">
+									<span class="profile-dropdown-icon"><i class="fa-solid fa-user"></i></span>
+									<span>Profile</span>
+								</a>
+								<a class="danger-link" href="<?php echo site_url('logout'); ?>">
+									<span class="profile-dropdown-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+									<span>Logout</span>
+								</a>
+							</div>
 						</div>
 					</div>
 				</header>
 
 				<div class="page-grid">
 				<?php endif; ?>
+

@@ -128,23 +128,55 @@ class Wallet extends CI_Controller
 		$user = $this->get_user();
 
 		$amount = (float)$this->input->post('amount');
-		$txn_id = $this->input->post('txn_id');
 
 		if ($amount <= 0) {
 			$this->session->set_flashdata('error', 'Invalid amount');
 			redirect('wallet/add_balance');
 		}
 
+		// ============================
+		// UPLOAD RECEIPT
+		// ============================
+		if (empty($_FILES['receipt']['name'])) {
+			$this->session->set_flashdata('error', 'Receipt is required');
+			redirect('wallet/add_balance');
+		}
+
+		$upload_path = './uploads/receipts/';
+		if (!is_dir($upload_path)) {
+			mkdir($upload_path, 0755, true);
+		}
+
+		$config['upload_path']   = $upload_path;
+		$config['allowed_types'] = 'jpg|jpeg|png|pdf';
+		$config['max_size']      = 4096;
+		$config['encrypt_name']  = TRUE;
+
+		$this->load->library('upload', $config);
+
+		if (!$this->upload->do_upload('receipt')) {
+			$this->session->set_flashdata('error', $this->upload->display_errors());
+			redirect('wallet/add_balance');
+		}
+
+		$upload_data = $this->upload->data();
+		$receipt_file = $upload_data['file_name'];
+
+		// ============================
+		// SAVE REQUEST
+		// ============================
 		$this->db->insert('deposit_requests', [
-			'user_id' => $user->id,
-			'amount' => $amount,
-			'txn_id' => $txn_id,
-			'status' => 'pending'
+			'user_id'  => $user->id,
+			'amount'   => $amount,
+			'receipt'  => $receipt_file,
+			'status'   => 'pending',
+			'created_at' => date('Y-m-d H:i:s')
 		]);
 
-		$this->session->set_flashdata('success', 'Deposit request sent to admin');
+		$this->session->set_flashdata('success', 'Deposit request submitted successfully');
 		redirect('wallet/add_balance');
 	}
+	
 	public function save_bank_details()
 	{
 		$user = $this->get_user();

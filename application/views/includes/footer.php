@@ -15,6 +15,8 @@
 			var sidebarOverlay = document.getElementById('sidebarOverlay');
 			var profileTrigger = document.getElementById('profileTrigger');
 			var profileMenu = document.getElementById('profileMenu');
+			var notificationTrigger = document.getElementById('notificationTrigger');
+			var notificationMenu = document.getElementById('notificationMenu');
 
 			function isMobile() {
 				return window.innerWidth <= 920;
@@ -30,8 +32,15 @@
 				}
 			}
 
+			function closeNotificationMenu() {
+				if (notificationMenu) {
+					notificationMenu.classList.remove('open');
+				}
+			}
+
 			function toggleSidebar() {
 				closeProfileMenu();
+				closeNotificationMenu();
 
 				if (isMobile()) {
 					body.classList.toggle('sidebar-open');
@@ -53,15 +62,28 @@
 			if (profileTrigger && profileMenu) {
 				profileTrigger.addEventListener('click', function (event) {
 					event.stopPropagation();
+					closeNotificationMenu();
 					profileMenu.classList.toggle('open');
 				});
+			}
 
-				document.addEventListener('click', function (event) {
-					if (!profileMenu.contains(event.target)) {
-						closeProfileMenu();
-					}
+			if (notificationTrigger && notificationMenu) {
+				notificationTrigger.addEventListener('click', function(event) {
+					event.stopPropagation();
+					closeProfileMenu();
+					notificationMenu.classList.toggle('open');
 				});
 			}
+
+			document.addEventListener('click', function (event) {
+				if (profileMenu && !profileMenu.contains(event.target)) {
+					closeProfileMenu();
+				}
+
+				if (notificationMenu && !notificationMenu.contains(event.target)) {
+					closeNotificationMenu();
+				}
+			});
 
 			Array.prototype.slice.call(document.querySelectorAll('.sidebar-nav a')).forEach(function (link) {
 				link.addEventListener('click', function () {
@@ -77,6 +99,7 @@
 				}
 
 				closeProfileMenu();
+				closeNotificationMenu();
 			});
 
 			var profileInput = document.getElementById('profile_image_file');

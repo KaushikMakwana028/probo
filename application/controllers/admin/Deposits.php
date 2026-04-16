@@ -41,7 +41,7 @@ class Deposits extends CI_Controller
 
             $data = $this->get_common_data();
             $data['settings'] = $settings ?? (object)[];
-            $data['active_page'] = 'deposit_settings';
+            $data['active_page'] = 'deposits_settings';
             $data['title'] = 'Payment Settings';
 
             $this->load->view('admin/includes/header', $data);
@@ -180,7 +180,7 @@ class Deposits extends CI_Controller
             $data = $this->get_common_data();
             $data['requests']      = $requests ?? [];
             $data['stats']         = $stats;
-            $data['active_page']   = 'deposit_requests';
+            $data['active_page']   = 'deposits_requests';
             $data['title']         = 'Deposit Requests';
             $data['status_filter'] = $status_filter;
 
@@ -414,7 +414,7 @@ class Deposits extends CI_Controller
 
             $data = $this->get_common_data();
             $data['request'] = $request;
-            $data['active_page'] = 'deposit_requests';
+            $data['active_page'] = 'deposits_requests';
             $data['title'] = 'Deposit Request Details';
 
             $this->load->view('admin/includes/header', $data);
