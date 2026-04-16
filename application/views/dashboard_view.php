@@ -8,12 +8,12 @@ $category_count = count($categories) ?: 12;
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
 <style>
 	:root {
-		--f-head: 'Syne', sans-serif;
-		--f-body: 'DM Sans', sans-serif;
+		--f-head: 'Roboto', sans-serif;
+		--f-body: 'Roboto', sans-serif;
 		--ink: #0a0d14;
 		--ink-2: #1c2235;
 		--ink-3: #2d3550;

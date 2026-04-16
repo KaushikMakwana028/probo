@@ -432,7 +432,7 @@ if ($has_address)          $profile_score += 25;
 ───────────────────────────────────────── */
 	:root {
 		--f-display: 'DM Serif Display', Georgia, serif;
-		--f-body: 'DM Sans', system-ui, sans-serif;
+		--f-body: 'Roboto', system-ui, sans-serif;
 		--f-mono: 'DM Mono', monospace;
 
 		--c-ink: #1a1a1a;

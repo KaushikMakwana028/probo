@@ -6,14 +6,14 @@ $users_with_address = 0;
 
 if (!empty($users)) {
 	foreach ($users as $user_item) {
-		if (trim((string) $user_item->email) !== '') $users_with_email++;
-		if (trim((string) $user_item->mobile) !== '') $users_with_mobile++;
+		if (trim((string) $user_item->email)   !== '') $users_with_email++;
+		if (trim((string) $user_item->mobile)  !== '') $users_with_mobile++;
 		if (trim((string) $user_item->address) !== '') $users_with_address++;
 	}
 }
 
-$email_pct   = $total_users > 0 ? round(($users_with_email / $total_users) * 100) : 0;
-$mobile_pct  = $total_users > 0 ? round(($users_with_mobile / $total_users) * 100) : 0;
+$email_pct   = $total_users > 0 ? round(($users_with_email   / $total_users) * 100) : 0;
+$mobile_pct  = $total_users > 0 ? round(($users_with_mobile  / $total_users) * 100) : 0;
 $address_pct = $total_users > 0 ? round(($users_with_address / $total_users) * 100) : 0;
 
 $avatar_palettes = [
@@ -29,142 +29,137 @@ $avatar_palettes = [
 ?>
 
 <?php if ($this->session->flashdata('error')): ?>
-	<div class="adm2-toast adm2-toast--err" role="alert">
-		<svg viewBox="0 0 20 20" fill="currentColor">
+	<div class="ud-toast ud-toast--err" role="alert">
+		<svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
 			<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
 		</svg>
 		<span><?php echo $this->session->flashdata('error'); ?></span>
-		<button class="adm2-toast__x" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+		<button class="ud-toast__x" onclick="this.parentElement.remove()">×</button>
 	</div>
 <?php endif; ?>
-
 <?php if ($this->session->flashdata('success')): ?>
-	<div class="adm2-toast adm2-toast--ok" role="alert">
-		<svg viewBox="0 0 20 20" fill="currentColor">
+	<div class="ud-toast ud-toast--ok" role="alert">
+		<svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
 			<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
 		</svg>
 		<span><?php echo $this->session->flashdata('success'); ?></span>
-		<button class="adm2-toast__x" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+		<button class="ud-toast__x" onclick="this.parentElement.remove()">×</button>
 	</div>
 <?php endif; ?>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 
-<div class="adm2">
+<div class="ud">
 
-	<!-- ── HEADER BANNER ── -->
-	<header class="adm2-banner">
-		<div>
-			<div class="adm2-banner__eyebrow"><span class="adm2-banner__dot"></span> Admin panel</div>
-			<h1 class="adm2-banner__title">User Directory</h1>
-			<p class="adm2-banner__sub">Manage registered users, audit contact completeness, and act fast — all from one clean interface.</p>
+	<!-- Banner -->
+	<header class="ud-banner">
+		<div class="ud-banner__left">
+			<div class="ud-banner__eyebrow"><span class="ud-dot"></span> Admin panel</div>
+			<h1 class="ud-banner__title">User Directory</h1>
+			<p class="ud-banner__sub">Manage registered users, audit contact completeness, and act fast — all from one clean interface.</p>
 		</div>
-		<div class="adm2-kpis">
-			<div class="adm2-kpi adm2-kpi--main">
-				<span class="adm2-kpi__label">Total users</span>
-				<strong class="adm2-kpi__val" id="visibleCount"><?php echo $total_users; ?></strong>
+		<div class="ud-kpis">
+			<div class="ud-kpi ud-kpi--main">
+				<span class="ud-kpi__label">Total users</span>
+				<strong class="ud-kpi__val" id="visibleCount"><?php echo $total_users; ?></strong>
 			</div>
-			<div class="adm2-kpi">
-				<span class="adm2-kpi__label">With mobile</span>
-				<strong class="adm2-kpi__val"><?php echo $users_with_mobile; ?></strong>
+			<div class="ud-kpi">
+				<span class="ud-kpi__label">With mobile</span>
+				<strong class="ud-kpi__val"><?php echo $users_with_mobile; ?></strong>
 			</div>
-			<div class="adm2-kpi">
-				<span class="adm2-kpi__label">With address</span>
-				<strong class="adm2-kpi__val"><?php echo $users_with_address; ?></strong>
+			<div class="ud-kpi">
+				<span class="ud-kpi__label">With address</span>
+				<strong class="ud-kpi__val"><?php echo $users_with_address; ?></strong>
 			</div>
 		</div>
 	</header>
 
-	<!-- ── COVERAGE CARDS ── -->
-	<section class="adm2-coverage" aria-label="Profile coverage statistics">
-		<div class="adm2-cov">
-			<div class="adm2-cov__top">
-				<div class="adm2-cov__icon adm2-cov__icon--e">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+	<!-- Coverage Cards -->
+	<section class="ud-coverage">
+		<div class="ud-cov">
+			<div class="ud-cov__top">
+				<div class="ud-cov__icon ud-cov__icon--e">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 						<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
 						<polyline points="22,6 12,13 2,6" />
 					</svg>
 				</div>
-				<div class="adm2-cov__right">
-					<span class="adm2-cov__num"><?php echo $users_with_email; ?></span>
-					<span class="adm2-cov__pct"><?php echo $email_pct; ?>% coverage</span>
+				<div class="ud-cov__right">
+					<span class="ud-cov__num"><?php echo $users_with_email; ?></span>
+					<span class="ud-cov__pct"><?php echo $email_pct; ?>% coverage</span>
 				</div>
 			</div>
-			<p class="adm2-cov__label">Email addresses</p>
-			<div class="adm2-bar">
-				<div class="adm2-bar__fill" style="width:<?php echo $email_pct; ?>%"></div>
+			<p class="ud-cov__label">Email addresses</p>
+			<div class="ud-bar">
+				<div class="ud-bar__fill" style="width:<?php echo $email_pct; ?>%"></div>
 			</div>
 		</div>
-
-		<div class="adm2-cov">
-			<div class="adm2-cov__top">
-				<div class="adm2-cov__icon adm2-cov__icon--m">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+		<div class="ud-cov">
+			<div class="ud-cov__top">
+				<div class="ud-cov__icon ud-cov__icon--m">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 						<rect x="5" y="2" width="14" height="20" rx="2" />
 						<line x1="12" y1="18" x2="12.01" y2="18" />
 					</svg>
 				</div>
-				<div class="adm2-cov__right">
-					<span class="adm2-cov__num"><?php echo $users_with_mobile; ?></span>
-					<span class="adm2-cov__pct"><?php echo $mobile_pct; ?>% coverage</span>
+				<div class="ud-cov__right">
+					<span class="ud-cov__num"><?php echo $users_with_mobile; ?></span>
+					<span class="ud-cov__pct"><?php echo $mobile_pct; ?>% coverage</span>
 				</div>
 			</div>
-			<p class="adm2-cov__label">Mobile numbers</p>
-			<div class="adm2-bar">
-				<div class="adm2-bar__fill" style="width:<?php echo $mobile_pct; ?>%"></div>
+			<p class="ud-cov__label">Mobile numbers</p>
+			<div class="ud-bar">
+				<div class="ud-bar__fill" style="width:<?php echo $mobile_pct; ?>%"></div>
 			</div>
 		</div>
-
-		<div class="adm2-cov">
-			<div class="adm2-cov__top">
-				<div class="adm2-cov__icon adm2-cov__icon--a">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+		<div class="ud-cov">
+			<div class="ud-cov__top">
+				<div class="ud-cov__icon ud-cov__icon--a">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 						<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
 						<circle cx="12" cy="10" r="3" />
 					</svg>
 				</div>
-				<div class="adm2-cov__right">
-					<span class="adm2-cov__num"><?php echo $users_with_address; ?></span>
-					<span class="adm2-cov__pct"><?php echo $address_pct; ?>% coverage</span>
+				<div class="ud-cov__right">
+					<span class="ud-cov__num"><?php echo $users_with_address; ?></span>
+					<span class="ud-cov__pct"><?php echo $address_pct; ?>% coverage</span>
 				</div>
 			</div>
-			<p class="adm2-cov__label">Addresses filled</p>
-			<div class="adm2-bar">
-				<div class="adm2-bar__fill" style="width:<?php echo $address_pct; ?>%"></div>
+			<p class="ud-cov__label">Addresses filled</p>
+			<div class="ud-bar">
+				<div class="ud-bar__fill" style="width:<?php echo $address_pct; ?>%"></div>
 			</div>
 		</div>
 	</section>
 
-	<!-- ── TABLE PANEL ── -->
-	<section class="adm2-panel">
-		<div class="adm2-panel__head">
-			<div>
-				<h2 class="adm2-panel__title">All users</h2>
-				<p class="adm2-panel__desc">Search, sort and manage every registered account.</p>
+	<!-- Table Panel -->
+	<section class="ud-panel">
+		<div class="ud-panel__head">
+			<div class="ud-panel__head-text">
+				<h2 class="ud-panel__title">All users</h2>
+				<p class="ud-panel__sub">Search, sort and manage every registered account.</p>
 			</div>
-			<div class="adm2-controls">
-				<div class="adm2-srch-w">
-					<svg class="adm2-srch-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<div class="ud-controls">
+				<div class="ud-search-wrap">
+					<svg class="ud-search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<circle cx="11" cy="11" r="8" />
 						<line x1="21" y1="21" x2="16.65" y2="16.65" />
 					</svg>
-					<input type="text" id="searchUsers" class="adm2-inp adm2-inp--s" placeholder="Name, email, mobile…" aria-label="Search users">
-					<button class="adm2-srch-x" id="searchClear" hidden aria-label="Clear search">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+					<input type="text" id="searchUsers" class="ud-input ud-input--search" placeholder="Name, email, mobile…" autocomplete="off">
+					<button class="ud-search-clear" id="searchClear" hidden>
+						<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 							<line x1="18" y1="6" x2="6" y2="18" />
 							<line x1="6" y1="6" x2="18" y2="18" />
 						</svg>
 					</button>
 				</div>
-				<div class="adm2-sel-w">
-					<svg class="adm2-sel-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<div class="ud-select-wrap">
+					<svg class="ud-select-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<line x1="4" y1="6" x2="20" y2="6" />
 						<line x1="4" y1="12" x2="14" y2="12" />
 						<line x1="4" y1="18" x2="10" y2="18" />
 					</svg>
-					<select id="sortUsers" class="adm2-inp adm2-inp--sel" aria-label="Sort users">
+					<select id="sortUsers" class="ud-input ud-input--select">
 						<option value="newest">Newest first</option>
 						<option value="oldest">Oldest first</option>
 						<option value="name">Name A → Z</option>
@@ -173,16 +168,17 @@ $avatar_palettes = [
 			</div>
 		</div>
 
-		<div class="adm2-scroll">
-			<table class="adm2-table" role="grid" aria-label="User directory">
+		<!-- Desktop Table -->
+		<div class="ud-table-scroll">
+			<table class="ud-table">
 				<thead>
 					<tr>
-						<th scope="col" class="adm2-th adm2-th--sno">#</th>
-						<th scope="col" class="adm2-th">User</th>
-						<th scope="col" class="adm2-th">Mobile</th>
-						<th scope="col" class="adm2-th">Email</th>
-						<th scope="col" class="adm2-th">Address</th>
-						<th scope="col" class="adm2-th adm2-th--act">Actions</th>
+						<th class="ud-th ud-th--sno">#</th>
+						<th class="ud-th">User</th>
+						<th class="ud-th">Mobile</th>
+						<th class="ud-th">Email</th>
+						<th class="ud-th ud-th--addr">Address</th>
+						<th class="ud-th ud-th--act">Actions</th>
 					</tr>
 				</thead>
 				<tbody id="usersTableBody">
@@ -193,91 +189,79 @@ $avatar_palettes = [
 							$display_mobile  = trim((string) $user_item->mobile);
 							$display_email   = trim((string) $user_item->email);
 							$display_address = trim((string) $user_item->address);
-
 							$initials = '';
 							$name_parts = array_slice(array_filter(explode(' ', $display_name ?: 'U')), 0, 2);
 							foreach ($name_parts as $p) $initials .= strtoupper(substr($p, 0, 1));
 							if ($initials === '') $initials = 'U';
-
 							$pal = $avatar_palettes[$user_item->id % count($avatar_palettes)];
 							?>
-							<tr class="adm2-row"
-								data-id="<?php echo (int) $user_item->id; ?>"
+							<tr class="ud-row"
+								data-id="<?php echo (int)$user_item->id; ?>"
 								data-name="<?php echo html_escape(strtolower($display_name)); ?>"
 								data-mobile="<?php echo html_escape(strtolower($display_mobile)); ?>"
 								data-email="<?php echo html_escape(strtolower($display_email)); ?>"
 								data-address="<?php echo html_escape(strtolower($display_address)); ?>">
-
-								<td class="adm2-td adm2-td--sno">
-									<span class="adm2-sno"><?php echo $index + 1; ?></span>
-								</td>
-
-								<td class="adm2-td">
-									<div class="adm2-user">
-										<div class="adm2-avatar" style="background:linear-gradient(135deg,<?php echo $pal[0]; ?>,<?php echo $pal[1]; ?>)">
-											<?php echo html_escape($initials); ?>
-										</div>
+								<td class="ud-td ud-td--sno"><span class="ud-sno"><?php echo $index + 1; ?></span></td>
+								<td class="ud-td">
+									<div class="ud-user">
+										<div class="ud-avatar" style="background:linear-gradient(135deg,<?php echo $pal[0]; ?>,<?php echo $pal[1]; ?>)"><?php echo html_escape($initials); ?></div>
 										<div>
-											<span class="adm2-user__name"><?php echo html_escape($display_name ?: 'Unknown user'); ?></span>
-											<span class="adm2-user__meta">Regular account</span>
+											<span class="ud-user__name"><?php echo html_escape($display_name ?: 'Unknown user'); ?></span>
+											<span class="ud-user__meta">Regular account</span>
 										</div>
 									</div>
 								</td>
-
-								<td class="adm2-td">
+								<td class="ud-td">
 									<?php if ($display_mobile): ?>
-										<span class="adm2-field adm2-field--e">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<span class="ud-field">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<rect x="5" y="2" width="14" height="20" rx="2" />
 												<line x1="12" y1="18" x2="12.01" y2="18" />
 											</svg>
 											<?php echo html_escape($display_mobile); ?>
 										</span>
-									<?php else: ?><span class="adm2-field adm2-field--nil">—</span><?php endif; ?>
+									<?php else: ?><span class="ud-nil">—</span><?php endif; ?>
 								</td>
-
-								<td class="adm2-td">
+								<td class="ud-td">
 									<?php if ($display_email): ?>
-										<span class="adm2-field adm2-field--e">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<span class="ud-field">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
 												<polyline points="22,6 12,13 2,6" />
 											</svg>
 											<?php echo html_escape($display_email); ?>
 										</span>
-									<?php else: ?><span class="adm2-field adm2-field--nil">—</span><?php endif; ?>
+									<?php else: ?><span class="ud-nil">—</span><?php endif; ?>
 								</td>
-
-								<td class="adm2-td adm2-td--addr">
+								<td class="ud-td ud-td--addr">
 									<?php if ($display_address): ?>
-										<span class="adm2-field adm2-field--e adm2-field--addr" title="<?php echo html_escape($display_address); ?>">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<span class="ud-field ud-field--addr" title="<?php echo html_escape($display_address); ?>">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
 												<circle cx="12" cy="10" r="3" />
 											</svg>
 											<?php echo html_escape($display_address); ?>
 										</span>
-									<?php else: ?><span class="adm2-field adm2-field--nil">—</span><?php endif; ?>
+									<?php else: ?><span class="ud-nil">—</span><?php endif; ?>
 								</td>
-
-								<td class="adm2-td adm2-td--act">
-									<div class="adm2-acts">
-										<a class="adm2-act" href="<?php echo site_url('admin/users/view/' . (int) $user_item->id); ?>" title="View profile">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+								<td class="ud-td ud-td--act">
+									<div class="ud-acts">
+										<a class="ud-act" href="<?php echo site_url('admin/users/view/' . (int)$user_item->id); ?>" title="View profile">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
 												<circle cx="12" cy="12" r="3" />
 											</svg>
 											<span>View</span>
 										</a>
-										<a class="adm2-act" href="<?php echo site_url('admin/users/edit/' . (int) $user_item->id); ?>" title="Edit user">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<a class="ud-act" href="<?php echo site_url('admin/users/edit/' . (int)$user_item->id); ?>" title="Edit user">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
 												<path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
 											</svg>
 											<span>Edit</span>
 										</a>
-										<a class="adm2-act adm2-act--del" href="<?php echo site_url('admin/users/delete/' . (int) $user_item->id); ?>" title="Delete user" onclick="return confirm('Permanently delete this user?')">
-											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<a class="ud-act ud-act--del" href="<?php echo site_url('admin/users/delete/' . (int)$user_item->id); ?>" title="Delete user" onclick="return confirm('Permanently delete this user?')">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
 												<polyline points="3 6 5 6 21 6" />
 												<path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
 												<path d="M10 11v6M14 11v6" />
@@ -292,9 +276,9 @@ $avatar_palettes = [
 					<?php else: ?>
 						<tr id="admEmptyRow">
 							<td colspan="6">
-								<div class="adm2-empty">
-									<div class="adm2-empty__icon">
-										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+								<div class="ud-empty">
+									<div class="ud-empty__icon">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
 											<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
 											<circle cx="9" cy="7" r="4" />
 											<path d="M23 21v-2a4 4 0 00-3-3.87" />
@@ -311,32 +295,124 @@ $avatar_palettes = [
 			</table>
 		</div>
 
-		<div class="adm2-empty adm2-empty--filtered" id="filteredEmpty" hidden>
-			<div class="adm2-empty__icon">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+		<!-- Mobile User Cards -->
+		<div class="ud-mobile-cards" id="udMobileCards">
+			<?php if (!empty($users)): ?>
+				<?php foreach ($users as $index => $user_item): ?>
+					<?php
+					$display_name    = trim((string) $user_item->name);
+					$display_mobile  = trim((string) $user_item->mobile);
+					$display_email   = trim((string) $user_item->email);
+					$display_address = trim((string) $user_item->address);
+					$initials = '';
+					$name_parts = array_slice(array_filter(explode(' ', $display_name ?: 'U')), 0, 2);
+					foreach ($name_parts as $p) $initials .= strtoupper(substr($p, 0, 1));
+					if ($initials === '') $initials = 'U';
+					$pal = $avatar_palettes[$user_item->id % count($avatar_palettes)];
+					?>
+					<div class="ud-mcard"
+						data-id="<?php echo (int)$user_item->id; ?>"
+						data-name="<?php echo html_escape(strtolower($display_name)); ?>"
+						data-mobile="<?php echo html_escape(strtolower($display_mobile)); ?>"
+						data-email="<?php echo html_escape(strtolower($display_email)); ?>"
+						data-address="<?php echo html_escape(strtolower($display_address)); ?>">
+						<div class="ud-mcard__header">
+							<div class="ud-mcard__user">
+								<div class="ud-mcard__avatar" style="background:linear-gradient(135deg,<?php echo $pal[0]; ?>,<?php echo $pal[1]; ?>)"><?php echo html_escape($initials); ?></div>
+								<div>
+									<span class="ud-mcard__name"><?php echo html_escape($display_name ?: 'Unknown user'); ?></span>
+									<span class="ud-mcard__badge">Regular account</span>
+								</div>
+							</div>
+							<div class="ud-mcard__acts">
+								<a class="ud-act" href="<?php echo site_url('admin/users/view/' . (int)$user_item->id); ?>">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+										<circle cx="12" cy="12" r="3" />
+									</svg>
+								</a>
+								<a class="ud-act" href="<?php echo site_url('admin/users/edit/' . (int)$user_item->id); ?>">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+										<path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+									</svg>
+								</a>
+								<a class="ud-act ud-act--del" href="<?php echo site_url('admin/users/delete/' . (int)$user_item->id); ?>" onclick="return confirm('Permanently delete this user?')">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+										<polyline points="3 6 5 6 21 6" />
+										<path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+										<path d="M10 11v6M14 11v6" />
+										<path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+									</svg>
+								</a>
+							</div>
+						</div>
+						<div class="ud-mcard__fields">
+							<?php if ($display_mobile): ?>
+								<div class="ud-mcard__field">
+									<span class="ud-mcard__field-label">Mobile</span>
+									<span class="ud-mcard__field-val">
+										<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+											<rect x="5" y="2" width="14" height="20" rx="2" />
+											<line x1="12" y1="18" x2="12.01" y2="18" />
+										</svg>
+										<?php echo html_escape($display_mobile); ?>
+									</span>
+								</div>
+							<?php endif; ?>
+							<?php if ($display_email): ?>
+								<div class="ud-mcard__field">
+									<span class="ud-mcard__field-label">Email</span>
+									<span class="ud-mcard__field-val">
+										<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+											<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+											<polyline points="22,6 12,13 2,6" />
+										</svg>
+										<?php echo html_escape($display_email); ?>
+									</span>
+								</div>
+							<?php endif; ?>
+							<?php if ($display_address): ?>
+								<div class="ud-mcard__field">
+									<span class="ud-mcard__field-label">Address</span>
+									<span class="ud-mcard__field-val">
+										<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+											<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+											<circle cx="12" cy="10" r="3" />
+										</svg>
+										<?php echo html_escape($display_address); ?>
+									</span>
+								</div>
+							<?php endif; ?>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			<?php endif; ?>
+		</div>
+
+		<!-- No results -->
+		<div class="ud-empty ud-empty--filter" id="filteredEmpty" hidden>
+			<div class="ud-empty__icon">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
 					<circle cx="11" cy="11" r="8" />
 					<line x1="21" y1="21" x2="16.65" y2="16.65" />
 				</svg>
 			</div>
 			<h3>No results</h3>
 			<p>No users match your search. Try a different term.</p>
-			<button class="adm2-clr-btn" id="clearSearchBtn">Clear search</button>
+			<button class="ud-clr-btn" id="clearSearchBtn">Clear search</button>
 		</div>
 
-		<footer class="adm2-foot">
-			<span class="adm2-foot-info" id="admFooterInfo">
+		<footer class="ud-foot">
+			<span class="ud-foot__info" id="admFooterInfo">
 				Showing all <strong><?php echo $total_users; ?></strong> users
 			</span>
-			<span class="adm2-badge">Regular users only</span>
+			<span class="ud-badge">Regular users only</span>
 		</footer>
 	</section>
-
-</div><!-- /.adm2 -->
+</div>
 
 <style>
-	/* ─────────────────────────────────────────
-   IMPORTS & RESET
-───────────────────────────────────────── */
 	*,
 	*::before,
 	*::after {
@@ -345,62 +421,39 @@ $avatar_palettes = [
 		padding: 0;
 	}
 
-	/* ─────────────────────────────────────────
-   DESIGN TOKENS
-───────────────────────────────────────── */
 	:root {
-		--f-body: 'Inter', system-ui, sans-serif;
+		--f-body: 'Roboto', system-ui, -apple-system, sans-serif;
 		--f-display: 'Instrument Serif', Georgia, serif;
-
-		/* Neutrals */
-		--c-ink: #111827;
-		--c-ink-2: #374151;
-		--c-ink-3: #6b7280;
-		--c-ink-4: #9ca3af;
-		--c-line: #e5e7eb;
-		--c-line-2: #f3f4f6;
-		--c-surface: #ffffff;
-		--c-base: #f9fafb;
-
-		/* Semantic */
-		--c-red: #a32d2d;
-		--c-red-lt: #fcebeb;
-		--c-red-bd: #f7c1c1;
-		--c-green: #22c55e;
-		--c-green-lt: #eaf3de;
-		--c-green-bd: #c0dd97;
-		--c-green-tx: #27500a;
-
-		/* Shadows */
-		--sh-xs: 0 1px 2px rgba(0, 0, 0, .05);
-		--sh-sm: 0 2px 8px rgba(0, 0, 0, .06);
-
-		/* Radii */
+		--ink: #111827;
+		--ink2: #374151;
+		--ink3: #6B7280;
+		--ink4: #9CA3AF;
+		--line: #E5E7EB;
+		--line2: #F3F4F6;
+		--bg: #FFFFFF;
+		--bg2: #F9FAFB;
+		--red: #A32D2D;
+		--red-lt: #FCEBEB;
+		--red-bd: #F7C1C1;
+		--green: #22C55E;
+		--green-lt: #EAF3DE;
+		--green-bd: #C0DD97;
+		--green-tx: #27500A;
 		--r-sm: 8px;
 		--r-md: 12px;
 		--r-lg: 16px;
 	}
 
-	body {
+	.ud {
 		font-family: var(--f-body);
-		background: var(--c-base);
-		color: var(--c-ink);
-	}
-
-	/* ─────────────────────────────────────────
-   ROOT
-───────────────────────────────────────── */
-	.adm2 {
-		padding: 24px 0 48px;
+		padding: 0 0 48px;
 		display: flex;
 		flex-direction: column;
 		gap: 14px;
 	}
 
-	/* ─────────────────────────────────────────
-   TOASTS
-───────────────────────────────────────── */
-	.adm2-toast {
+	/* Toast */
+	.ud-toast {
 		display: flex;
 		align-items: center;
 		gap: 10px;
@@ -410,70 +463,65 @@ $avatar_palettes = [
 		font-weight: 500;
 		border: 1px solid transparent;
 		animation: toastIn .3s cubic-bezier(.34, 1.56, .64, 1) both;
-	}
-
-	.adm2-toast svg {
-		width: 16px;
-		height: 16px;
-		flex-shrink: 0;
-	}
-
-	.adm2-toast--err {
-		background: var(--c-red-lt);
-		border-color: var(--c-red-bd);
-		color: #791f1f;
-	}
-
-	.adm2-toast--ok {
-		background: var(--c-green-lt);
-		border-color: var(--c-green-bd);
-		color: var(--c-green-tx);
-	}
-
-	.adm2-toast__x {
-		margin-left: auto;
-		border: none;
-		background: none;
-		cursor: pointer;
-		font-size: 18px;
-		line-height: 1;
-		color: inherit;
-		opacity: .5;
-	}
-
-	.adm2-toast__x:hover {
-		opacity: 1;
+		margin-bottom: 4px;
 	}
 
 	@keyframes toastIn {
 		from {
 			opacity: 0;
-			transform: translateY(-10px);
+			transform: translateY(-10px)
 		}
 
 		to {
 			opacity: 1;
-			transform: none;
+			transform: none
 		}
 	}
 
-	/* ─────────────────────────────────────────
-   BANNER
-───────────────────────────────────────── */
-	.adm2-banner {
-		background: var(--c-surface);
-		border: 1px solid var(--c-line);
+	.ud-toast svg {
+		flex-shrink: 0;
+	}
+
+	.ud-toast--err {
+		background: var(--red-lt);
+		border-color: var(--red-bd);
+		color: #791f1f;
+	}
+
+	.ud-toast--ok {
+		background: var(--green-lt);
+		border-color: var(--green-bd);
+		color: var(--green-tx);
+	}
+
+	.ud-toast__x {
+		margin-left: auto;
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-size: 18px;
+		color: inherit;
+		opacity: .5;
+	}
+
+	.ud-toast__x:hover {
+		opacity: 1;
+	}
+
+	/* Banner */
+	.ud-banner {
+		background: var(--bg);
+		border: 1px solid var(--line);
 		border-radius: var(--r-lg);
-		padding: 32px 36px;
+		padding: 28px 32px;
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
 		gap: 24px;
 		flex-wrap: wrap;
-		box-shadow: var(--sh-xs);
 	}
 
-	.adm2-banner__eyebrow {
+	.ud-banner__eyebrow {
 		display: inline-flex;
 		align-items: center;
 		gap: 7px;
@@ -481,677 +529,750 @@ $avatar_palettes = [
 		font-weight: 500;
 		letter-spacing: .1em;
 		text-transform: uppercase;
-		color: var(--c-ink-3);
+		color: var(--ink3);
 		margin-bottom: 10px;
 	}
 
-	.adm2-banner__dot {
+	.ud-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: var(--c-green);
+		background: var(--green);
+		flex-shrink: 0;
 	}
 
-	.adm2-banner__title {
+	.ud-banner__title {
 		font-family: var(--f-display);
-		font-size: clamp(28px, 4vw, 44px);
-		font-weight: 400;
+		font-size: clamp(26px, 4vw, 40px);
 		font-style: italic;
-		color: var(--c-ink);
+		color: var(--ink);
 		line-height: 1.1;
 		margin-bottom: 8px;
 	}
 
-	.adm2-banner__sub {
-		font-size: 13.5px;
-		color: var(--c-ink-3);
+	.ud-banner__sub {
+		font-size: 13px;
+		color: var(--ink3);
 		line-height: 1.65;
-		max-width: 420px;
+		max-width: 400px;
 	}
 
-	/* KPIs */
-	.adm2-kpis {
+	.ud-kpis {
 		display: flex;
 		gap: 10px;
 		flex-wrap: wrap;
 		flex-shrink: 0;
 	}
 
-	.adm2-kpi {
-		min-width: 110px;
-		padding: 16px 20px;
+	.ud-kpi {
+		min-width: 100px;
+		padding: 14px 18px;
 		border-radius: var(--r-md);
-		border: 1px solid var(--c-line);
-		background: var(--c-base);
+		border: 1px solid var(--line);
+		background: var(--bg2);
 		text-align: center;
 	}
 
-	.adm2-kpi--main {
-		background: var(--c-surface);
-		border-color: var(--c-ink);
+	.ud-kpi--main {
+		background: var(--bg);
+		border-color: var(--ink);
 	}
 
-	.adm2-kpi__label {
+	.ud-kpi__label {
 		display: block;
-		font-size: 10.5px;
+		font-size: 10px;
 		font-weight: 500;
 		letter-spacing: .09em;
 		text-transform: uppercase;
-		color: var(--c-ink-4);
-		margin-bottom: 7px;
+		color: var(--ink4);
+		margin-bottom: 6px;
 	}
 
-	.adm2-kpi__val {
+	.ud-kpi__val {
 		display: block;
 		font-family: var(--f-display);
-		font-size: 30px;
+		font-size: 28px;
 		font-style: italic;
 		font-weight: 400;
-		color: var(--c-ink);
+		color: var(--ink);
 		line-height: 1;
 	}
 
-	/* ─────────────────────────────────────────
-   COVERAGE CARDS
-───────────────────────────────────────── */
-	.adm2-coverage {
+	/* Coverage */
+	.ud-coverage {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 12px;
 	}
 
-	.adm2-cov {
-		background: var(--c-surface);
-		border: 1px solid var(--c-line);
+	.ud-cov {
+		background: var(--bg);
+		border: 1px solid var(--line);
 		border-radius: var(--r-lg);
-		padding: 20px 22px;
-		box-shadow: var(--sh-xs);
-		transition: box-shadow .18s, transform .18s;
+		padding: 18px 20px;
+		transition: box-shadow .15s, transform .15s;
 	}
 
-	.adm2-cov:hover {
-		box-shadow: var(--sh-sm);
+	.ud-cov:hover {
+		box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
 		transform: translateY(-1px);
 	}
 
-	.adm2-cov__top {
+	.ud-cov__top {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 12px;
 	}
 
-	.adm2-cov__icon {
-		width: 38px;
-		height: 38px;
+	.ud-cov__icon {
+		width: 36px;
+		height: 36px;
 		border-radius: var(--r-sm);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--c-base);
-		color: var(--c-ink-3);
-		border: 1px solid var(--c-line);
+		background: var(--bg2);
+		color: var(--ink3);
+		border: 1px solid var(--line);
 	}
 
-	.adm2-cov__icon svg {
-		width: 17px;
-		height: 17px;
-	}
-
-	.adm2-cov__right {
+	.ud-cov__right {
 		text-align: right;
 	}
 
-	.adm2-cov__num {
+	.ud-cov__num {
 		display: block;
 		font-family: var(--f-display);
-		font-size: 26px;
+		font-size: 24px;
 		font-style: italic;
-		color: var(--c-ink);
+		color: var(--ink);
 		line-height: 1;
 	}
 
-	.adm2-cov__pct {
+	.ud-cov__pct {
 		font-size: 12px;
-		color: var(--c-ink-4);
-		font-weight: 400;
+		color: var(--ink4);
 	}
 
-	.adm2-cov__label {
-		font-size: 12.5px;
+	.ud-cov__label {
+		font-size: 12px;
 		font-weight: 500;
-		color: var(--c-ink-3);
+		color: var(--ink3);
 		margin-bottom: 10px;
 	}
 
-	.adm2-bar {
+	.ud-bar {
 		height: 3px;
-		background: var(--c-line-2);
+		background: var(--line2);
 		border-radius: 999px;
 		overflow: hidden;
 	}
 
-	.adm2-bar__fill {
+	.ud-bar__fill {
 		height: 100%;
 		border-radius: 999px;
-		background: var(--c-ink);
+		background: var(--ink);
 		transition: width .5s cubic-bezier(.34, 1.2, .64, 1);
 	}
 
-	/* ─────────────────────────────────────────
-   TABLE PANEL
-───────────────────────────────────────── */
-	.adm2-panel {
-		background: var(--c-surface);
-		border: 1px solid var(--c-line);
+	/* Panel */
+	.ud-panel {
+		background: var(--bg);
+		border: 1px solid var(--line);
 		border-radius: var(--r-lg);
 		overflow: hidden;
-		box-shadow: var(--sh-xs);
 	}
 
-	.adm2-panel__head {
+	.ud-panel__head {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
 		gap: 16px;
 		flex-wrap: wrap;
-		padding: 26px 30px 22px;
-		border-bottom: 1px solid var(--c-line);
-		background: var(--c-base);
+		padding: 22px 26px 18px;
+		border-bottom: 1px solid var(--line);
+		background: var(--bg2);
 	}
 
-	.adm2-panel__title {
+	.ud-panel__title {
 		font-family: var(--f-display);
-		font-size: 22px;
+		font-size: 20px;
 		font-style: italic;
 		font-weight: 400;
-		color: var(--c-ink);
-		margin-bottom: 4px;
+		color: var(--ink);
+		margin-bottom: 3px;
 	}
 
-	.adm2-panel__desc {
-		font-size: 13px;
-		color: var(--c-ink-4);
+	.ud-panel__sub {
+		font-size: 12.5px;
+		color: var(--ink4);
 	}
 
-	/* Controls */
-	.adm2-controls {
+	.ud-controls {
 		display: flex;
 		gap: 8px;
 		align-items: center;
 		flex-wrap: wrap;
 	}
 
-	.adm2-srch-w {
+	.ud-search-wrap {
 		position: relative;
 	}
 
-	.adm2-srch-ico {
+	.ud-search-ico {
 		position: absolute;
 		top: 50%;
-		left: 12px;
+		left: 11px;
 		transform: translateY(-50%);
-		width: 14px;
-		height: 14px;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 		pointer-events: none;
 	}
 
-	.adm2-srch-x {
+	.ud-search-clear {
 		position: absolute;
 		top: 50%;
-		right: 10px;
+		right: 9px;
 		transform: translateY(-50%);
 		border: none;
 		background: none;
 		cursor: pointer;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 		display: flex;
 		padding: 3px;
 		border-radius: 4px;
 		transition: color .12s;
 	}
 
-	.adm2-srch-x svg {
-		width: 12px;
-		height: 12px;
+	.ud-search-clear:hover {
+		color: var(--red);
 	}
 
-	.adm2-srch-x:hover {
-		color: var(--c-red);
-	}
-
-	.adm2-inp {
-		height: 38px;
-		border: 1px solid var(--c-line);
+	.ud-input {
+		height: 36px;
+		border: 1px solid var(--line);
 		border-radius: var(--r-sm);
-		background: var(--c-surface);
-		color: var(--c-ink);
+		background: var(--bg);
+		color: var(--ink);
 		font-family: var(--f-body);
 		font-size: 13px;
 		transition: border-color .15s, box-shadow .15s;
-		appearance: none;
 		-webkit-appearance: none;
+		appearance: none;
 	}
 
-	.adm2-inp:focus {
+	.ud-input:focus {
 		outline: none;
-		border-color: var(--c-ink-3);
-		box-shadow: 0 0 0 3px rgba(17, 24, 39, .07);
+		border-color: var(--ink3);
+		box-shadow: 0 0 0 3px rgba(17, 24, 39, .06);
 	}
 
-	.adm2-inp--s {
-		padding: 0 32px 0 36px;
-		width: 260px;
+	.ud-input--search {
+		padding: 0 30px 0 34px;
+		width: 240px;
 	}
 
-	.adm2-inp--sel {
-		padding: 0 32px 0 34px;
-		width: 165px;
+	.ud-input--select {
+		padding: 0 28px 0 32px;
+		width: 155px;
 		cursor: pointer;
 	}
 
-	.adm2-sel-w {
+	.ud-select-wrap {
 		position: relative;
 	}
 
-	.adm2-sel-ico {
+	.ud-select-ico {
 		position: absolute;
 		top: 50%;
-		left: 11px;
+		left: 10px;
 		transform: translateY(-50%);
-		width: 14px;
-		height: 14px;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 		pointer-events: none;
 	}
 
-	.adm2-sel-w::after {
+	.ud-select-wrap::after {
 		content: '';
 		position: absolute;
 		top: 50%;
-		right: 12px;
+		right: 10px;
 		transform: translateY(-50%);
 		width: 0;
 		height: 0;
 		border-left: 4px solid transparent;
 		border-right: 4px solid transparent;
-		border-top: 5px solid var(--c-ink-4);
+		border-top: 5px solid var(--ink4);
 		pointer-events: none;
 	}
 
-	/* ─────────────────────────────────────────
-   TABLE
-───────────────────────────────────────── */
-	.adm2-scroll {
+	/* Desktop Table */
+	.ud-table-scroll {
 		overflow-x: auto;
-		padding: 10px 16px 4px;
+		padding: 10px 14px 4px;
 	}
 
-	.adm2-table {
+	.ud-table {
 		width: 100%;
-		min-width: 880px;
+		min-width: 840px;
 		border-collapse: separate;
 		border-spacing: 0 4px;
 	}
 
-	.adm2-th {
-		padding: 0 14px 8px;
+	.ud-th {
+		padding: 0 12px 8px;
 		font-size: 10.5px;
 		font-weight: 500;
 		letter-spacing: .1em;
 		text-transform: uppercase;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 		text-align: left;
 		white-space: nowrap;
 	}
 
-	.adm2-th--sno {
-		width: 52px;
+	.ud-th--sno {
+		width: 48px;
 	}
 
-	.adm2-th--act {
+	.ud-th--act {
 		text-align: right;
-		width: 220px;
+		width: 200px;
 	}
 
-	.adm2-td {
-		padding: 13px 14px;
-		background: var(--c-base);
-		border-top: 1px solid var(--c-line);
-		border-bottom: 1px solid var(--c-line);
+	.ud-th--addr {
+		max-width: 160px;
+	}
+
+	.ud-td {
+		padding: 12px;
+		background: var(--bg2);
+		border-top: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
 		vertical-align: middle;
 		font-size: 13.5px;
-		color: var(--c-ink-2);
-		transition: background .12s;
+		color: var(--ink2);
+		transition: background .1s;
 	}
 
-	.adm2-td:first-child {
-		border-left: 1px solid var(--c-line);
+	.ud-td:first-child {
+		border-left: 1px solid var(--line);
 		border-radius: var(--r-sm) 0 0 var(--r-sm);
 	}
 
-	.adm2-td:last-child {
-		border-right: 1px solid var(--c-line);
+	.ud-td:last-child {
+		border-right: 1px solid var(--line);
 		border-radius: 0 var(--r-sm) var(--r-sm) 0;
 	}
 
-	.adm2-row:hover .adm2-td {
-		background: var(--c-surface);
+	.ud-row:hover .ud-td {
+		background: var(--bg);
 	}
 
-	.adm2-td--sno {
-		width: 52px;
+	.ud-td--sno {
+		width: 48px;
 	}
 
-	.adm2-td--addr {
-		max-width: 190px;
+	.ud-td--addr {
+		max-width: 160px;
 	}
 
-	.adm2-td--act {
+	.ud-td--act {
 		text-align: right;
 	}
 
-	/* Serial number */
-	.adm2-sno {
+	.ud-sno {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 30px;
-		height: 30px;
+		width: 28px;
+		height: 28px;
 		border-radius: var(--r-sm);
-		background: var(--c-surface);
-		border: 1px solid var(--c-line);
-		font-size: 12px;
+		background: var(--bg);
+		border: 1px solid var(--line);
+		font-size: 11.5px;
 		font-weight: 500;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 	}
 
-	/* Avatar & User */
-	.adm2-user {
+	.ud-user {
 		display: flex;
 		align-items: center;
-		gap: 11px;
+		gap: 10px;
 	}
 
-	.adm2-avatar {
-		width: 40px;
-		height: 40px;
+	.ud-avatar {
+		width: 38px;
+		height: 38px;
 		border-radius: var(--r-sm);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 500;
 		color: #fff;
 		flex-shrink: 0;
 	}
 
-	.adm2-user__name {
+	.ud-user__name {
 		display: block;
-		font-size: 14px;
+		font-size: 13.5px;
 		font-weight: 500;
-		color: var(--c-ink);
+		color: var(--ink);
 	}
 
-	.adm2-user__meta {
+	.ud-user__meta {
 		display: block;
-		font-size: 11.5px;
-		color: var(--c-ink-4);
+		font-size: 11px;
+		color: var(--ink4);
 		margin-top: 2px;
 	}
 
-	/* Fields */
-	.adm2-field {
+	.ud-field {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
 		font-size: 13px;
+		color: var(--ink2);
 	}
 
-	.adm2-field svg {
-		width: 13px;
-		height: 13px;
+	.ud-field svg {
+		color: var(--ink4);
 		flex-shrink: 0;
-		color: var(--c-ink-4);
 	}
 
-	.adm2-field--e {
-		color: var(--c-ink-2);
-	}
-
-	.adm2-field--nil {
-		color: var(--c-ink-4);
-		font-style: italic;
-	}
-
-	.adm2-field--addr {
-		max-width: 180px;
+	.ud-field--addr {
+		max-width: 170px;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		display: inline-flex;
 	}
 
-	/* Action buttons */
-	.adm2-acts {
+	.ud-nil {
+		color: var(--ink4);
+		font-style: italic;
+	}
+
+	.ud-acts {
 		display: flex;
 		justify-content: flex-end;
 		gap: 5px;
 	}
 
-	.adm2-act {
+	.ud-act {
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		padding: 6px 13px;
+		padding: 5px 11px;
 		border-radius: var(--r-sm);
 		font-size: 12px;
 		font-weight: 500;
 		text-decoration: none;
-		border: 1px solid var(--c-line);
-		background: var(--c-surface);
-		color: var(--c-ink-2);
+		border: 1px solid var(--line);
+		background: var(--bg);
+		color: var(--ink2);
 		cursor: pointer;
-		transition: background .12s, border-color .12s, transform .12s;
+		transition: all .12s;
 	}
 
-	.adm2-act svg {
-		width: 12px;
-		height: 12px;
+	.ud-act svg {
+		flex-shrink: 0;
 	}
 
-	.adm2-act:hover {
-		background: var(--c-base);
-		border-color: var(--c-ink-4);
+	.ud-act:hover {
+		background: var(--bg2);
+		border-color: var(--ink4);
 		transform: translateY(-1px);
 	}
 
-	.adm2-act:active {
+	.ud-act:active {
 		transform: none;
 	}
 
-	.adm2-act--del:hover {
-		color: var(--c-red);
-		border-color: var(--c-red-bd);
-		background: var(--c-red-lt);
+	.ud-act--del:hover {
+		color: var(--red);
+		border-color: var(--red-bd);
+		background: var(--red-lt);
 	}
 
-	/* ─────────────────────────────────────────
-   EMPTY STATES
-───────────────────────────────────────── */
-	.adm2-empty {
+	/* Mobile Cards */
+	.ud-mobile-cards {
+		display: none;
+	}
+
+	.ud-mcard {
+		padding: 16px;
+		border-bottom: 1px solid var(--line2);
+		transition: background .1s;
+	}
+
+	.ud-mcard:last-child {
+		border-bottom: none;
+	}
+
+	.ud-mcard:hover {
+		background: var(--bg2);
+	}
+
+	.ud-mcard__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 12px;
+	}
+
+	.ud-mcard__user {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-width: 0;
+	}
+
+	.ud-mcard__avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: var(--r-sm);
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		font-weight: 500;
+		color: #fff;
+	}
+
+	.ud-mcard__name {
+		display: block;
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--ink);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.ud-mcard__badge {
+		display: block;
+		font-size: 11px;
+		color: var(--ink4);
+		margin-top: 2px;
+	}
+
+	.ud-mcard__acts {
+		display: flex;
+		gap: 5px;
+		flex-shrink: 0;
+	}
+
+	.ud-mcard__acts .ud-act {
+		padding: 6px 9px;
+	}
+
+	.ud-mcard__fields {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.ud-mcard__field {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.ud-mcard__field-label {
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: .05em;
+		color: var(--ink4);
+		min-width: 56px;
+		padding-top: 1px;
+	}
+
+	.ud-mcard__field-val {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		font-size: 13px;
+		color: var(--ink2);
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.ud-mcard__field-val svg {
+		flex-shrink: 0;
+		color: var(--ink4);
+	}
+
+	/* Empty */
+	.ud-empty {
 		padding: 48px 24px;
 		text-align: center;
 	}
 
-	.adm2-empty__icon {
-		width: 52px;
-		height: 52px;
+	.ud-empty__icon {
+		width: 50px;
+		height: 50px;
 		margin: 0 auto 14px;
 		border-radius: var(--r-md);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--c-base);
-		border: 1px solid var(--c-line);
-		color: var(--c-ink-4);
+		background: var(--bg2);
+		border: 1px solid var(--line);
+		color: var(--ink4);
 	}
 
-	.adm2-empty__icon svg {
-		width: 24px;
-		height: 24px;
-	}
-
-	.adm2-empty h3 {
+	.ud-empty h3 {
 		font-family: var(--f-display);
-		font-size: 20px;
+		font-size: 19px;
 		font-style: italic;
 		font-weight: 400;
-		color: var(--c-ink);
-		margin-bottom: 6px;
+		color: var(--ink);
+		margin-bottom: 5px;
 	}
 
-	.adm2-empty p {
+	.ud-empty p {
 		font-size: 13px;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 	}
 
-	.adm2-empty--filtered {
-		border-top: 1px solid var(--c-line);
+	.ud-empty--filter {
+		border-top: 1px solid var(--line);
 	}
 
-	.adm2-clr-btn {
+	.ud-clr-btn {
 		margin-top: 14px;
-		padding: 8px 20px;
+		padding: 7px 18px;
 		border-radius: var(--r-sm);
-		border: 1px solid var(--c-line);
-		background: var(--c-surface);
-		color: var(--c-ink-2);
+		border: 1px solid var(--line);
+		background: var(--bg);
+		color: var(--ink2);
 		font-family: var(--f-body);
 		font-size: 13px;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background .12s, border-color .12s;
+		transition: all .12s;
 	}
 
-	.adm2-clr-btn:hover {
-		background: var(--c-base);
-		border-color: var(--c-ink-4);
+	.ud-clr-btn:hover {
+		background: var(--bg2);
+		border-color: var(--ink4);
 	}
 
-	/* ─────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────── */
-	.adm2-foot {
+	/* Footer */
+	.ud-foot {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		flex-wrap: wrap;
-		gap: 12px;
-		padding: 16px 30px 20px;
-		border-top: 1px solid var(--c-line);
-		background: var(--c-base);
+		gap: 10px;
+		padding: 14px 26px 18px;
+		border-top: 1px solid var(--line);
+		background: var(--bg2);
 	}
 
-	.adm2-foot-info {
+	.ud-foot__info {
 		font-size: 13px;
-		color: var(--c-ink-4);
+		color: var(--ink4);
 	}
 
-	.adm2-foot-info strong {
-		color: var(--c-ink-3);
+	.ud-foot__info strong {
+		color: var(--ink3);
 		font-weight: 500;
 	}
 
-	.adm2-badge {
+	.ud-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 5px 12px;
+		padding: 4px 11px;
 		border-radius: 999px;
-		background: var(--c-surface);
-		border: 1px solid var(--c-line);
-		color: var(--c-ink-4);
+		background: var(--bg);
+		border: 1px solid var(--line);
+		color: var(--ink4);
 		font-size: 11px;
 		font-weight: 500;
 		letter-spacing: .04em;
 	}
 
-	.adm2-badge::before {
+	.ud-badge::before {
 		content: '';
 		width: 5px;
 		height: 5px;
 		border-radius: 50%;
-		background: var(--c-green);
+		background: var(--green);
 	}
 
-	/* ─────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────── */
-	@media (max-width: 900px) {
-		.adm2-coverage {
+	/* Responsive */
+	@media (max-width: 960px) {
+		.ud-coverage {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	@media (max-width: 740px) {
+		.ud-coverage {
 			grid-template-columns: 1fr;
 		}
 
-		.adm2-panel__head {
+		.ud-panel__head {
 			flex-direction: column;
 			align-items: stretch;
-			padding: 20px;
+			padding: 18px;
 		}
 
-		.adm2-controls {
+		.ud-controls {
 			flex-direction: column;
 		}
 
-		.adm2-inp--s,
-		.adm2-inp--sel,
-		.adm2-srch-w,
-		.adm2-sel-w {
-			width: 100%;
-		}
-	}
-
-	@media (max-width: 700px) {
-		.adm2-banner {
-			flex-direction: column;
-			align-items: flex-start;
-			padding: 24px;
-		}
-
-		.adm2-kpis {
+		.ud-input--search,
+		.ud-input--select,
+		.ud-search-wrap,
+		.ud-select-wrap {
 			width: 100%;
 		}
 
-		.adm2-kpi {
-			flex: 1;
-		}
-	}
-
-	@media (max-width: 560px) {
-		.adm2-banner__title {
-			font-size: 28px;
-		}
-
-		.adm2-kpi__val {
-			font-size: 24px;
-		}
-
-		.adm2-panel__title {
-			font-size: 20px;
-		}
-
-		.adm2-act span {
+		.ud-table-scroll {
 			display: none;
 		}
 
-		.adm2-act {
-			padding: 7px 9px;
+		.ud-mobile-cards {
+			display: block;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.ud-banner {
+			flex-direction: column;
+			align-items: flex-start;
+			padding: 20px;
 		}
 
-		.adm2-act svg {
-			width: 14px;
-			height: 14px;
+		.ud-kpis {
+			width: 100%;
+		}
+
+		.ud-kpi {
+			flex: 1;
+			min-width: auto;
+			padding: 12px 14px;
+		}
+
+		.ud-kpi__val {
+			font-size: 24px;
+		}
+
+		.ud-banner__title {
+			font-size: 26px;
+		}
+	}
+
+	@media (max-width: 400px) {
+		.ud-kpis {
+			flex-direction: column;
 		}
 	}
 </style>
@@ -1159,27 +1280,29 @@ $avatar_palettes = [
 <script>
 	(function() {
 		'use strict';
-
 		var si = document.getElementById('searchUsers');
 		var ss = document.getElementById('sortUsers');
 		var sx = document.getElementById('searchClear');
 		var cb = document.getElementById('clearSearchBtn');
 		var tb = document.getElementById('usersTableBody');
+		var mc = document.getElementById('udMobileCards');
 		var vc = document.getElementById('visibleCount');
 		var fi = document.getElementById('admFooterInfo');
 		var fe = document.getElementById('filteredEmpty');
 
-		if (!tb) return;
+		function tableRows() {
+			return tb ? Array.prototype.slice.call(tb.querySelectorAll('.ud-row')) : [];
+		}
 
-		function rows() {
-			return Array.prototype.slice.call(tb.querySelectorAll('.adm2-row'));
+		function mobileCards() {
+			return mc ? Array.prototype.slice.call(mc.querySelectorAll('.ud-mcard')) : [];
 		}
 
 		function reindex(vis) {
 			var n = 0;
 			vis.forEach(function(r) {
 				n++;
-				var s = r.querySelector('.adm2-sno');
+				var s = r.querySelector('.ud-sno');
 				if (s) s.textContent = n;
 			});
 			return n;
@@ -1187,10 +1310,11 @@ $avatar_palettes = [
 
 		function filter() {
 			var term = si ? si.value.toLowerCase().trim() : '';
-			var all = rows();
+			var tRows = tableRows();
+			var mCards = mobileCards();
 			var vis = [];
 
-			all.forEach(function(r) {
+			tRows.forEach(function(r) {
 				var match = !term ||
 					(r.dataset.name || '').indexOf(term) > -1 ||
 					(r.dataset.mobile || '').indexOf(term) > -1 ||
@@ -1199,26 +1323,39 @@ $avatar_palettes = [
 				r.style.display = match ? '' : 'none';
 				if (match) vis.push(r);
 			});
+			mCards.forEach(function(c) {
+				var match = !term ||
+					(c.dataset.name || '').indexOf(term) > -1 ||
+					(c.dataset.mobile || '').indexOf(term) > -1 ||
+					(c.dataset.email || '').indexOf(term) > -1 ||
+					(c.dataset.address || '').indexOf(term) > -1;
+				c.style.display = match ? '' : 'none';
+			});
 
 			var n = reindex(vis);
 			if (vc) vc.textContent = n;
-			if (fe) fe.hidden = n > 0;
+			if (fe) fe.hidden = (n > 0);
 			if (sx) sx.hidden = !term;
 			if (fi) fi.innerHTML = term ?
-				'Showing <strong>' + n + '</strong> of <strong>' + all.length + '</strong> users' :
-				'Showing all <strong>' + all.length + '</strong> users';
+				'Showing <strong>' + n + '</strong> of <strong>' + tRows.length + '</strong> users' :
+				'Showing all <strong>' + tRows.length + '</strong> users';
 		}
 
 		function sort() {
-			var all = rows();
 			var order = ss ? ss.value : 'newest';
-			all.sort(function(a, b) {
+			var tRows = tableRows();
+			var mCards = mobileCards();
+
+			function sortFn(a, b) {
 				if (order === 'oldest') return parseInt(a.dataset.id, 10) - parseInt(b.dataset.id, 10);
 				if (order === 'name') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
 				return parseInt(b.dataset.id, 10) - parseInt(a.dataset.id, 10);
+			}
+			tRows.sort(sortFn).forEach(function(r) {
+				if (tb) tb.appendChild(r);
 			});
-			all.forEach(function(r) {
-				tb.appendChild(r);
+			mCards.sort(sortFn).forEach(function(c) {
+				if (mc) mc.appendChild(c);
 			});
 			filter();
 		}
@@ -1236,10 +1373,9 @@ $avatar_palettes = [
 		if (sx) sx.addEventListener('click', clearSearch);
 		if (cb) cb.addEventListener('click', clearSearch);
 
-		sort(); /* initial render */
+		sort();
 
-		/* Auto-dismiss toasts */
-		Array.prototype.slice.call(document.querySelectorAll('.adm2-toast')).forEach(function(el) {
+		Array.prototype.slice.call(document.querySelectorAll('.ud-toast')).forEach(function(el) {
 			setTimeout(function() {
 				el.style.transition = 'opacity .4s ease, transform .4s ease';
 				el.style.opacity = '0';

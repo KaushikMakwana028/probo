@@ -2,7 +2,7 @@
 // add_balance_view.php — Enhanced UI
 ?>
 
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -51,8 +51,8 @@
         --radius-xl: 18px;
         --radius-2xl: 24px;
 
-        --f-body: 'Sora', system-ui, sans-serif;
-        --f-mono: 'JetBrains Mono', monospace;
+        --f-body: 'Roboto', system-ui, -apple-system, sans-serif;
+        --f-mono: 'Roboto Mono', monospace;
 
         --sh-xs: 0 1px 3px rgba(13, 17, 23, .06), 0 1px 2px rgba(13, 17, 23, .04);
         --sh-sm: 0 3px 12px rgba(13, 17, 23, .07), 0 1px 4px rgba(13, 17, 23, .04);

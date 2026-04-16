@@ -663,7 +663,7 @@ $has_image   = !empty($user->profile_image);
 		--r-800: #9f1239;
 
 		/* Typography */
-		--f-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+		--f-body: 'Roboto', system-ui, -apple-system, sans-serif;
 		--f-display: 'DM Serif Display', Georgia, serif;
 
 		/* Radii */

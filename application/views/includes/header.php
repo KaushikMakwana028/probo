@@ -75,7 +75,7 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 		}
 
 		body {
-			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 			color: var(--text);
 			background: var(--bg);
 			line-height: 1.6;

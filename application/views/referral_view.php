@@ -10,7 +10,7 @@ $register_url_encoded = rawurlencode($register_url);
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
 <style>
 	:root {
@@ -36,13 +36,15 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2 {
-		font-family: 'Outfit', sans-serif;
+		font-family: 'Roboto', sans-serif;
 		color: var(--rf2-ink);
 		display: grid;
 		gap: 24px;
 		background: var(--rf2-sand);
 		border-radius: 0;
 		min-height: 100%;
+		padding: 0;
+		margin: 0;
 	}
 
 	/* ── EDITORIAL HERO ─────────────────────────────────── */
@@ -113,7 +115,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-big-code-val {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: clamp(42px, 6vw, 72px);
 		font-weight: 700;
 		color: #fff;
@@ -147,7 +149,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-hero-title {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: clamp(26px, 3.5vw, 40px);
 		font-weight: 700;
 		line-height: 1.1;
@@ -166,7 +168,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-hero-stat-val {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 30px;
 		font-weight: 600;
 		color: #fff;
@@ -214,7 +216,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-panel-title {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 22px;
 		font-weight: 600;
 		color: var(--rf2-ink);
@@ -252,7 +254,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-codebox-val {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 38px;
 		font-weight: 600;
 		letter-spacing: 0.08em;
@@ -273,7 +275,7 @@ $register_url_encoded = rawurlencode($register_url);
 		cursor: pointer;
 		transition: all 0.2s;
 		white-space: nowrap;
-		font-family: 'Outfit', sans-serif;
+		font-family: 'Roboto', sans-serif;
 	}
 
 	.rf2-copy-btn:hover {
@@ -303,7 +305,7 @@ $register_url_encoded = rawurlencode($register_url);
 		text-decoration: none;
 		color: var(--rf2-ink);
 		cursor: pointer;
-		font-family: 'Outfit', sans-serif;
+		font-family: 'Roboto', sans-serif;
 		transition: all 0.2s;
 	}
 
@@ -395,6 +397,8 @@ $register_url_encoded = rawurlencode($register_url);
 		line-height: 1.8;
 		color: var(--rf2-text);
 		white-space: pre-line;
+		word-break: break-word;
+		overflow-wrap: break-word;
 	}
 
 	/* ── PROFILE CARD ─────────────────────────────────── */
@@ -415,6 +419,7 @@ $register_url_encoded = rawurlencode($register_url);
 		border-radius: 50%;
 		object-fit: cover;
 		border: 3px solid var(--rf2-warm);
+		flex-shrink: 0;
 	}
 
 	.rf2-profile-role {
@@ -427,7 +432,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-profile-name {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 22px;
 		font-weight: 600;
 		margin-bottom: 3px;
@@ -436,6 +441,7 @@ $register_url_encoded = rawurlencode($register_url);
 	.rf2-profile-email {
 		font-size: 13px;
 		color: var(--rf2-muted);
+		word-break: break-word;
 	}
 
 	/* ── REWARDS SUMMARY ─────────────────────────────────── */
@@ -476,7 +482,7 @@ $register_url_encoded = rawurlencode($register_url);
 	}
 
 	.rf2-reward-val {
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 28px;
 		font-weight: 600;
 		color: var(--rf2-ink);
@@ -512,7 +518,7 @@ $register_url_encoded = rawurlencode($register_url);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: 'Fraunces', serif;
+		font-family: 'Roboto', serif;
 		font-size: 15px;
 		font-weight: 600;
 		color: var(--rf2-amber);
@@ -539,6 +545,11 @@ $register_url_encoded = rawurlencode($register_url);
 		margin-left: 15px;
 	}
 
+	/* ══════════════════════════════════════════════════
+	   RESPONSIVE MEDIA QUERIES
+	   ══════════════════════════════════════════════════ */
+
+	/* Tablet landscape / Small desktop (1060px and below) */
 	@media (max-width: 1060px) {
 		.rf2-hero {
 			grid-template-columns: 1fr;
@@ -553,9 +564,123 @@ $register_url_encoded = rawurlencode($register_url);
 		}
 	}
 
+	/* Tablet portrait (768px and below) */
+	@media (max-width: 768px) {
+		.rf2 {
+			gap: 18px;
+		}
+
+		.rf2-hero {
+			border-radius: 20px;
+			min-height: 280px;
+		}
+
+		.rf2-hero-left {
+			padding: 32px 28px;
+		}
+
+		.rf2-hero-title {
+			font-size: clamp(22px, 5vw, 32px);
+			margin-bottom: 14px;
+		}
+
+		.rf2-hero-stats {
+			gap: 20px;
+		}
+
+		.rf2-hero-stat-val {
+			font-size: 26px;
+		}
+
+		.rf2-panel {
+			border-radius: 20px;
+		}
+
+		.rf2-panel-head {
+			padding: 20px 22px 16px;
+		}
+
+		.rf2-panel-title {
+			font-size: 20px;
+		}
+
+		.rf2-panel-body {
+			padding: 20px 22px 22px;
+		}
+
+		.rf2-codebox {
+			padding: 18px 20px;
+			gap: 14px;
+		}
+
+		.rf2-codebox-val {
+			font-size: 32px;
+		}
+
+		.rf2-profile {
+			padding: 18px 20px;
+			gap: 14px;
+		}
+
+		.rf2-profile img {
+			width: 60px;
+			height: 60px;
+		}
+
+		.rf2-profile-name {
+			font-size: 20px;
+		}
+
+		.rf2-reward-val {
+			font-size: 26px;
+		}
+	}
+
+	/* Mobile landscape (680px and below) */
 	@media (max-width: 680px) {
+		.rf2 {
+			gap: 16px;
+		}
+
+		.rf2-hero {
+			border-radius: 16px;
+			min-height: 240px;
+		}
+
 		.rf2-hero-left {
 			padding: 28px 22px;
+		}
+
+		.rf2-hero-tag {
+			font-size: 10px;
+			gap: 6px;
+			margin-bottom: 16px;
+		}
+
+		.rf2-hero-tag span {
+			width: 18px;
+		}
+
+		.rf2-hero-title {
+			font-size: clamp(20px, 5.5vw, 28px);
+			margin-bottom: 16px;
+		}
+
+		.rf2-hero-stats {
+			gap: 16px;
+			flex-wrap: wrap;
+		}
+
+		.rf2-hero-stat-val {
+			font-size: 24px;
+		}
+
+		.rf2-hero-stat-label {
+			font-size: 10px;
+		}
+
+		.rf2-panel {
+			border-radius: 18px;
 		}
 
 		.rf2-panel-head,
@@ -564,8 +689,315 @@ $register_url_encoded = rawurlencode($register_url);
 			padding-right: 18px;
 		}
 
+		.rf2-panel-head {
+			padding-top: 18px;
+			padding-bottom: 14px;
+		}
+
+		.rf2-panel-title {
+			font-size: 18px;
+		}
+
+		.rf2-panel-sub {
+			font-size: 12px;
+		}
+
+		.rf2-panel-body {
+			padding-top: 18px;
+			padding-bottom: 20px;
+		}
+
+		.rf2-codebox {
+			flex-direction: column;
+			align-items: stretch;
+			text-align: center;
+			padding: 20px 18px;
+			gap: 16px;
+		}
+
+		.rf2-codebox-val {
+			font-size: 28px;
+		}
+
+		.rf2-copy-btn {
+			width: 100%;
+			justify-content: center;
+			padding: 14px 20px;
+		}
+
+		.rf2-share {
+			padding: 14px 16px;
+			gap: 12px;
+		}
+
+		.rf2-share-icon {
+			width: 42px;
+			height: 42px;
+			font-size: 16px;
+		}
+
+		.rf2-share-name {
+			font-size: 13px;
+		}
+
+		.rf2-share-desc {
+			font-size: 11px;
+		}
+
+		.rf2-msgbox {
+			padding: 16px 18px;
+			margin-top: 16px;
+		}
+
+		.rf2-msgbox-text {
+			font-size: 13px;
+			line-height: 1.9;
+		}
+
+		.rf2-profile {
+			padding: 16px 18px;
+			gap: 12px;
+		}
+
+		.rf2-profile img {
+			width: 56px;
+			height: 56px;
+			border-width: 2px;
+		}
+
+		.rf2-profile-name {
+			font-size: 18px;
+		}
+
+		.rf2-profile-email {
+			font-size: 12px;
+		}
+
 		.rf2-rewards {
 			grid-template-columns: 1fr;
+			gap: 12px;
+		}
+
+		.rf2-reward-card {
+			padding: 18px;
+		}
+
+		.rf2-reward-val {
+			font-size: 24px;
+		}
+
+		.rf2-step {
+			gap: 12px;
+		}
+
+		.rf2-step-num {
+			width: 28px;
+			height: 28px;
+			font-size: 14px;
+		}
+
+		.rf2-step-title {
+			font-size: 13px;
+		}
+
+		.rf2-step-body {
+			font-size: 12px;
+		}
+
+		.rf2-step-line {
+			margin-left: 13px;
+			height: 16px;
+		}
+	}
+
+	/* Mobile portrait (480px and below) */
+	@media (max-width: 480px) {
+		.rf2 {
+			gap: 14px;
+		}
+
+		.rf2-hero {
+			border-radius: 14px;
+			min-height: 220px;
+		}
+
+		.rf2-hero-left {
+			padding: 24px 18px;
+		}
+
+		.rf2-hero-title {
+			font-size: clamp(18px, 6vw, 24px);
+			margin-bottom: 14px;
+		}
+
+		.rf2-hero-stats {
+			gap: 14px;
+		}
+
+		.rf2-hero-stat-val {
+			font-size: 22px;
+		}
+
+		.rf2-panel {
+			border-radius: 16px;
+		}
+
+		.rf2-panel-head,
+		.rf2-panel-body {
+			padding-left: 16px;
+			padding-right: 16px;
+		}
+
+		.rf2-panel-head {
+			padding-top: 16px;
+			padding-bottom: 12px;
+		}
+
+		.rf2-msgbox-text {
+			font-size: 12.5px;
+			line-height: 1.9;
+		}
+
+		.rf2-panel-title {
+			font-size: 17px;
+		}
+
+		.rf2-panel-body {
+			padding-top: 16px;
+			padding-bottom: 18px;
+		}
+
+		.rf2-codebox {
+			padding: 18px 16px;
+		}
+
+		.rf2-codebox-val {
+			font-size: 26px;
+		}
+
+		.rf2-share {
+			padding: 12px 14px;
+		}
+
+		.rf2-share-icon {
+			width: 40px;
+			height: 40px;
+			font-size: 15px;
+		}
+
+		.rf2-share-left {
+			gap: 12px;
+		}
+
+		.rf2-profile {
+			padding: 14px 16px;
+		}
+
+		.rf2-profile img {
+			width: 52px;
+			height: 52px;
+		}
+
+		.rf2-profile-name {
+			font-size: 17px;
+		}
+
+		.rf2-reward-card {
+			padding: 16px;
+		}
+
+		.rf2-reward-icon {
+			width: 40px;
+			height: 40px;
+			font-size: 16px;
+		}
+
+		.rf2-reward-val {
+			font-size: 22px;
+		}
+
+		.rf2-reward-label {
+			font-size: 10px;
+		}
+	}
+
+	/* Small mobile (360px and below) */
+	@media (max-width: 360px) {
+		.rf2 {
+			gap: 12px;
+		}
+
+		.rf2-hero {
+			border-radius: 12px;
+		}
+
+		.rf2-hero-left {
+			padding: 20px 16px;
+		}
+
+		.rf2-hero-title {
+			font-size: clamp(16px, 6.5vw, 22px);
+		}
+
+		.rf2-hero-stat-val {
+			font-size: 20px;
+		}
+
+		.rf2-panel {
+			border-radius: 14px;
+		}
+
+		.rf2-panel-head,
+		.rf2-panel-body {
+			padding-left: 14px;
+			padding-right: 14px;
+		}
+
+		.rf2-msgbox-text {
+			font-size: 12px;
+			line-height: 2;
+		}
+
+		.rf2-panel-title {
+			font-size: 16px;
+		}
+
+		.rf2-codebox-val {
+			font-size: 24px;
+		}
+
+		.rf2-copy-btn {
+			font-size: 12px;
+			padding: 12px 18px;
+		}
+
+		.rf2-share-name {
+			font-size: 12px;
+		}
+
+		.rf2-share-desc {
+			font-size: 10px;
+		}
+
+		.rf2-profile-name {
+			font-size: 16px;
+		}
+	}
+
+	/* Hover effects disabled on touch devices */
+	@media (hover: none) {
+		.rf2-copy-btn:hover {
+			transform: none;
+			box-shadow: none;
+		}
+
+		.rf2-share:hover {
+			transform: none;
+			background: var(--rf2-card);
+		}
+
+		.rf2-share:hover .rf2-share-chev {
+			transform: none;
 		}
 	}
 </style>

@@ -391,7 +391,7 @@
     }
 
     .ps-wrap {
-        font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+        font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
         padding: 0 0 48px;
         max-width: 1200px;
     }

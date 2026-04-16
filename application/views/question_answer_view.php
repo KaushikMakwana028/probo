@@ -20,7 +20,7 @@ $winning_preview  = round($default_price * $default_quantity * $multiplier, 2);
 $yes_trade_qty    = isset($trade_breakdown['yes_quantity']) ? (int)$trade_breakdown['yes_quantity'] : 0;
 $no_trade_qty     = isset($trade_breakdown['no_quantity'])  ? (int)$trade_breakdown['no_quantity']  : 0;
 $total_trade_qty  = $yes_trade_qty + $no_trade_qty;
-$joined_users     = isset($total_users) ? (int) $total_users : 0;
+$joined_users     = isset($total_users) ? (int)$total_users : 0;
 $yes_pct          = $market_total > 0 ? round($yes_price / $market_total * 100) : 50;
 $no_pct           = 100 - $yes_pct;
 $yes_vol_pct      = $total_trade_qty > 0 ? round($yes_trade_qty / $total_trade_qty * 100) : 50;
@@ -31,37 +31,32 @@ $QTY_MIN          = 1;
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
 <style>
 	:root {
-		--f-head: 'Syne', sans-serif;
-		--f-body: 'DM Sans', sans-serif;
-		--ink: #0a0d14;
-		--ink-2: #1c2235;
-		--text: #4a5568;
-		--muted: #8892a4;
-		--surface: #f5f7fb;
-		--surface-2: #edf0f7;
+		--f: 'Roboto', sans-serif;
+		--ink: #0f172a;
+		--ink-2: #1e293b;
+		--muted: #64748b;
+		--hint: #94a3b8;
+		--surface: #f8fafc;
+		--surface-2: #f1f5f9;
 		--white: #ffffff;
-		--accent: #5b5ef4;
-		--accent-light: rgba(91, 94, 244, 0.1);
-		--green: #00c896;
-		--green-soft: rgba(0, 200, 150, 0.1);
-		--green-border: rgba(0, 200, 150, 0.3);
-		--red: #ff4d6a;
-		--red-soft: rgba(255, 77, 106, 0.1);
-		--red-border: rgba(255, 77, 106, 0.3);
-		--gold: #f5a623;
 		--border: rgba(0, 0, 0, 0.07);
-		--border-2: rgba(0, 0, 0, 0.11);
-		--shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-		--shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-		--shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.1);
-		--r-sm: 10px;
-		--r-md: 16px;
-		--r-lg: 20px;
-		--r-xl: 26px;
+		--border-2: rgba(0, 0, 0, 0.12);
+		--accent: #6366f1;
+		--accent-soft: rgba(99, 102, 241, 0.08);
+		--accent-border: rgba(99, 102, 241, 0.25);
+		--green: #22c55e;
+		--green-soft: rgba(34, 197, 94, 0.08);
+		--green-border: rgba(34, 197, 94, 0.25);
+		--red: #ef4444;
+		--red-soft: rgba(239, 68, 68, 0.08);
+		--red-border: rgba(239, 68, 68, 0.25);
+		--r-sm: 8px;
+		--r-md: 12px;
+		--r-lg: 16px;
 	}
 
 	*,
@@ -73,132 +68,124 @@ $QTY_MIN          = 1;
 	}
 
 	.tp {
-		font-family: var(--f-body);
+		font-family: var(--f);
 		color: var(--ink);
 		display: grid;
-		gap: 18px;
+		gap: 14px;
 	}
 
 	/* ─── ALERTS ─── */
 	.tp-alert {
-		padding: 14px 18px;
+		padding: 12px 16px;
 		border-radius: var(--r-md);
 		font-size: 14px;
 		font-weight: 500;
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 9px;
 	}
 
 	.tp-alert-err {
 		background: var(--red-soft);
-		border: 1px solid var(--red-border);
-		color: #cc1f3a;
+		border: 0.5px solid var(--red-border);
+		color: #b91c1c;
 	}
 
 	.tp-alert-ok {
 		background: var(--green-soft);
-		border: 1px solid var(--green-border);
-		color: #009970;
+		border: 0.5px solid var(--green-border);
+		color: #15803d;
 	}
 
 	/* ─── BACK ─── */
 	.tp-back {
 		display: inline-flex;
 		align-items: center;
-		gap: 7px;
+		gap: 6px;
 		font-size: 13px;
 		font-weight: 500;
 		color: var(--muted);
 		text-decoration: none;
-		padding: 8px 14px;
+		padding: 7px 14px;
 		border-radius: var(--r-sm);
-		border: 1px solid var(--border-2);
+		border: 0.5px solid var(--border-2);
 		background: var(--white);
-		transition: all 0.16s;
-		align-self: start;
+		transition: all .15s;
 	}
 
 	.tp-back:hover {
-		color: var(--accent);
-		border-color: var(--accent);
-		background: var(--accent-light);
-	}
-
-	/* ─── QUESTION HERO ─── */
-	.tp-qhero {
-		background: var(--white);
-		border: 1px solid var(--border);
-		border-radius: var(--r-xl);
-		padding: 28px 32px;
-		display: grid;
-		grid-template-columns: 1fr auto;
-		gap: 20px;
-		align-items: start;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.tp-qhero-title {
-		font-family: var(--f-head);
-		font-size: clamp(16px, 2.2vw, 22px);
-		font-weight: 700;
-		letter-spacing: -0.02em;
 		color: var(--ink);
-		line-height: 1.35;
-		margin-bottom: 8px;
+		border-color: var(--border-2);
+		background: var(--surface);
 	}
 
-	.tp-qhero-sub {
+	/* ─── HERO ─── */
+	.tp-hero {
+		background: var(--white);
+		border: 0.5px solid var(--border);
+		border-radius: var(--r-lg);
+		padding: 22px 26px;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 20px;
+	}
+
+	.tp-hero-q {
+		font-size: clamp(16px, 2vw, 20px);
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--ink);
+	}
+
+	.tp-hero-sub {
 		font-size: 13px;
-		line-height: 1.6;
 		color: var(--muted);
+		margin-top: 6px;
+		line-height: 1.6;
 	}
 
-	.tp-qhero-meta {
+	.tp-hero-pills {
 		display: flex;
 		flex-direction: column;
+		gap: 6px;
 		align-items: flex-end;
-		gap: 8px;
 		flex-shrink: 0;
 	}
 
 	.tp-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 6px 14px;
+		gap: 5px;
+		padding: 5px 12px;
 		border-radius: 999px;
-		font-family: var(--f-head);
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: 0.06em;
+		font-size: 12px;
+		font-weight: 500;
 		white-space: nowrap;
 	}
 
 	.tp-pill-open {
 		background: var(--green-soft);
-		color: #009970;
-		border: 1px solid var(--green-border);
+		color: #15803d;
+		border: 0.5px solid var(--green-border);
 	}
 
 	.tp-pill-closed {
-		background: var(--surface);
+		background: var(--surface-2);
 		color: var(--muted);
-		border: 1px solid var(--border-2);
+		border: 0.5px solid var(--border-2);
 	}
 
 	.tp-pill-cat {
-		background: var(--accent-light);
+		background: var(--accent-soft);
 		color: var(--accent);
-		border: 1px solid rgba(91, 94, 244, 0.2);
+		border: 0.5px solid var(--accent-border);
 	}
 
 	.tp-pill-users {
-		background: var(--red-soft);
-		color: #cc1f3a;
-		border: 1px solid var(--red-border);
-		font-size: 12px;
-		padding: 7px 14px;
+		background: var(--surface-2);
+		color: var(--muted);
+		border: 0.5px solid var(--border-2);
 	}
 
 	.tp-pulse {
@@ -206,272 +193,218 @@ $QTY_MIN          = 1;
 		height: 6px;
 		border-radius: 50%;
 		background: var(--green);
-		animation: tpPulse 1.6s ease-in-out infinite;
+		animation: pulse 1.6s infinite;
 	}
 
-	@keyframes tpPulse {
+	@keyframes pulse {
 
 		0%,
 		100% {
-			opacity: 1;
-			transform: scale(1);
+			opacity: 1
 		}
 
 		50% {
-			opacity: 0.4;
-			transform: scale(0.65);
+			opacity: .3
 		}
 	}
 
 	/* ─── LAYOUT ─── */
 	.tp-layout {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 300px;
-		gap: 18px;
+		grid-template-columns: minmax(0, 1fr) 280px;
+		gap: 14px;
 		align-items: start;
 	}
 
-	/* ─── PANELS ─── */
-	.tp-panel {
+	/* ─── CARDS ─── */
+	.tp-card {
 		background: var(--white);
-		border: 1px solid var(--border);
-		border-radius: var(--r-xl);
+		border: 0.5px solid var(--border);
+		border-radius: var(--r-lg);
 		overflow: hidden;
-		box-shadow: var(--shadow-sm);
 	}
 
-	.tp-panel+.tp-panel {
-		margin-top: 16px;
+	.tp-card+.tp-card {
+		margin-top: 12px;
 	}
 
-	.tp-panel-head {
-		padding: 18px 24px;
-		border-bottom: 1px solid var(--border);
+	.tp-card-head {
+		padding: 14px 20px;
+		border-bottom: 0.5px solid var(--border);
 		background: var(--surface);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
 	}
 
-	.tp-panel-title {
-		font-family: var(--f-head);
-		font-size: 15px;
-		font-weight: 700;
+	.tp-card-title {
+		font-size: 14px;
+		font-weight: 500;
 		color: var(--ink);
-		letter-spacing: -0.01em;
 	}
 
-	.tp-panel-sub {
+	.tp-card-sub {
 		font-size: 12px;
 		color: var(--muted);
 		margin-top: 2px;
 	}
 
-	.tp-panel-body {
-		padding: 22px 24px;
+	.tp-card-body {
+		padding: 20px;
 	}
 
 	/* ─── MARKET OVERVIEW ─── */
-	.tp-prob-bar-wrap {
-		margin-bottom: 20px;
-	}
-
-	.tp-prob-labels {
+	.tp-bar-labels {
 		display: flex;
 		justify-content: space-between;
-		font-family: var(--f-head);
 		font-size: 13px;
-		font-weight: 700;
+		font-weight: 500;
 		margin-bottom: 8px;
 	}
 
-	.tp-yes-label {
-		color: var(--green);
+	.tp-yes-lbl {
+		color: #15803d;
 	}
 
-	.tp-no-label {
-		color: var(--red);
+	.tp-no-lbl {
+		color: #b91c1c;
 	}
 
 	.tp-prob-bar {
-		height: 8px;
+		height: 6px;
 		border-radius: 999px;
 		background: var(--surface-2);
-		overflow: hidden;
 		display: flex;
+		overflow: hidden;
+		margin-bottom: 18px;
 	}
 
-	.tp-prob-y {
+	.tp-bar-y {
 		height: 100%;
-		background: linear-gradient(90deg, #00c896, #00a87a);
-		border-radius: 999px 0 0 999px;
-		transition: width 0.5s ease;
+		background: var(--green-soft);
+		border-left: 2px solid var(--green);
 	}
 
-	.tp-prob-n {
+	.tp-bar-n {
 		height: 100%;
-		background: linear-gradient(90deg, #ff6b82, #ff4d6a);
-		border-radius: 0 999px 999px 0;
-		transition: width 0.5s ease;
+		background: var(--red-soft);
+		border-right: 2px solid var(--red);
 	}
 
-	.tp-market-chips {
+	.tp-mchips {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
-		margin-bottom: 16px;
+		gap: 8px;
 	}
 
-	.tp-mchip {
-		padding: 14px 16px;
-		border-radius: var(--r-md);
-		border: 1px solid var(--border);
+	.tp-chip {
 		background: var(--surface);
+		border: 0.5px solid var(--border);
+		border-radius: var(--r-md);
+		padding: 12px;
 		text-align: center;
 	}
 
-	.tp-mchip-label {
-		font-family: var(--f-head);
-		font-size: 10px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-bottom: 5px;
+	.tp-chip-lbl {
+		font-size: 11px;
 		color: var(--muted);
+		margin-bottom: 4px;
+		text-transform: uppercase;
+		letter-spacing: .06em;
 	}
 
-	.tp-mchip-val {
-		font-family: var(--f-head);
-		font-size: 19px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
+	.tp-chip-val {
+		font-size: 18px;
+		font-weight: 500;
 	}
 
-	.mc-users .tp-mchip-label {
-		color: #cc1f3a;
+	.mc-yes .tp-chip-val {
+		color: #15803d;
 	}
 
-	.mc-users .tp-mchip-val {
-		color: #cc1f3a;
-	}
-
-	.mc-yes .tp-mchip-label {
-		color: #009970;
-	}
-
-	.mc-yes .tp-mchip-val {
-		color: #009970;
-	}
-
-	.mc-no .tp-mchip-label {
-		color: var(--red);
-	}
-
-	.mc-no .tp-mchip-val {
-		color: var(--red);
+	.mc-no .tp-chip-val {
+		color: #b91c1c;
 	}
 
 	.tp-vol-row {
 		display: flex;
 		align-items: center;
 		gap: 10px;
+		margin-top: 14px;
 		font-size: 12px;
-		font-weight: 600;
-		font-family: var(--f-head);
+		font-weight: 500;
 	}
 
 	.tp-vol-bar {
 		flex: 1;
-		height: 5px;
-		border-radius: 999px;
+		height: 4px;
 		background: var(--surface-2);
+		border-radius: 999px;
 		overflow: hidden;
 	}
 
 	.tp-vol-fill {
 		height: 100%;
-		background: linear-gradient(90deg, var(--green), var(--red));
 		border-radius: 999px;
+		background: linear-gradient(90deg, var(--green), var(--red));
 	}
 
 	.tv-yes {
-		color: #009970;
+		color: #15803d;
 	}
 
 	.tv-no {
-		color: var(--red);
+		color: #b91c1c;
 	}
 
-	/* ─── TRADE SECTION ─── */
-
-	/* Result Banner */
+	/* ─── TRADE PANEL ─── */
 	.tp-result {
-		border-radius: var(--r-lg);
-		padding: 20px 22px;
-		margin-bottom: 20px;
+		border-radius: var(--r-md);
+		padding: 16px 20px;
+		margin-bottom: 16px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 16px;
+		gap: 14px;
 		flex-wrap: wrap;
 	}
 
 	.tp-result-pend {
-		background: rgba(91, 94, 244, 0.06);
-		border: 1px solid rgba(91, 94, 244, 0.2);
+		background: var(--accent-soft);
+		border: 0.5px solid var(--accent-border);
 	}
 
 	.tp-result-correct {
 		background: var(--green-soft);
-		border: 1px solid var(--green-border);
+		border: 0.5px solid var(--green-border);
 	}
 
 	.tp-result-wrong {
 		background: var(--red-soft);
-		border: 1px solid var(--red-border);
+		border: 0.5px solid var(--red-border);
 	}
 
 	.tp-result-tag {
-		font-family: var(--f-head);
-		font-size: 10px;
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 500;
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-bottom: 5px;
-	}
-
-	.tp-result-pend .tp-result-tag {
-		color: var(--accent);
-	}
-
-	.tp-result-correct .tp-result-tag {
-		color: #009970;
-	}
-
-	.tp-result-wrong .tp-result-tag {
-		color: var(--red);
+		letter-spacing: .06em;
+		margin-bottom: 4px;
+		color: var(--muted);
 	}
 
 	.tp-result h4 {
-		font-family: var(--f-head);
-		font-size: 15px;
-		font-weight: 700;
-		color: var(--ink);
-		margin-bottom: 4px;
+		font-size: 14px;
+		font-weight: 500;
+		margin-bottom: 3px;
 	}
 
 	.tp-result p {
-		font-size: 13px;
+		font-size: 12px;
 		color: var(--muted);
 		line-height: 1.5;
 	}
 
 	.tp-result-amt {
-		font-family: var(--f-head);
-		font-size: 26px;
-		font-weight: 800;
-		letter-spacing: -0.03em;
+		font-size: 22px;
+		font-weight: 600;
 		flex-shrink: 0;
 	}
 
@@ -480,19 +413,19 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-result-correct .tp-result-amt {
-		color: #009970;
+		color: #15803d;
 	}
 
 	.tp-result-wrong .tp-result-amt {
-		color: var(--red);
+		color: #b91c1c;
 	}
 
-	/* Answer Toggle */
+	/* Toggle */
 	.tp-toggle {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 10px;
-		margin-bottom: 18px;
+		gap: 8px;
+		margin-bottom: 16px;
 	}
 
 	.tp-toggle input[type=radio] {
@@ -503,15 +436,15 @@ $QTY_MIN          = 1;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 16px 18px;
+		padding: 14px 16px;
 		border-radius: var(--r-md);
-		border: 1.5px solid var(--border-2);
+		border: 0.5px solid var(--border-2);
 		background: var(--surface);
 		cursor: pointer;
-		transition: all 0.18s;
+		transition: all .18s;
 	}
 
-	.tp-tog-left {
+	.tp-tog-l {
 		display: flex;
 		align-items: center;
 		gap: 10px;
@@ -523,106 +456,102 @@ $QTY_MIN          = 1;
 		border-radius: 50%;
 	}
 
-	.tog-yes-lbl .tp-tog-dot {
+	.tog-yes .tp-tog-dot {
 		background: var(--green);
 	}
 
-	.tog-no-lbl .tp-tog-dot {
+	.tog-no .tp-tog-dot {
 		background: var(--red);
 	}
 
 	.tp-tog-name {
-		font-family: var(--f-head);
 		font-size: 15px;
-		font-weight: 700;
-		color: var(--ink);
+		font-weight: 500;
 	}
 
 	.tp-tog-price {
 		font-size: 12px;
 		color: var(--muted);
+		margin-top: 2px;
 	}
 
 	.tp-tog-badge {
-		font-family: var(--f-head);
 		font-size: 11px;
-		font-weight: 700;
-		padding: 4px 10px;
+		font-weight: 500;
+		padding: 3px 10px;
 		border-radius: 6px;
 		background: var(--surface-2);
 		color: var(--muted);
-		transition: all 0.18s;
+		transition: all .18s;
 	}
 
-	#tp_yes:checked+label.tog-yes-lbl {
+	#tp_yes:checked+label.tog-yes {
 		border-color: var(--green);
+		border-width: 1.5px;
 		background: var(--green-soft);
 	}
 
-	#tp_yes:checked+label.tog-yes-lbl .tp-tog-name {
-		color: #009970;
+	#tp_yes:checked+label.tog-yes .tp-tog-name {
+		color: #15803d;
 	}
 
-	#tp_yes:checked+label.tog-yes-lbl .tp-tog-badge {
+	#tp_yes:checked+label.tog-yes .tp-tog-badge {
 		background: var(--green);
 		color: #fff;
 	}
 
-	#tp_no:checked+label.tog-no-lbl {
+	#tp_no:checked+label.tog-no {
 		border-color: var(--red);
+		border-width: 1.5px;
 		background: var(--red-soft);
 	}
 
-	#tp_no:checked+label.tog-no-lbl .tp-tog-name {
-		color: var(--red);
+	#tp_no:checked+label.tog-no .tp-tog-name {
+		color: #b91c1c;
 	}
 
-	#tp_no:checked+label.tog-no-lbl .tp-tog-badge {
+	#tp_no:checked+label.tog-no .tp-tog-badge {
 		background: var(--red);
 		color: #fff;
 	}
 
 	.tp-toggle.locked label {
 		cursor: not-allowed;
-		opacity: 0.6;
+		opacity: .55;
 	}
 
 	/* Controls */
 	.tp-controls {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 12px;
-		margin-bottom: 18px;
+		gap: 10px;
+		margin-bottom: 16px;
 	}
 
 	.tp-ctrl {
-		padding: 16px 18px;
-		border-radius: var(--r-md);
-		border: 1px solid var(--border);
 		background: var(--surface);
+		border: 0.5px solid var(--border);
+		border-radius: var(--r-md);
+		padding: 14px;
 	}
 
-	.tp-ctrl-hdr {
+	.tp-ctrl-top {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 12px;
+		margin-bottom: 10px;
 	}
 
-	.tp-ctrl-label {
-		font-family: var(--f-head);
-		font-size: 10px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
+	.tp-ctrl-lbl {
+		font-size: 11px;
 		color: var(--muted);
+		text-transform: uppercase;
+		letter-spacing: .06em;
 	}
 
 	.tp-ctrl-val {
-		font-family: var(--f-head);
-		font-size: 16px;
-		font-weight: 800;
-		color: var(--ink);
+		font-size: 15px;
+		font-weight: 500;
 	}
 
 	.tp-stepper {
@@ -632,32 +561,28 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-step-btn {
-		width: 32px;
-		height: 32px;
-		border-radius: 8px;
-		border: 1px solid var(--border-2);
+		width: 30px;
+		height: 30px;
+		border-radius: var(--r-sm);
+		border: 0.5px solid var(--border-2);
 		background: var(--white);
-		color: var(--accent);
-		font-size: 15px;
+		color: var(--ink);
+		font-size: 16px;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 0.14s;
 		flex-shrink: 0;
-		line-height: 1;
-		font-family: var(--f-head);
-		font-weight: 700;
+		transition: all .14s;
 	}
 
 	.tp-step-btn:hover {
-		background: var(--accent);
-		color: #fff;
-		border-color: var(--accent);
+		background: var(--surface-2);
+		border-color: var(--border-2);
 	}
 
 	.tp-step-btn:disabled {
-		opacity: 0.3;
+		opacity: .35;
 		cursor: not-allowed;
 	}
 
@@ -670,21 +595,20 @@ $QTY_MIN          = 1;
 
 	.tp-stepper input[type=number] {
 		flex: 1;
-		padding: 7px 8px;
-		border-radius: 8px;
-		border: 1px solid var(--border-2);
+		padding: 7px 4px;
+		border-radius: var(--r-sm);
+		border: 0.5px solid var(--border-2);
 		background: var(--white);
 		color: var(--ink);
 		text-align: center;
 		font-size: 14px;
-		font-weight: 700;
-		font-family: var(--f-head);
+		font-weight: 500;
+		font-family: var(--f);
 		outline: none;
 	}
 
 	.tp-stepper input[type=number]:focus {
 		border-color: var(--accent);
-		box-shadow: 0 0 0 3px rgba(91, 94, 244, 0.1);
 	}
 
 	.tp-stepper input[type=number]::-webkit-inner-spin-button,
@@ -694,13 +618,13 @@ $QTY_MIN          = 1;
 
 	.tp-ctrl-hint {
 		font-size: 11px;
-		color: var(--muted);
+		color: var(--hint);
 		margin-top: 6px;
 	}
 
 	.tp-qty-warn {
 		font-size: 11px;
-		color: var(--red);
+		color: #b91c1c;
 		margin-top: 5px;
 		display: none;
 	}
@@ -709,52 +633,45 @@ $QTY_MIN          = 1;
 		display: block;
 	}
 
-	/* Stake Preview */
+	/* Stake summary */
 	.tp-stake {
+		border: 0.5px solid var(--border);
 		border-radius: var(--r-md);
-		border: 1px solid var(--border);
 		overflow: hidden;
-		margin-bottom: 16px;
+		margin-bottom: 14px;
 	}
 
-	.tp-stake-head {
-		padding: 12px 18px;
-		background: linear-gradient(90deg, rgba(91, 94, 244, 0.06), rgba(91, 94, 244, 0.02));
-		border-bottom: 1px solid var(--border);
+	.tp-stake-hd {
+		padding: 10px 16px;
+		background: var(--surface);
+		border-bottom: 0.5px solid var(--border);
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		justify-content: space-between;
 	}
 
-	.tp-boost-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		padding: 4px 10px;
-		border-radius: 999px;
+	.tp-stake-hd-lbl {
+		font-size: 12px;
+		color: var(--muted);
+	}
+
+	.tp-boost {
 		background: var(--green-soft);
-		color: #009970;
-		font-family: var(--f-head);
+		color: #15803d;
+		border: 0.5px solid var(--green-border);
+		border-radius: 999px;
+		padding: 3px 10px;
 		font-size: 11px;
-		font-weight: 700;
-		border: 1px solid var(--green-border);
-	}
-
-	.tp-stake-body {
-		padding: 0;
+		font-weight: 500;
 	}
 
 	.tp-stake-row {
 		display: flex;
-		align-items: center;
 		justify-content: space-between;
-		padding: 12px 18px;
+		align-items: center;
+		padding: 10px 16px;
 		font-size: 13px;
-		border-bottom: 1px solid var(--border);
-	}
-
-	.tp-stake-row:last-child {
-		border-bottom: none;
+		border-top: 0.5px solid var(--border);
 	}
 
 	.tp-stake-row span {
@@ -762,47 +679,34 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-stake-row strong {
-		font-family: var(--f-head);
-		font-weight: 700;
-		color: var(--ink);
+		font-weight: 500;
 	}
 
 	.tp-stake-total strong {
 		color: var(--accent);
-		font-size: 15px;
+		font-size: 14px;
 	}
 
 	.tp-stake-win strong {
-		color: var(--green);
+		color: #15803d;
+		font-size: 14px;
 	}
 
-	/* Formula */
-	.tp-formula {
-		padding: 14px 18px;
-		border-radius: var(--r-md);
-		background: rgba(91, 94, 244, 0.04);
-		border: 1px solid rgba(91, 94, 244, 0.15);
-		margin-bottom: 18px;
-	}
-
-	.tp-formula-title {
-		font-family: var(--f-head);
-		font-size: 10px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		color: var(--accent);
-		margin-bottom: 6px;
-	}
-
-	.tp-formula p {
+	/* Info box */
+	.tp-info {
+		background: var(--surface);
+		border-left: 2px solid var(--accent);
+		border-radius: 0 var(--r-md) var(--r-md) 0;
+		padding: 12px 16px;
+		margin-bottom: 16px;
 		font-size: 13px;
-		line-height: 1.65;
 		color: var(--muted);
+		line-height: 1.6;
 	}
 
-	.tp-formula strong {
-		color: var(--accent);
+	.tp-info strong {
+		color: var(--ink);
+		font-weight: 500;
 	}
 
 	/* Submit */
@@ -810,19 +714,17 @@ $QTY_MIN          = 1;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 16px;
-		padding: 16px 20px;
+		gap: 14px;
+		padding: 14px 18px;
 		border-radius: var(--r-md);
 		background: var(--surface);
-		border: 1px solid var(--border);
+		border: 0.5px solid var(--border);
 		flex-wrap: wrap;
 	}
 
 	.tp-submit-info strong {
-		font-family: var(--f-head);
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--ink);
+		font-size: 13px;
+		font-weight: 500;
 		display: block;
 		margin-bottom: 2px;
 	}
@@ -833,77 +735,71 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-submit-btn {
-		padding: 13px 28px;
+		padding: 11px 24px;
 		border: none;
 		border-radius: var(--r-sm);
-		background: var(--ink);
-		color: var(--white);
-		font-family: var(--f-head);
-		font-size: 14px;
-		font-weight: 700;
+		background: var(--accent);
+		color: #fff;
+		font-family: var(--f);
+		font-size: 13px;
+		font-weight: 500;
 		cursor: pointer;
-		letter-spacing: 0.02em;
-		transition: all 0.18s;
+		transition: all .15s;
 		flex-shrink: 0;
 	}
 
 	.tp-submit-btn:hover {
-		background: var(--accent);
+		background: #4f52d9;
 		transform: translateY(-1px);
-		box-shadow: 0 8px 20px rgba(91, 94, 244, 0.3);
 	}
 
 	.tp-submit-btn:active {
-		transform: scale(0.98);
+		transform: scale(.98);
 	}
 
 	.tp-submit-btn:disabled {
 		background: var(--surface-2);
-		color: var(--muted);
+		color: var(--hint);
 		cursor: not-allowed;
 		transform: none;
-		box-shadow: none;
 	}
 
 	.tp-lock-note {
-		padding: 14px 18px;
+		padding: 12px 16px;
 		border-radius: var(--r-md);
-		border: 1px dashed var(--border-2);
-		background: var(--surface);
+		border: 0.5px dashed var(--border-2);
 		font-size: 13px;
 		color: var(--muted);
-		line-height: 1.6;
-		margin-top: 16px;
+		line-height: 1.5;
+		margin-top: 14px;
 	}
 
-	/* Chart */
+	/* ─── CHART ─── */
 	.tp-chart-wrap {
-		border-radius: var(--r-md);
 		background: var(--surface);
-		border: 1px solid var(--border);
-		padding: 18px;
+		border: 0.5px solid var(--border);
+		border-radius: var(--r-md);
+		padding: 14px;
 	}
 
 	.tp-chart-hdr {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		gap: 10px;
-		margin-bottom: 16px;
+		margin-bottom: 12px;
 		flex-wrap: wrap;
+		gap: 8px;
 	}
 
 	.tp-chart-title {
-		font-family: var(--f-head);
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--ink);
-		margin-bottom: 2px;
+		font-size: 13px;
+		font-weight: 500;
 	}
 
 	.tp-chart-sub {
-		font-size: 12px;
+		font-size: 11px;
 		color: var(--muted);
+		margin-top: 2px;
 	}
 
 	.tp-chart-legend {
@@ -911,120 +807,100 @@ $QTY_MIN          = 1;
 		gap: 6px;
 	}
 
-	.tp-leg-pill {
+	.tp-leg {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		padding: 4px 10px;
+		padding: 3px 10px;
 		border-radius: 999px;
 		font-size: 11px;
-		font-weight: 600;
-		font-family: var(--f-head);
-		background: var(--white);
-		border: 1px solid var(--border-2);
+		border: 0.5px solid var(--border-2);
 		color: var(--muted);
+		background: var(--white);
 	}
 
-	.tp-leg-pill::before {
-		content: '';
+	.tp-leg-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		display: inline-block;
 	}
 
-	.tp-leg-pill.yes::before {
-		background: var(--green);
-	}
-
-	.tp-leg-pill.no::before {
-		background: var(--red);
-	}
-
-	.tp-chart-metrics {
+	.tp-metrics {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 8px;
-		margin-bottom: 14px;
+		gap: 6px;
+		margin-bottom: 12px;
 	}
 
 	.tp-metric {
 		background: var(--white);
-		border: 1px solid var(--border);
+		border: 0.5px solid var(--border);
 		border-radius: var(--r-sm);
-		padding: 12px 14px;
+		padding: 10px 12px;
 	}
 
-	.tp-metric-label {
-		font-family: var(--f-head);
+	.tp-metric-lbl {
 		font-size: 10px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--muted);
-		margin-bottom: 4px;
+		text-transform: uppercase;
+		letter-spacing: .06em;
+		margin-bottom: 3px;
 	}
 
 	.tp-metric-val {
-		font-family: var(--f-head);
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--ink);
-	}
-
-	.tp-metric-val.m-yes {
-		color: #009970;
-	}
-
-	.tp-metric-val.m-no {
-		color: var(--red);
-	}
-
-	.tp-metric-val.m-acc {
-		color: var(--accent);
+		font-size: 16px;
+		font-weight: 500;
 	}
 
 	.tp-metric-sub {
 		font-size: 10px;
-		color: var(--muted);
-		margin-top: 3px;
+		color: var(--hint);
+		margin-top: 2px;
+	}
+
+	.m-yes {
+		color: #15803d;
+	}
+
+	.m-no {
+		color: #b91c1c;
+	}
+
+	.m-acc {
+		color: var(--accent);
 	}
 
 	.tp-chart-svg {
 		background: var(--white);
-		border: 1px solid var(--border);
+		border: 0.5px solid var(--border);
 		border-radius: var(--r-sm);
 		overflow: hidden;
 		padding: 8px;
 	}
 
-	.tp-chart-footer {
+	.tp-spread-row {
 		display: flex;
-		align-items: center;
 		justify-content: space-between;
+		align-items: center;
 		margin-top: 10px;
-		font-size: 11px;
+		font-size: 12px;
 		color: var(--muted);
 	}
 
-	.tp-spread-pill {
-		padding: 3px 10px;
-		border-radius: 999px;
-		background: var(--white);
-		border: 1px solid var(--border-2);
-		color: var(--text);
-		font-weight: 600;
-		font-family: var(--f-head);
+	.tp-spread-val {
+		font-weight: 500;
+		color: var(--ink);
+		font-size: 12px;
 	}
 
-	/* Sidebar */
+	/* ─── SIDEBAR ─── */
 	.tp-side {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 12px;
 	}
 
-	.tp-progress-grid {
+	.tp-prog-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 8px;
@@ -1032,27 +908,23 @@ $QTY_MIN          = 1;
 
 	.tp-prog-stat {
 		background: var(--surface);
-		border: 1px solid var(--border);
+		border: 0.5px solid var(--border);
 		border-radius: var(--r-md);
-		padding: 14px;
+		padding: 12px;
 		text-align: center;
 	}
 
-	.tp-prog-label {
-		font-family: var(--f-head);
+	.tp-prog-lbl {
 		font-size: 10px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--muted);
-		margin-bottom: 5px;
+		text-transform: uppercase;
+		letter-spacing: .06em;
+		margin-bottom: 4px;
 	}
 
 	.tp-prog-val {
-		font-family: var(--f-head);
 		font-size: 22px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
+		font-weight: 500;
 	}
 
 	.ps-total .tp-prog-val {
@@ -1060,39 +932,39 @@ $QTY_MIN          = 1;
 	}
 
 	.ps-correct .tp-prog-val {
-		color: var(--green);
+		color: #15803d;
 	}
 
 	.ps-wrong .tp-prog-val {
-		color: var(--red);
+		color: #b91c1c;
 	}
 
-	/* Question List */
+	/* Question list */
 	.tp-qlist {
 		display: flex;
 		flex-direction: column;
-		gap: 7px;
+		gap: 6px;
 	}
 
 	.tp-qitem {
 		display: block;
-		padding: 13px 16px;
+		padding: 11px 14px;
 		border-radius: var(--r-md);
-		border: 1px solid var(--border);
+		border: 0.5px solid var(--border);
 		background: var(--white);
 		text-decoration: none;
-		transition: all 0.18s;
+		transition: all .15s;
 	}
 
 	.tp-qitem:hover {
-		border-color: #c5cdd9;
-		transform: translateX(2px);
-		box-shadow: var(--shadow-sm);
+		border-color: var(--border-2);
+		background: var(--surface);
 	}
 
 	.tp-qitem.q-active {
 		border-color: var(--accent);
-		background: rgba(91, 94, 244, 0.04);
+		border-width: 1.5px;
+		background: var(--accent-soft);
 	}
 
 	.tp-qitem.q-correct {
@@ -1107,19 +979,17 @@ $QTY_MIN          = 1;
 
 	.tp-qitem-text {
 		font-size: 13px;
-		font-weight: 500;
 		color: var(--ink);
-		line-height: 1.45;
+		line-height: 1.4;
+		margin-bottom: 6px;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		margin-bottom: 7px;
 	}
 
 	.tp-qitem-foot {
 		display: flex;
-		align-items: center;
 		gap: 6px;
 	}
 
@@ -1129,33 +999,8 @@ $QTY_MIN          = 1;
 		gap: 4px;
 		padding: 2px 8px;
 		border-radius: 6px;
-		font-family: var(--f-head);
 		font-size: 10px;
-		font-weight: 700;
-	}
-
-	.tp-qbadge.bq-open {
-		background: var(--green-soft);
-		color: #009970;
-		border: 1px solid var(--green-border);
-	}
-
-	.tp-qbadge.bq-closed {
-		background: var(--surface-2);
-		color: var(--muted);
-		border: 1px solid var(--border-2);
-	}
-
-	.tp-qbadge.bq-correct {
-		background: var(--green-soft);
-		color: #009970;
-		border: 1px solid var(--green-border);
-	}
-
-	.tp-qbadge.bq-wrong {
-		background: var(--red-soft);
-		color: var(--red);
-		border: 1px solid var(--red-border);
+		font-weight: 500;
 	}
 
 	.tp-qbadge-dot {
@@ -1165,24 +1010,46 @@ $QTY_MIN          = 1;
 		background: currentColor;
 	}
 
-	/* Responsive */
-	@media (max-width: 1020px) {
+	.bq-open {
+		background: var(--green-soft);
+		color: #15803d;
+		border: 0.5px solid var(--green-border);
+	}
+
+	.bq-closed {
+		background: var(--surface-2);
+		color: var(--muted);
+		border: 0.5px solid var(--border-2);
+	}
+
+	.bq-correct {
+		background: var(--green-soft);
+		color: #15803d;
+	}
+
+	.bq-wrong {
+		background: var(--red-soft);
+		color: #b91c1c;
+	}
+
+	/* ─── RESPONSIVE ─── */
+	@media (max-width: 960px) {
 		.tp-layout {
 			grid-template-columns: 1fr;
 		}
 
-		.tp-chart-metrics {
+		.tp-metrics {
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
-	@media (max-width: 640px) {
-		.tp-qhero {
-			grid-template-columns: 1fr;
-			padding: 20px;
+	@media (max-width: 600px) {
+		.tp-hero {
+			flex-direction: column;
+			padding: 18px;
 		}
 
-		.tp-qhero-meta {
+		.tp-hero-pills {
 			flex-direction: row;
 			flex-wrap: wrap;
 			align-items: flex-start;
@@ -1192,16 +1059,23 @@ $QTY_MIN          = 1;
 			grid-template-columns: 1fr;
 		}
 
-		.tp-market-chips {
+		.tp-mchips {
 			grid-template-columns: 1fr;
 		}
 
-		.tp-panel-body {
-			padding: 18px;
+		.tp-mchips .tp-chip {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			text-align: left;
 		}
 
-		.tp-panel-head {
-			padding: 16px 18px;
+		.tp-card-body {
+			padding: 16px;
+		}
+
+		.tp-card-head {
+			padding: 13px 16px;
 		}
 	}
 </style>
@@ -1209,10 +1083,16 @@ $QTY_MIN          = 1;
 <div class="tp">
 
 	<?php if ($answer_error_flash): ?>
-		<div class="tp-alert tp-alert-err"><i class="fa-solid fa-circle-xmark"></i> <?php echo $answer_error_flash; ?></div>
+		<div class="tp-alert tp-alert-err">
+			<i class="fa-solid fa-circle-xmark"></i>
+			<?php echo $answer_error_flash; ?>
+		</div>
 	<?php endif; ?>
 	<?php if ($this->session->flashdata('success')): ?>
-		<div class="tp-alert tp-alert-ok"><i class="fa-solid fa-circle-check"></i> <?php echo $this->session->flashdata('success'); ?></div>
+		<div class="tp-alert tp-alert-ok">
+			<i class="fa-solid fa-circle-check"></i>
+			<?php echo $this->session->flashdata('success'); ?>
+		</div>
 	<?php endif; ?>
 
 	<!-- Back -->
@@ -1225,28 +1105,30 @@ $QTY_MIN          = 1;
 		</a>
 	</div>
 
-	<!-- Question Hero -->
-	<section class="tp-qhero">
+	<!-- Hero -->
+	<div class="tp-hero">
 		<div>
-			<h1 class="tp-qhero-title"><?php echo html_escape($selected_question->question); ?></h1>
-			<p class="tp-qhero-sub">
+			<div class="tp-hero-q"><?php echo html_escape($selected_question->question); ?></div>
+			<p class="tp-hero-sub">
 				<?php echo $is_locked
 					? 'Your trade is locked. Payout will be credited once the admin resolves this market.'
 					: 'Pick YES or NO, set your price and quantity, then submit. One trade per question.'; ?>
 			</p>
 		</div>
-		<div class="tp-qhero-meta">
+		<div class="tp-hero-pills">
 			<span class="tp-pill tp-pill-users">
-				<i class="fa-solid fa-users" style="font-size:11px;"></i>
-				<?php echo number_format($joined_users); ?> Joined
+				<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+					<path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 14s-1 0-1-1 1-4 7-4 7 3 7 4-1 1-1 1H2Z" />
+				</svg>
+				<?php echo number_format($joined_users); ?> joined
 			</span>
 			<span class="tp-pill <?php echo $market_is_open ? 'tp-pill-open' : 'tp-pill-closed'; ?>">
 				<?php if ($market_is_open): ?><span class="tp-pulse"></span><?php endif; ?>
-				<?php echo $market_is_open ? 'Market Open' : 'Market Closed'; ?>
+				<?php echo $market_is_open ? 'Market open' : 'Market closed'; ?>
 			</span>
 			<span class="tp-pill tp-pill-cat"><?php echo html_escape($selected_category->name); ?></span>
 		</div>
-	</section>
+	</div>
 
 	<!-- Layout -->
 	<div class="tp-layout">
@@ -1255,41 +1137,34 @@ $QTY_MIN          = 1;
 		<div>
 
 			<!-- Market Overview -->
-			<div class="tp-panel">
-				<div class="tp-panel-head">
-					<div>
-						<div class="tp-panel-title">Market Overview</div>
-						<div class="tp-panel-sub">Current YES / NO prices and trade volume.</div>
-					</div>
+			<div class="tp-card">
+				<div class="tp-card-head">
+					<div class="tp-card-title">Market overview</div>
+					<div class="tp-card-sub">Current YES / NO prices and trade volume</div>
 				</div>
-				<div class="tp-panel-body">
-
-					<div class="tp-prob-bar-wrap">
-						<div class="tp-prob-labels">
-							<span class="tp-yes-label">YES — <?php echo $yes_pct; ?>%</span>
-							<span class="tp-no-label"><?php echo $no_pct; ?>% — NO</span>
+				<div class="tp-card-body">
+					<div class="tp-bar-labels">
+						<span class="tp-yes-lbl">YES — <?php echo $yes_pct; ?>%</span>
+						<span class="tp-no-lbl"><?php echo $no_pct; ?>% — NO</span>
+					</div>
+					<div class="tp-prob-bar">
+						<div class="tp-bar-y" style="width:<?php echo $yes_pct; ?>%"></div>
+						<div class="tp-bar-n" style="width:<?php echo $no_pct; ?>%"></div>
+					</div>
+					<div class="tp-mchips">
+						<div class="tp-chip">
+							<div class="tp-chip-lbl">Joined</div>
+							<div class="tp-chip-val"><?php echo number_format($joined_users); ?></div>
 						</div>
-						<div class="tp-prob-bar">
-							<div class="tp-prob-y" style="width:<?php echo $yes_pct; ?>%"></div>
-							<div class="tp-prob-n" style="width:<?php echo $no_pct; ?>%"></div>
+						<div class="tp-chip mc-yes">
+							<div class="tp-chip-lbl">YES price</div>
+							<div class="tp-chip-val">₹<?php echo number_format($yes_price, 2); ?></div>
+						</div>
+						<div class="tp-chip mc-no">
+							<div class="tp-chip-lbl">NO price</div>
+							<div class="tp-chip-val">₹<?php echo number_format($no_price, 2); ?></div>
 						</div>
 					</div>
-
-					<div class="tp-market-chips">
-						<div class="tp-mchip mc-users">
-							<div class="tp-mchip-label">Joined</div>
-							<div class="tp-mchip-val"><?php echo number_format($joined_users); ?></div>
-						</div>
-						<div class="tp-mchip mc-yes">
-							<div class="tp-mchip-label">YES Price</div>
-							<div class="tp-mchip-val">₹<?php echo number_format($yes_price, 2); ?></div>
-						</div>
-						<div class="tp-mchip mc-no">
-							<div class="tp-mchip-label">NO Price</div>
-							<div class="tp-mchip-val">₹<?php echo number_format($no_price, 2); ?></div>
-						</div>
-					</div>
-
 					<div class="tp-vol-row">
 						<span class="tv-yes"><?php echo $yes_trade_qty; ?> YES</span>
 						<div class="tp-vol-bar">
@@ -1297,25 +1172,22 @@ $QTY_MIN          = 1;
 						</div>
 						<span class="tv-no"><?php echo $no_trade_qty; ?> NO</span>
 					</div>
-
 				</div>
 			</div>
 
 			<!-- Trade Panel -->
-			<div class="tp-panel" style="margin-top:16px">
-				<div class="tp-panel-head">
-					<div>
-						<div class="tp-panel-title"><?php echo $is_locked ? 'Your Trade (Locked)' : 'Place Trade'; ?></div>
-						<div class="tp-panel-sub"><?php echo $is_locked ? 'Cannot be modified.' : 'Choose a side and confirm your stake.'; ?></div>
-					</div>
+			<div class="tp-card">
+				<div class="tp-card-head">
+					<div class="tp-card-title"><?php echo $is_locked ? 'Your trade (locked)' : 'Place trade'; ?></div>
+					<div class="tp-card-sub"><?php echo $is_locked ? 'Cannot be modified.' : 'Choose a side and confirm your stake.'; ?></div>
 				</div>
-				<div class="tp-panel-body">
+				<div class="tp-card-body">
 
 					<?php if ($is_locked): ?>
 						<div class="tp-result <?php echo $is_settled ? ($is_correct_ans ? 'tp-result-correct' : 'tp-result-wrong') : 'tp-result-pend'; ?>">
 							<div>
 								<div class="tp-result-tag">
-									<?php echo $is_settled ? ($is_correct_ans ? '✓ Correct Answer' : '✗ Wrong Answer') : '⏳ Awaiting Result'; ?>
+									<?php echo $is_settled ? ($is_correct_ans ? '✓ Correct answer' : '✗ Wrong answer') : '⏳ Awaiting result'; ?>
 								</div>
 								<h4>You answered <strong><?php echo strtoupper($selected_answer); ?></strong></h4>
 								<p>
@@ -1343,18 +1215,18 @@ $QTY_MIN          = 1;
 					<input type="hidden" name="question_id" value="<?php echo (int)$selected_question->id; ?>">
 					<input type="hidden" name="price" class="js-ph" value="<?php echo number_format($default_price, 2, '.', ''); ?>">
 
-					<!-- Toggle -->
+					<!-- YES / NO Toggle -->
 					<div class="tp-toggle<?php echo $is_locked ? ' locked' : ''; ?>">
 						<div>
 							<input type="radio" id="tp_yes" name="answer" value="yes"
 								<?php echo $selected_answer === 'yes' ? 'checked' : ''; ?>
 								<?php echo $is_locked ? 'disabled' : ''; ?>>
-							<label for="tp_yes" class="tog-yes-lbl">
-								<div class="tp-tog-left">
+							<label for="tp_yes" class="tog-yes">
+								<div class="tp-tog-l">
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">YES</div>
-										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?></div>
+										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?> per share</div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">YES</span>
@@ -1364,12 +1236,12 @@ $QTY_MIN          = 1;
 							<input type="radio" id="tp_no" name="answer" value="no"
 								<?php echo $selected_answer === 'no' ? 'checked' : ''; ?>
 								<?php echo $is_locked ? 'disabled' : ''; ?>>
-							<label for="tp_no" class="tog-no-lbl">
-								<div class="tp-tog-left">
+							<label for="tp_no" class="tog-no">
+								<div class="tp-tog-l">
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">NO</div>
-										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?></div>
+										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?> per share</div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">NO</span>
@@ -1377,11 +1249,11 @@ $QTY_MIN          = 1;
 						</div>
 					</div>
 
-					<!-- Controls -->
+					<!-- Price & Quantity Controls -->
 					<div class="tp-controls">
 						<div class="tp-ctrl">
-							<div class="tp-ctrl-hdr">
-								<span class="tp-ctrl-label">Price per share</span>
+							<div class="tp-ctrl-top">
+								<span class="tp-ctrl-lbl">Price / share</span>
 								<strong class="tp-ctrl-val js-pdisplay">₹<?php echo number_format($default_price, 2); ?></strong>
 							</div>
 							<div class="tp-stepper">
@@ -1396,10 +1268,9 @@ $QTY_MIN          = 1;
 							</div>
 							<div class="tp-ctrl-hint">₹0.50 – ₹<?php echo number_format($price_max, 2); ?></div>
 						</div>
-
 						<div class="tp-ctrl">
-							<div class="tp-ctrl-hdr">
-								<span class="tp-ctrl-label">Quantity</span>
+							<div class="tp-ctrl-top">
+								<span class="tp-ctrl-lbl">Quantity</span>
 								<strong class="tp-ctrl-val js-qdisplay"><?php echo (int)$default_quantity; ?></strong>
 							</div>
 							<div class="tp-stepper">
@@ -1417,31 +1288,21 @@ $QTY_MIN          = 1;
 						</div>
 					</div>
 
-					<!-- Stake Preview -->
+					<!-- Stake Summary -->
 					<div class="tp-stake">
-						<div class="tp-stake-head">
-							<span class="tp-boost-badge">🔥 ×<?php echo number_format($multiplier, 2); ?> Boost Active</span>
+						<div class="tp-stake-hd">
+							<span class="tp-stake-hd-lbl">Trade summary</span>
+							<span class="tp-boost">×<?php echo number_format($multiplier, 2); ?> boost active</span>
 						</div>
-						<div class="tp-stake-body">
-							<div class="tp-stake-row">
-								<span>Price × Quantity</span>
-								<strong class="js-formula">—</strong>
-							</div>
-							<div class="tp-stake-row tp-stake-total">
-								<span>Total Stake</span>
-								<strong class="js-stake">—</strong>
-							</div>
-							<div class="tp-stake-row tp-stake-win">
-								<span>Winning Preview (×<?php echo number_format($multiplier, 2); ?>)</span>
-								<strong class="js-win">—</strong>
-							</div>
-						</div>
+						<div class="tp-stake-row"><span>Price × Quantity</span><strong class="js-formula">—</strong></div>
+						<div class="tp-stake-row tp-stake-total"><span>Total stake</span><strong class="js-stake">—</strong></div>
+						<div class="tp-stake-row tp-stake-win"><span>Winning preview (×<?php echo number_format($multiplier, 2); ?>)</span><strong class="js-win">—</strong></div>
 					</div>
 
-					<!-- Formula -->
-					<div class="tp-formula">
-						<div class="tp-formula-title">How Winning is Calculated</div>
-						<p>If your answer matches the result: <strong class="js-win-inline">—</strong> will be credited. Formula: Price × Quantity × <?php echo number_format($multiplier, 2); ?>. Wrong answer = ₹0.00.</p>
+					<!-- How it works -->
+					<div class="tp-info">
+						If your answer matches the result, <strong class="js-win-inline">—</strong> will be credited.
+						Formula: Price × Quantity × <?php echo number_format($multiplier, 2); ?>. Wrong answer = ₹0.00.
 					</div>
 
 					<?php if ($is_locked): ?>
@@ -1455,7 +1316,7 @@ $QTY_MIN          = 1;
 								<strong>Ready to submit?</strong>
 								<p>This action is final and cannot be undone.</p>
 							</div>
-							<button type="submit" class="tp-submit-btn" id="js-sbtn">Place Trade →</button>
+							<button type="submit" class="tp-submit-btn" id="js-sbtn">Place trade →</button>
 						</div>
 					<?php endif; ?>
 
@@ -1464,56 +1325,51 @@ $QTY_MIN          = 1;
 			</div>
 
 			<!-- Price History Chart -->
-			<div class="tp-panel" style="margin-top:16px">
-				<div class="tp-panel-head">
-					<div>
-						<div class="tp-panel-title">Price History</div>
-						<div class="tp-panel-sub">YES and NO price movement from market snapshots.</div>
-					</div>
+			<div class="tp-card" style="margin-top:12px">
+				<div class="tp-card-head">
+					<div class="tp-card-title">Price history</div>
+					<div class="tp-card-sub">YES and NO price movement from market snapshots</div>
 				</div>
-				<div class="tp-panel-body">
+				<div class="tp-card-body">
 					<div class="tp-chart-wrap" data-chart data-history='<?php echo json_encode($price_history); ?>'>
 						<div class="tp-chart-hdr">
 							<div>
-								<div class="tp-chart-title">Demand Chart · <?php echo html_escape($selected_category->name); ?></div>
+								<div class="tp-chart-title">Demand chart · <?php echo html_escape($selected_category->name); ?></div>
 								<div class="tp-chart-sub">Auto-scaled from latest price snapshots</div>
 							</div>
 							<div class="tp-chart-legend">
-								<span class="tp-leg-pill yes">YES</span>
-								<span class="tp-leg-pill no">NO</span>
+								<span class="tp-leg"><span class="tp-leg-dot" style="background:var(--green)"></span>YES</span>
+								<span class="tp-leg"><span class="tp-leg-dot" style="background:var(--red)"></span>NO</span>
 							</div>
 						</div>
-
-						<div class="tp-chart-metrics">
+						<div class="tp-metrics">
 							<div class="tp-metric">
-								<div class="tp-metric-label">YES Price</div>
+								<div class="tp-metric-lbl">YES price</div>
 								<div class="tp-metric-val m-yes">₹<?php echo number_format($yes_price, 2); ?></div>
 								<div class="tp-metric-sub"><?php echo $yes_trade_qty; ?> trades</div>
 							</div>
 							<div class="tp-metric">
-								<div class="tp-metric-label">NO Price</div>
+								<div class="tp-metric-lbl">NO price</div>
 								<div class="tp-metric-val m-no">₹<?php echo number_format($no_price, 2); ?></div>
 								<div class="tp-metric-sub"><?php echo $no_trade_qty; ?> trades</div>
 							</div>
 							<div class="tp-metric">
-								<div class="tp-metric-label">Market Total</div>
+								<div class="tp-metric-lbl">Market total</div>
 								<div class="tp-metric-val">₹<?php echo number_format($market_total, 2); ?></div>
 								<div class="tp-metric-sub"><?php echo ucfirst((string)$selected_question->status); ?></div>
 							</div>
 							<div class="tp-metric">
-								<div class="tp-metric-label">Positions</div>
+								<div class="tp-metric-lbl">Positions</div>
 								<div class="tp-metric-val m-acc"><?php echo $total_trade_qty; ?></div>
 								<div class="tp-metric-sub">Total opened</div>
 							</div>
 						</div>
-
 						<div class="tp-chart-svg">
 							<div id="js-chart"></div>
 						</div>
-
-						<div class="tp-chart-footer">
+						<div class="tp-spread-row">
 							<span>Current spread</span>
-							<span class="tp-spread-pill">₹<?php echo number_format(abs($yes_price - $no_price), 2); ?></span>
+							<span class="tp-spread-val">₹<?php echo number_format(abs($yes_price - $no_price), 2); ?></span>
 						</div>
 					</div>
 				</div>
@@ -1525,25 +1381,23 @@ $QTY_MIN          = 1;
 		<aside class="tp-side">
 
 			<!-- Progress -->
-			<div class="tp-panel">
-				<div class="tp-panel-head">
-					<div>
-						<div class="tp-panel-title"><?php echo html_escape($selected_category->name); ?></div>
-						<div class="tp-panel-sub">Your answers in this category</div>
-					</div>
+			<div class="tp-card">
+				<div class="tp-card-head">
+					<div class="tp-card-title"><?php echo html_escape($selected_category->name); ?></div>
+					<div class="tp-card-sub">Your answers in this category</div>
 				</div>
-				<div class="tp-panel-body">
-					<div class="tp-progress-grid">
+				<div class="tp-card-body">
+					<div class="tp-prog-grid">
 						<div class="tp-prog-stat ps-total">
-							<div class="tp-prog-label">Done</div>
+							<div class="tp-prog-lbl">Done</div>
 							<div class="tp-prog-val"><?php echo (int)$answered_count; ?></div>
 						</div>
 						<div class="tp-prog-stat ps-correct">
-							<div class="tp-prog-label">Right</div>
+							<div class="tp-prog-lbl">Right</div>
 							<div class="tp-prog-val"><?php echo (int)$correct_count; ?></div>
 						</div>
 						<div class="tp-prog-stat ps-wrong">
-							<div class="tp-prog-label">Wrong</div>
+							<div class="tp-prog-lbl">Wrong</div>
 							<div class="tp-prog-val"><?php echo (int)$wrong_count; ?></div>
 						</div>
 					</div>
@@ -1551,14 +1405,12 @@ $QTY_MIN          = 1;
 			</div>
 
 			<!-- Question List -->
-			<div class="tp-panel">
-				<div class="tp-panel-head">
-					<div>
-						<div class="tp-panel-title">All Questions</div>
-						<div class="tp-panel-sub">Jump to any question in this category</div>
-					</div>
+			<div class="tp-card">
+				<div class="tp-card-head">
+					<div class="tp-card-title">All questions</div>
+					<div class="tp-card-sub">Jump to any question in this category</div>
 				</div>
-				<div class="tp-panel-body">
+				<div class="tp-card-body">
 					<div class="tp-qlist">
 						<?php foreach ($selected_category->questions as $qi):
 							$la = isset($user_answers[(int)$qi->id]) ? $user_answers[(int)$qi->id] : NULL;
@@ -1572,7 +1424,6 @@ $QTY_MIN          = 1;
 								<div class="tp-qitem-foot">
 									<?php if ($la): ?>
 										<span class="tp-qbadge <?php echo $qs === 'correct' ? 'bq-correct' : 'bq-wrong'; ?>">
-											<span class="tp-qbadge-dot"></span>
 											<?php echo $qs === 'correct' ? 'Correct' : 'Wrong'; ?>
 										</span>
 									<?php elseif (strtolower(trim((string)$qi->status)) === 'open'): ?>
@@ -1736,7 +1587,7 @@ $QTY_MIN          = 1;
 				return !isNaN(v);
 			});
 			if (!all.length) {
-				mount.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:130px;font-size:13px;color:#8892a4;">No price history available yet.</div>';
+				mount.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:130px;font-size:13px;color:#94a3b8;">No price history available yet.</div>';
 				return;
 			}
 			var W = 520,
@@ -1755,16 +1606,13 @@ $QTY_MIN          = 1;
 					return x.toFixed(1) + ',' + y.toFixed(1);
 				}).join(' ');
 			}
+
 			mount.innerHTML =
 				'<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;display:block;min-height:' + H + 'px">' +
-				'<defs>' +
-				'<linearGradient id="gY" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00c896"/><stop offset="100%" stop-color="#009970"/></linearGradient>' +
-				'<linearGradient id="gN" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff6b82"/><stop offset="100%" stop-color="#ff4d6a"/></linearGradient>' +
-				'</defs>' +
-				'<line x1="' + PX + '" y1="' + (H - PB) + '" x2="' + (W - PX) + '" y2="' + (H - PB) + '" stroke="#e4e8f2" stroke-width="1"/>' +
-				'<line x1="' + PX + '" y1="' + Math.round((H - PB + PT) / 2) + '" x2="' + (W - PX) + '" y2="' + Math.round((H - PB + PT) / 2) + '" stroke="#e4e8f2" stroke-width="1" stroke-dasharray="4 4"/>' +
-				'<polyline fill="none" stroke="url(#gY)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vY) + '"/>' +
-				'<polyline fill="none" stroke="url(#gN)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vN) + '"/>' +
+				'<line x1="' + PX + '" y1="' + (H - PB) + '" x2="' + (W - PX) + '" y2="' + (H - PB) + '" stroke="#e2e8f0" stroke-width="1"/>' +
+				'<line x1="' + PX + '" y1="' + Math.round((H - PB + PT) / 2) + '" x2="' + (W - PX) + '" y2="' + Math.round((H - PB + PT) / 2) + '" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 4"/>' +
+				'<polyline fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vY) + '"/>' +
+				'<polyline fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vN) + '"/>' +
 				'</svg>';
 		}());
 	}());

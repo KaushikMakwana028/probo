@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
             background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
             min-height: 100vh;
             display: flex;
