@@ -1008,6 +1008,10 @@
 											<span class="vq-mi-val js-market-total">Rs <?php echo number_format((float)$q->yes_price + (float)$q->no_price, 2); ?></span>
 										</div>
 										<div class="vq-meta-item">
+											<span class="vq-mi-label">Multiplier</span>
+											<span class="vq-mi-val">x<?php echo number_format((float) (isset($q->multiplier) ? $q->multiplier : 1.25), 2); ?></span>
+										</div>
+										<div class="vq-meta-item">
 											<span class="vq-mi-label">Status</span>
 											<span class="vq-mi-val js-status-plain"><?php echo ucfirst(html_escape($q->status)); ?></span>
 										</div>

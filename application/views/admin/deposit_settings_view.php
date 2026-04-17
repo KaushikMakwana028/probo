@@ -368,17 +368,170 @@
                     Need Help?
                 </div>
                 <div class="ps-side-card-body">
-                    <p class="ps-help-text">Having trouble setting up payment details?</p>
-                    <a href="#" class="ps-help-btn">
+                    <p class="ps-help-text">Need a quick finance flow reference before updating deposit settings?</p>
+                    <button type="button" class="ps-help-btn" id="psDocOpenBtn">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                         </svg>
-                        View Documentation
-                    </a>
+                        Open Deposit Guide
+                    </button>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <div class="ps-doc-overlay" id="psDocOverlay" aria-hidden="true">
+        <div class="ps-doc-modal" role="dialog" aria-modal="true" aria-labelledby="psDocTitle">
+            <div class="ps-doc-head">
+                <div>
+                    <span class="ps-doc-eyebrow">Admin Deposit Guide</span>
+                    <h2 id="psDocTitle" class="ps-doc-title" data-lang="en">Payment setup and approval process</h2>
+                    <h2 class="ps-doc-title" data-lang="hi" style="display:none;">पेमेंट सेटअप और अप्रूवल प्रोसेस</h2>
+                    <p class="ps-doc-sub" data-lang="en">A practical admin reference for configuring payment methods, reviewing proofs, and approving wallet credits safely.</p>
+                    <p class="ps-doc-sub" data-lang="hi" style="display:none;">पेमेंट डिटेल सेट करने, रसीद लेने और डिपॉजिट सुरक्षित तरीके से अप्रूव करने की पूरी जानकारी।</p>
+                </div>
+                <div class="ps-doc-actions">
+                    <div class="ps-doc-lang">
+                        <button type="button" class="ps-doc-lang-btn is-active" data-doc-lang="en">English</button>
+                        <button type="button" class="ps-doc-lang-btn" data-doc-lang="hi">Hindi</button>
+                    </div>
+                    <button type="button" class="ps-doc-close" id="psDocCloseBtn" aria-label="Close documentation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="ps-doc-body">
+                <div class="ps-doc-banner">
+                    <div class="ps-doc-banner-visual">
+                        <div class="ps-doc-phone">
+                            <div class="ps-doc-phone-notch"></div>
+                            <div class="ps-doc-phone-screen">
+                                <div class="ps-doc-ui-row"></div>
+                                <div class="ps-doc-ui-card"></div>
+                                <div class="ps-doc-ui-grid">
+                                    <span></span><span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ps-doc-banner-copy">
+                        <h3 data-lang="en">How the admin deposit flow works</h3>
+                        <h3 data-lang="hi" style="display:none;">डिपॉजिट फ्लो कैसे काम करता है</h3>
+                        <p data-lang="en">First you publish valid UPI, bank, and QR details. Then the user pays and uploads proof. After you verify the receipt and amount, approval credits the wallet instantly and records the transaction.</p>
+                        <p data-lang="hi" style="display:none;">एडमिन UPI, बैंक और QR डिटेल जोड़ता है। यूज़र पेमेंट करके रसीद अपलोड करता है। एडमिन जांच करके रिक्वेस्ट अप्रूव करता है और यूज़र का वॉलेट तुरंत क्रेडिट हो जाता है।</p>
+                    </div>
+                </div>
+
+                <div class="ps-doc-section">
+                    <div class="ps-doc-section-head">
+                        <h3 data-lang="en">Step by step process</h3>
+                        <h3 data-lang="hi" style="display:none;">स्टेप बाय स्टेप प्रोसेस</h3>
+                    </div>
+
+                    <div class="ps-doc-steps">
+                        <article class="ps-doc-step-card">
+                            <div class="ps-doc-step-media media-purple">
+                                <img src="<?php echo base_url('assets/images/cards/DG1.png'); ?>" alt="Configure payment details">
+                            </div>
+                            <div class="ps-doc-step-content">
+                                <span class="ps-doc-step-no">01</span>
+                                <h4 data-lang="en">Configure payment details</h4>
+                                <h4 data-lang="hi" style="display:none;">पेमेंट डिटेल सेट करें</h4>
+                                <p data-lang="en">Fill UPI ID, bank name, account number, IFSC code and upload a clear QR image. Save settings so users see valid payment options.</p>
+                                <p data-lang="hi" style="display:none;">UPI ID, बैंक नाम, अकाउंट नंबर, IFSC कोड भरें और साफ QR इमेज अपलोड करें। सेव करने के बाद यूज़र को सही पेमेंट ऑप्शन दिखेंगे।</p>
+                            </div>
+                        </article>
+
+                        <article class="ps-doc-step-card">
+                            <div class="ps-doc-step-media media-blue">
+                                <img src="<?php echo base_url('assets/images/cards/DG2.png'); ?>" alt="User makes payment and uploads receipt">
+                            </div>
+                            <div class="ps-doc-step-content">
+                                <span class="ps-doc-step-no">02</span>
+                                <h4 data-lang="en">User makes payment and uploads receipt</h4>
+                                <h4 data-lang="hi" style="display:none;">यूज़र पेमेंट करता है और रसीद अपलोड करता है</h4>
+                                <p data-lang="en">User sends money using UPI or QR, goes to Add Balance, enters the amount, and uploads payment proof.</p>
+                                <p data-lang="hi" style="display:none;">यूज़र UPI या QR से पेमेंट करता है, फिर Add Balance पेज पर जाकर अमाउंट भरता है और पेमेंट रसीद अपलोड करता है।</p>
+                            </div>
+                        </article>
+
+                        <article class="ps-doc-step-card">
+                            <div class="ps-doc-step-media media-amber">
+                                <img src="<?php echo base_url('assets/images/cards/DG3.png'); ?>" alt="Admin verifies proof">
+                            </div>
+                            <div class="ps-doc-step-content">
+                                <span class="ps-doc-step-no">03</span>
+                                <h4 data-lang="en">Admin verifies proof</h4>
+                                <h4 data-lang="hi" style="display:none;">एडमिन प्रूफ वेरिफाई करता है</h4>
+                                <p data-lang="en">Match amount, receipt screenshot, date, and your statement before taking action. This prevents wrong credits.</p>
+                                <p data-lang="hi" style="display:none;">अमाउंट, रसीद स्क्रीनशॉट, तारीख और अपने स्टेटमेंट को मिलाकर जांचें। इससे गलत वॉलेट क्रेडिट से बचाव होता है।</p>
+                            </div>
+                        </article>
+
+                        <article class="ps-doc-step-card">
+                            <div class="ps-doc-step-media media-green">
+                                <img src="<?php echo base_url('assets/images/cards/DG4.png'); ?>" alt="Approve and credit wallet">
+                            </div>
+                            <div class="ps-doc-step-content">
+                                <span class="ps-doc-step-no">04</span>
+                                <h4 data-lang="en">Approve and credit wallet</h4>
+                                <h4 data-lang="hi" style="display:none;">अप्रूव करें और वॉलेट क्रेडिट करें</h4>
+                                <p data-lang="en">After approval, wallet balance updates instantly, transaction history is saved, and the user receives a notification.</p>
+                                <p data-lang="hi" style="display:none;">अप्रूव करने के बाद वॉलेट बैलेंस तुरंत अपडेट होता है, ट्रांजैक्शन हिस्ट्री सेव होती है और यूज़र को नोटिफिकेशन मिलता है।</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="ps-doc-grid">
+                    <section class="ps-doc-panel">
+                        <h3 data-lang="en">Admin checklist</h3>
+                        <h3 data-lang="hi" style="display:none;">एडमिन चेकलिस्ट</h3>
+                        <ul class="ps-doc-list" data-lang="en">
+                            <li>Receipt amount should match request amount.</li>
+                            <li>Transaction date and time should match your records.</li>
+                            <li>Approve only once to avoid duplicate balance credit.</li>
+                            <li>Reject requests with unclear, wrong, or suspicious proof.</li>
+                        </ul>
+                        <ul class="ps-doc-list" data-lang="hi" style="display:none;">
+                            <li>रसीद का अमाउंट रिक्वेस्ट अमाउंट से मैच होना चाहिए।</li>
+                            <li>ट्रांजैक्शन की तारीख और समय आपके रिकॉर्ड से मिलना चाहिए।</li>
+                            <li>डुप्लिकेट बैलेंस क्रेडिट से बचने के लिए केवल एक बार अप्रूव करें।</li>
+                            <li>गलत, धुंधले या संदिग्ध प्रूफ वाली रिक्वेस्ट रिजेक्ट करें।</li>
+                        </ul>
+                    </section>
+
+                    <section class="ps-doc-panel">
+                        <h3 data-lang="en">QR image tips</h3>
+                        <h3 data-lang="hi" style="display:none;">QR इमेज टिप्स</h3>
+                        <ul class="ps-doc-list" data-lang="en">
+                            <li>Use a clear square QR code with strong contrast.</li>
+                            <li>Do not upload cropped or blurry QR screenshots.</li>
+                            <li>Update QR immediately after changing UPI or bank account.</li>
+                            <li>Keep account details readable for manual bank transfers.</li>
+                        </ul>
+                        <ul class="ps-doc-list" data-lang="hi" style="display:none;">
+                            <li>साफ और हाई-कॉन्ट्रास्ट वाला स्क्वायर QR कोड इस्तेमाल करें।</li>
+                            <li>कटा हुआ या धुंधला QR स्क्रीनशॉट अपलोड न करें।</li>
+                            <li>UPI या बैंक डिटेल बदलते ही QR अपडेट करें।</li>
+                            <li>बैंक ट्रांसफर के लिए अकाउंट डिटेल साफ और पढ़ने योग्य रखें।</li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="ps-doc-note">
+                    <strong data-lang="en">Important:</strong>
+                    <strong data-lang="hi" style="display:none;">महत्वपूर्ण:</strong>
+                    <span data-lang="en">Deposit approval credits wallet immediately, so always verify payment proof before approval.</span>
+                    <span data-lang="hi" style="display:none;">डिपॉजिट अप्रूव करते ही वॉलेट तुरंत क्रेडिट हो जाता है, इसलिए अप्रूव करने से पहले प्रूफ जरूर जांचें।</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1005,11 +1158,408 @@
         font-size: 0.83rem;
         font-weight: 500;
         text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
         transition: background 0.18s;
     }
 
     .ps-help-btn:hover {
         background: #0E7490;
+    }
+
+    .help-side-card {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top right, rgba(45, 212, 191, 0.16), transparent 28%),
+            linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+    }
+
+    .help-side-card::after {
+        content: "";
+        position: absolute;
+        right: -42px;
+        bottom: -42px;
+        width: 130px;
+        height: 130px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(20, 184, 166, 0.14), transparent 72%);
+        pointer-events: none;
+    }
+
+    .ps-help-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(13, 148, 136, 0.18);
+        background: linear-gradient(135deg, #0f766e, #14b8a6);
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 14px 30px rgba(20, 184, 166, 0.20);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .ps-help-btn:hover {
+        filter: brightness(1.03);
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(20, 184, 166, 0.24);
+    }
+
+    .ps-doc-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.56);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 1100;
+    }
+
+    .ps-doc-overlay.is-open {
+        display: flex;
+    }
+
+    .ps-doc-modal {
+        width: min(1040px, 100%);
+        max-height: 88vh;
+        background: linear-gradient(180deg, #fffdfa 0%, #ffffff 100%);
+        border-radius: 24px;
+        border: 1px solid rgba(16, 185, 129, 0.12);
+        box-shadow: 0 28px 90px rgba(15, 23, 42, 0.24);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ps-doc-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 24px 28px 20px;
+        border-bottom: 1px solid #ecfdf5;
+        background:
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 24%),
+            radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 22%),
+            linear-gradient(135deg, #f0fdf4 0%, #fffbeb 100%);
+    }
+
+    .ps-doc-eyebrow {
+        display: inline-block;
+        margin-bottom: 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #0f766e;
+    }
+
+    .ps-doc-title {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #111827;
+    }
+
+    .ps-doc-sub {
+        margin: 8px 0 0;
+        max-width: 700px;
+        font-size: 0.92rem;
+        color: #6B7280;
+        line-height: 1.65;
+    }
+
+    .ps-doc-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+    }
+
+    .ps-doc-lang {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid #d1fae5;
+        border-radius: 999px;
+    }
+
+    .ps-doc-lang-btn {
+        border: none;
+        background: transparent;
+        color: #6B7280;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 9px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .ps-doc-lang-btn.is-active {
+        background: linear-gradient(135deg, #0f766e, #14b8a6);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(20, 184, 166, 0.24);
+    }
+
+    .ps-doc-close {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        border: 1px solid #d1fae5;
+        background: #fff;
+        color: #374151;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .ps-doc-body {
+        padding: 24px 28px 28px;
+        overflow-y: auto;
+        display: grid;
+        gap: 22px;
+    }
+
+    .ps-doc-banner {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 22px;
+        background:
+            radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 24%),
+            radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.14), transparent 28%),
+            linear-gradient(135deg, #052e2b 0%, #0f172a 100%);
+        border-radius: 22px;
+        padding: 22px;
+        color: #fff;
+        box-shadow: 0 22px 46px rgba(15, 23, 42, 0.22);
+    }
+
+    .ps-doc-banner-copy h3 {
+        margin: 0 0 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .ps-doc-banner-copy p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .ps-doc-banner-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ps-doc-phone {
+        width: 158px;
+        height: 198px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, #134e4a, #0f172a);
+        padding: 14px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .ps-doc-phone-notch {
+        width: 68px;
+        height: 8px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, 0.12);
+        margin: 0 auto 10px;
+    }
+
+    .ps-doc-phone-screen {
+        background: linear-gradient(180deg, #ecfeff, #ffffff);
+        border-radius: 20px;
+        height: calc(100% - 18px);
+        padding: 12px;
+    }
+
+    .ps-doc-ui-row,
+    .ps-doc-ui-card,
+    .ps-doc-ui-grid span {
+        display: block;
+        border-radius: 10px;
+    }
+
+    .ps-doc-ui-row {
+        height: 12px;
+        background: #99f6e4;
+        margin-bottom: 10px;
+    }
+
+    .ps-doc-ui-card {
+        height: 56px;
+        background: linear-gradient(135deg, #14b8a6, #fbbf24);
+        margin-bottom: 10px;
+    }
+
+    .ps-doc-ui-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .ps-doc-ui-grid span {
+        height: 36px;
+        background: #ccfbf1;
+    }
+
+    .ps-doc-section-head h3,
+    .ps-doc-panel h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .ps-doc-steps {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 14px;
+    }
+
+    .ps-doc-step-card {
+        border: 1px solid rgba(16, 185, 129, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+        position: relative;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .ps-doc-step-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.10);
+        border-color: rgba(16, 185, 129, 0.22);
+    }
+
+    .ps-doc-step-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: linear-gradient(180deg, #14b8a6, #f59e0b);
+    }
+
+    .ps-doc-step-media {
+        padding: 16px;
+    }
+
+    .ps-doc-step-media img {
+        width: 100%;
+        height: 180px;
+        display: block;
+        object-fit: cover;
+        border-radius: 18px;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .media-purple {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+
+    .media-blue {
+        background: linear-gradient(135deg, #ecfeff, #cffafe);
+    }
+
+    .media-amber {
+        background: linear-gradient(135deg, #fff7ed, #fde68a);
+    }
+
+    .media-green {
+        background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+    }
+
+    .ps-doc-step-content {
+        padding: 18px 18px 20px;
+    }
+
+    .ps-doc-step-no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        height: 28px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ccfbf1, #fef3c7);
+        color: #0f766e;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+    }
+
+    .ps-doc-step-content h4 {
+        margin: 0 0 8px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .ps-doc-step-content p {
+        margin: 0;
+        color: #6B7280;
+        line-height: 1.65;
+        font-size: 0.85rem;
+    }
+
+    .ps-doc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .ps-doc-panel {
+        border: 1px solid rgba(16, 185, 129, 0.12);
+        border-radius: 18px;
+        background: #fff;
+        padding: 18px;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .ps-doc-list {
+        margin: 14px 0 0;
+        padding-left: 18px;
+        color: #4B5563;
+        display: grid;
+        gap: 10px;
+        line-height: 1.6;
+        font-size: 0.84rem;
+    }
+
+    .ps-doc-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ecfdf5, #fffbeb);
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        box-shadow: 0 14px 30px rgba(16, 185, 129, 0.08);
+    }
+
+    .ps-doc-note strong {
+        flex-shrink: 0;
     }
 
     /* ─── Responsive ─── */
@@ -1022,6 +1572,12 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 14px;
+        }
+
+        .ps-doc-banner,
+        .ps-doc-steps,
+        .ps-doc-grid {
+            grid-template-columns: 1fr;
         }
     }
 
@@ -1052,6 +1608,42 @@
         .ps-view-requests-btn {
             width: 100%;
             justify-content: center;
+        }
+
+        .ps-doc-overlay {
+            padding: 12px;
+        }
+
+        .ps-doc-head,
+        .ps-doc-body {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .ps-doc-head {
+            flex-direction: column;
+        }
+
+        .ps-doc-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .ps-doc-lang {
+            flex: 1;
+        }
+
+        .ps-doc-lang-btn {
+            flex: 1;
+            text-align: center;
+        }
+
+        .ps-doc-banner {
+            padding: 16px;
+        }
+
+        .ps-doc-title {
+            font-size: 1.18rem;
         }
     }
 </style>
@@ -1089,6 +1681,67 @@
             setTimeout(() => flash && flash.remove(), 400);
         }
     }, 5000);
+
+    (function() {
+        const overlay = document.getElementById('psDocOverlay');
+        const openBtn = document.getElementById('psDocOpenBtn');
+        const closeBtn = document.getElementById('psDocCloseBtn');
+        const langButtons = document.querySelectorAll('[data-doc-lang]');
+
+        function setDocLanguage(lang) {
+            document.querySelectorAll('#psDocOverlay [data-lang]').forEach(el => {
+                el.style.display = el.getAttribute('data-lang') === lang ? '' : 'none';
+            });
+
+            langButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.getAttribute('data-doc-lang') === lang);
+            });
+        }
+
+        function openDocs() {
+            if (!overlay) return;
+            overlay.classList.add('is-open');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDocs() {
+            if (!overlay) return;
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (openBtn) {
+            openBtn.addEventListener('click', openDocs);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDocs);
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    closeDocs();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && overlay && overlay.classList.contains('is-open')) {
+                closeDocs();
+            }
+        });
+
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                setDocLanguage(this.getAttribute('data-doc-lang'));
+            });
+        });
+
+        setDocLanguage('en');
+    }());
 
     document.getElementById('settingsForm').addEventListener('submit', function(e) {
         const upi = document.getElementById('upi_id').value.trim();

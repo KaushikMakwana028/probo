@@ -143,6 +143,40 @@ $QTY_MIN          = 1;
 		color: var(--muted);
 		margin-top: 6px;
 		line-height: 1.6;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	.tp-hero-sub-icon {
+		width: 22px;
+		height: 22px;
+		border-radius: 999px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		font-size: 11px;
+		font-weight: 700;
+	}
+
+	.tp-hero-sub-icon.open {
+		background: var(--green-soft);
+		color: #15803d;
+		border: 0.5px solid var(--green-border);
+	}
+
+	.tp-hero-sub-icon.closed {
+		background: var(--red-soft);
+		color: #b91c1c;
+		border: 0.5px solid var(--red-border);
+	}
+
+	.tp-hero-sub-icon.pending {
+		background: var(--accent-soft);
+		color: var(--accent);
+		border: 0.5px solid var(--accent-border);
 	}
 
 	.tp-hero-pills {
@@ -168,12 +202,14 @@ $QTY_MIN          = 1;
 		background: var(--green-soft);
 		color: #15803d;
 		border: 0.5px solid var(--green-border);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
 	}
 
 	.tp-pill-closed {
-		background: var(--surface-2);
-		color: var(--muted);
-		border: 0.5px solid var(--border-2);
+		background: var(--red-soft);
+		color: #b91c1c;
+		border: 0.5px solid var(--red-border);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 	}
 
 	.tp-pill-cat {
@@ -715,42 +751,59 @@ $QTY_MIN          = 1;
 		align-items: center;
 		justify-content: space-between;
 		gap: 14px;
-		padding: 14px 18px;
+		padding: 18px 20px;
 		border-radius: var(--r-md);
-		background: var(--surface);
-		border: 0.5px solid var(--border);
+		background:
+			radial-gradient(circle at top left, rgba(99, 102, 241, 0.16), transparent 38%),
+			linear-gradient(135deg, #eff6ff 0%, #eef2ff 55%, #f8fafc 100%);
+		border: 1px solid rgba(99, 102, 241, 0.18);
+		box-shadow: 0 16px 34px rgba(99, 102, 241, 0.10);
 		flex-wrap: wrap;
 	}
 
+	.tp-submit-row.market-closed {
+		background:
+			radial-gradient(circle at top right, rgba(239, 68, 68, 0.15), transparent 36%),
+			linear-gradient(135deg, #fff7ed 0%, #fef2f2 58%, #fff1f2 100%);
+		border-color: rgba(239, 68, 68, 0.22);
+		box-shadow: 0 16px 34px rgba(239, 68, 68, 0.10);
+	}
+
 	.tp-submit-info strong {
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 18px;
+		font-weight: 700;
 		display: block;
-		margin-bottom: 2px;
+		margin-bottom: 6px;
+		color: var(--ink);
 	}
 
 	.tp-submit-info p {
-		font-size: 12px;
-		color: var(--muted);
+		font-size: 13px;
+		color: #475569;
+		line-height: 1.6;
+		max-width: 540px;
 	}
 
 	.tp-submit-btn {
-		padding: 11px 24px;
+		padding: 14px 26px;
 		border: none;
-		border-radius: var(--r-sm);
-		background: var(--accent);
+		border-radius: 14px;
+		background: linear-gradient(135deg, #2563eb 0%, #4f46e5 52%, #7c3aed 100%);
 		color: #fff;
 		font-family: var(--f);
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 14px;
+		font-weight: 700;
+		letter-spacing: 0.01em;
 		cursor: pointer;
 		transition: all .15s;
 		flex-shrink: 0;
+		min-width: 196px;
+		box-shadow: 0 16px 34px rgba(79, 70, 229, 0.28);
 	}
 
 	.tp-submit-btn:hover {
-		background: #4f52d9;
-		transform: translateY(-1px);
+		transform: translateY(-2px);
+		box-shadow: 0 18px 36px rgba(79, 70, 229, 0.34);
 	}
 
 	.tp-submit-btn:active {
@@ -758,10 +811,13 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-submit-btn:disabled {
-		background: var(--surface-2);
-		color: var(--hint);
+		background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+		color: #fff;
+		border: 1px solid rgba(255, 255, 255, 0.22);
 		cursor: not-allowed;
 		transform: none;
+		box-shadow: 0 14px 28px rgba(239, 68, 68, 0.20);
+		opacity: 0.92;
 	}
 
 	.tp-lock-note {
@@ -772,6 +828,36 @@ $QTY_MIN          = 1;
 		color: var(--muted);
 		line-height: 1.5;
 		margin-top: 14px;
+	}
+
+	.tp-inline-note {
+		display: inline-flex;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 14px 16px;
+		border-radius: 16px;
+		border: 1px solid rgba(239, 68, 68, 0.18);
+		background: rgba(255, 255, 255, 0.72);
+		backdrop-filter: blur(6px);
+		color: #991b1b;
+		flex: 1 1 280px;
+	}
+
+	.tp-inline-note i {
+		margin-top: 2px;
+	}
+
+	.tp-inline-note strong {
+		display: block;
+		font-size: 14px;
+		color: #7f1d1d;
+		margin-bottom: 4px;
+	}
+
+	.tp-inline-note span {
+		display: block;
+		font-size: 12px;
+		line-height: 1.5;
 	}
 
 	/* ─── CHART ─── */
@@ -1016,20 +1102,16 @@ $QTY_MIN          = 1;
 		border: 0.5px solid var(--green-border);
 	}
 
-	.bq-closed {
+	.bq-not-open {
 		background: var(--surface-2);
 		color: var(--muted);
 		border: 0.5px solid var(--border-2);
 	}
 
-	.bq-correct {
-		background: var(--green-soft);
-		color: #15803d;
-	}
-
-	.bq-wrong {
-		background: var(--red-soft);
-		color: #b91c1c;
+	.bq-review {
+		background: var(--accent-soft);
+		color: var(--accent);
+		border: 0.5px solid var(--accent-border);
 	}
 
 	/* ─── RESPONSIVE ─── */
@@ -1077,6 +1159,10 @@ $QTY_MIN          = 1;
 		.tp-card-head {
 			padding: 13px 16px;
 		}
+
+		.tp-submit-btn {
+			width: 100%;
+		}
 	}
 </style>
 
@@ -1109,10 +1195,20 @@ $QTY_MIN          = 1;
 	<div class="tp-hero">
 		<div>
 			<div class="tp-hero-q"><?php echo html_escape($selected_question->question); ?></div>
+			<?php
+			$start_ts = (!empty($selected_question->start_time) && $selected_question->start_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->start_time) : false;
+			$end_ts   = (!empty($selected_question->end_time) && $selected_question->end_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->end_time) : false;
+			$now      = time();
+			?>
+
 			<p class="tp-hero-sub">
-				<?php echo $is_locked
-					? 'Your trade is locked. Payout will be credited once the admin resolves this market.'
-					: 'Pick YES or NO, set your price and quantity, then submit. One trade per question.'; ?>
+				<?php if ($start_ts && $now < $start_ts): ?>
+					⏳ Market starts at <strong><?php echo date('d M Y, h:i A', $start_ts); ?></strong>
+				<?php elseif ($end_ts && $now <= $end_ts): ?>
+					🔴 Market closes at <strong><?php echo date('d M Y, h:i A', $end_ts); ?></strong>
+				<?php else: ?>
+					⚠️ Market is closed
+				<?php endif; ?>
 			</p>
 		</div>
 		<div class="tp-hero-pills">
@@ -1216,11 +1312,11 @@ $QTY_MIN          = 1;
 					<input type="hidden" name="price" class="js-ph" value="<?php echo number_format($default_price, 2, '.', ''); ?>">
 
 					<!-- YES / NO Toggle -->
-					<div class="tp-toggle<?php echo $is_locked ? ' locked' : ''; ?>">
+					<div class="tp-toggle<?php echo ($is_locked || !$market_is_open) ? ' locked' : ''; ?>">
 						<div>
 							<input type="radio" id="tp_yes" name="answer" value="yes"
 								<?php echo $selected_answer === 'yes' ? 'checked' : ''; ?>
-								<?php echo $is_locked ? 'disabled' : ''; ?>>
+								<?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>
 							<label for="tp_yes" class="tog-yes">
 								<div class="tp-tog-l">
 									<span class="tp-tog-dot"></span>
@@ -1235,7 +1331,7 @@ $QTY_MIN          = 1;
 						<div>
 							<input type="radio" id="tp_no" name="answer" value="no"
 								<?php echo $selected_answer === 'no' ? 'checked' : ''; ?>
-								<?php echo $is_locked ? 'disabled' : ''; ?>>
+								<?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>
 							<label for="tp_no" class="tog-no">
 								<div class="tp-tog-l">
 									<span class="tp-tog-dot"></span>
@@ -1257,14 +1353,14 @@ $QTY_MIN          = 1;
 								<strong class="tp-ctrl-val js-pdisplay">₹<?php echo number_format($default_price, 2); ?></strong>
 							</div>
 							<div class="tp-stepper">
-								<button type="button" class="tp-step-btn js-pdec" <?php echo $is_locked ? 'disabled' : ''; ?>>−</button>
+								<button type="button" class="tp-step-btn js-pdec" <?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>−</button>
 								<input type="range" class="js-prange"
 									min="0.50"
 									max="<?php echo number_format($price_max, 2, '.', ''); ?>"
 									step="0.50"
 									value="<?php echo number_format(min($default_price, $price_max), 2, '.', ''); ?>"
-									<?php echo $is_locked ? 'disabled' : ''; ?>>
-								<button type="button" class="tp-step-btn js-pinc" <?php echo $is_locked ? 'disabled' : ''; ?>>+</button>
+									<?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>
+								<button type="button" class="tp-step-btn js-pinc" <?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>+</button>
 							</div>
 							<div class="tp-ctrl-hint">₹0.50 – ₹<?php echo number_format($price_max, 2); ?></div>
 						</div>
@@ -1274,14 +1370,14 @@ $QTY_MIN          = 1;
 								<strong class="tp-ctrl-val js-qdisplay"><?php echo (int)$default_quantity; ?></strong>
 							</div>
 							<div class="tp-stepper">
-								<button type="button" class="tp-step-btn js-qdec" <?php echo $is_locked ? 'disabled' : ''; ?>>−</button>
+								<button type="button" class="tp-step-btn js-qdec" <?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>−</button>
 								<input type="number" class="js-qinput" name="quantity"
 									min="<?php echo $QTY_MIN; ?>"
 									max="<?php echo $QTY_MAX; ?>"
 									step="1"
 									value="<?php echo (int)$default_quantity; ?>"
-									<?php echo $is_locked ? 'readonly' : ''; ?>>
-								<button type="button" class="tp-step-btn js-qinc" <?php echo $is_locked ? 'disabled' : ''; ?>>+</button>
+									<?php echo ($is_locked || !$market_is_open) ? 'readonly' : ''; ?>>
+								<button type="button" class="tp-step-btn js-qinc" <?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>+</button>
 							</div>
 							<div class="tp-ctrl-hint">Min <?php echo $QTY_MIN; ?> · Max <?php echo number_format($QTY_MAX); ?></div>
 							<div class="tp-qty-warn" id="js-qwarn">Quantity cannot exceed <?php echo $QTY_MAX; ?></div>
@@ -1311,12 +1407,24 @@ $QTY_MIN          = 1;
 							This trade is locked. Head back to the category to open another question.
 						</div>
 					<?php else: ?>
-						<div class="tp-submit-row">
+						<div class="tp-submit-row<?php echo !$market_is_open ? ' market-closed' : ''; ?>">
 							<div class="tp-submit-info">
 								<strong>Ready to submit?</strong>
-								<p>This action is final and cannot be undone.</p>
+								<p><?php echo $market_is_open ? 'This action is final and cannot be undone.' : 'Trading will become available once this market opens again.'; ?></p>
 							</div>
-							<button type="submit" class="tp-submit-btn" id="js-sbtn">Place trade →</button>
+							<?php if (!$market_is_open): ?>
+								<div class="tp-inline-note">
+									<i class="fa-solid fa-ban"></i>
+									<div>
+										<strong>Market closed right now</strong>
+										<span>Trading is not allowed right now. Please wait for market to open.</span>
+									</div>
+								</div>
+							<?php endif; ?>
+							<button type="submit" class="tp-submit-btn" id="js-sbtn"
+								<?php echo !$market_is_open ? 'disabled' : ''; ?>>
+								<?php echo $market_is_open ? 'Place trade →' : 'Market Closed'; ?>
+							</button>
 						</div>
 					<?php endif; ?>
 
@@ -1416,20 +1524,26 @@ $QTY_MIN          = 1;
 							$la = isset($user_answers[(int)$qi->id]) ? $user_answers[(int)$qi->id] : NULL;
 							$ia = (int)$qi->id === (int)$selected_question->id;
 							$qs = '';
-							if ($la) $qs = strtolower((string)$la->answer) === strtolower((string)$qi->answer_key) ? 'correct' : 'wrong';
+							$question_status = strtolower(trim((string)(isset($qi->status) ? $qi->status : '')));
+							$start_ts = (!empty($qi->start_time) && $qi->start_time !== '0000-00-00 00:00:00') ? strtotime($qi->start_time) : FALSE;
+							$end_ts = (!empty($qi->end_time) && $qi->end_time !== '0000-00-00 00:00:00') ? strtotime($qi->end_time) : FALSE;
+							$is_trade_open = $question_status === 'open'
+								&& ($start_ts === FALSE || time() >= $start_ts)
+								&& ($end_ts === FALSE || time() <= $end_ts);
+							if ($la && !empty($la->settled_at)) $qs = strtolower((string)$la->answer) === strtolower((string)$qi->answer_key) ? 'correct' : 'wrong';
 							$cls = $ia ? 'q-active' : ($qs ? 'q-' . $qs : '');
 						?>
 							<a class="tp-qitem <?php echo $cls; ?>" href="<?php echo site_url('questions/answer/' . (int)$qi->id); ?>">
 								<div class="tp-qitem-text"><?php echo html_escape($qi->question); ?></div>
 								<div class="tp-qitem-foot">
 									<?php if ($la): ?>
-										<span class="tp-qbadge <?php echo $qs === 'correct' ? 'bq-correct' : 'bq-wrong'; ?>">
-											<?php echo $qs === 'correct' ? 'Correct' : 'Wrong'; ?>
+										<span class="tp-qbadge bq-review">
+											Review question
 										</span>
-									<?php elseif (strtolower(trim((string)$qi->status)) === 'open'): ?>
+									<?php elseif ($is_trade_open): ?>
 										<span class="tp-qbadge bq-open"><span class="tp-qbadge-dot"></span>Open</span>
 									<?php else: ?>
-										<span class="tp-qbadge bq-closed">Closed</span>
+										<span class="tp-qbadge bq-not-open">Not open</span>
 									<?php endif; ?>
 								</div>
 							</a>
@@ -1457,6 +1571,7 @@ $QTY_MIN          = 1;
 
 		var yR = document.getElementById('tp_yes'),
 			nR = document.getElementById('tp_no');
+		var heroSub = document.querySelector('.tp-hero-sub');
 		var pR = document.querySelector('.js-prange'),
 			pH = document.querySelector('.js-ph');
 		var pD = document.querySelector('.js-pdisplay'),
@@ -1472,6 +1587,20 @@ $QTY_MIN          = 1;
 			pInc = document.querySelector('.js-pinc');
 		var qDec = document.querySelector('.js-qdec'),
 			qInc = document.querySelector('.js-qinc');
+
+		if (heroSub) {
+			heroSub.innerHTML = <?php echo json_encode(
+				($start_ts && $now < $start_ts)
+					? '<span class="tp-hero-sub-icon pending"><i class="fa-solid fa-clock"></i></span><span>Market starts at <strong>' . date('d M Y, h:i A', $start_ts) . '</strong></span>'
+					: (($end_ts && $now <= $end_ts)
+						? '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market closes at <strong>' . date('d M Y, h:i A', $end_ts) . '</strong></span>'
+						: '<span class="tp-hero-sub-icon closed"><i class="fa-solid fa-lock"></i></span><span>Market is closed</span>')
+			); ?>;
+		}
+
+		if (sb) {
+			sb.textContent = sb.disabled ? 'Market Closed' : 'Place Trade Now';
+		}
 
 		function fmt(v) {
 			return '₹' + Number(v).toFixed(2);

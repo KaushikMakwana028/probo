@@ -2003,17 +2003,29 @@ $all_sorted = array_merge(
 <script>
     function handleAction(action, id, btnEl) {
         var isApprove = action === 'approve';
-        if (!confirm(isApprove ? 'Approve this deposit and credit wallet?' : 'Reject this deposit request?')) return;
-        var rowEl = document.getElementById('row-' + id) || document.getElementById('mcard-' + id);
-        if (rowEl) {
-            rowEl.querySelectorAll('button').forEach(function(b) {
-                b.disabled = true;
-                b.style.opacity = '0.5';
+        var message = isApprove ? 'Approve this deposit and credit wallet?' : 'Reject this deposit request?';
+
+        if (typeof adminSwalConfirm === 'function') {
+            adminSwalConfirm(message, {
+                confirmButtonText: isApprove ? 'Approve' : 'Reject'
+            }).then(function(confirmed) {
+                if (!confirmed) return;
+
+                var rowEl = document.getElementById('row-' + id) || document.getElementById('mcard-' + id);
+                if (rowEl) {
+                    rowEl.querySelectorAll('button').forEach(function(b) {
+                        b.disabled = true;
+                        b.style.opacity = '0.5';
+                    });
+                }
+                document.getElementById('drLoadingOverlay').style.display = 'flex';
+                document.getElementById('drLoadingText').textContent = isApprove ? 'Approving...' : 'Rejecting...';
+                window.location.href = '<?php echo site_url("admin/deposits/"); ?>' + action + '/' + id;
             });
+            return;
         }
-        document.getElementById('drLoadingOverlay').style.display = 'flex';
-        document.getElementById('drLoadingText').textContent = isApprove ? 'Approving...' : 'Rejecting...';
-        window.location.href = '<?php echo site_url("admin/deposits/"); ?>' + action + '/' + id;
+
+        if (!confirm(message)) return;
     }
 
     setTimeout(function() {

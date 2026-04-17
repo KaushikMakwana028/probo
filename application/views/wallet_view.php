@@ -1,5 +1,5 @@
 <?php
-// wallet_view.php — Enhanced UI v3 (Perfect Mobile Responsive)
+// wallet_view.php — Enhanced UI v5 (Full Mobile Fix + Premium Design)
 $history_filter = isset($history_filter) ? $history_filter : 'all';
 $pending_withdrawals = array();
 $merged_transactions = array();
@@ -31,11 +31,11 @@ if (!empty($withdrawals)) {
 			$history_row->type = 'debit';
 			$history_row->source_type = 'withdrawal_request';
 			$history_row->history_type_label = 'Withdrawal';
-			$history_row->history_badge_class = 'wv-badge--withdrawal';
+			$history_row->history_badge_class = 'badge--withdrawal';
 			$history_row->history_filter = 'withdrawals';
 			$history_row->history_description = 'Withdrawal request';
 			$history_row->history_status_label = in_array($ws, array('approved', 'success', 'completed'), TRUE) ? 'Success' : (in_array($ws, array('rejected', 'failed', 'declined'), TRUE) ? 'Rejected' : ucfirst($ws));
-			$history_row->history_status_class = in_array($ws, array('approved', 'success', 'completed'), TRUE) ? 'wv-badge--success' : (in_array($ws, array('rejected', 'failed', 'declined'), TRUE) ? 'wv-badge--rejected' : 'wv-badge--processed');
+			$history_row->history_status_class = in_array($ws, array('approved', 'success', 'completed'), TRUE) ? 'badge--success' : (in_array($ws, array('rejected', 'failed', 'declined'), TRUE) ? 'badge--rejected' : 'badge--pending');
 			$history_row->_history_timestamp = !empty($wr->created_at) ? strtotime($wr->created_at) : 0;
 			$merged_transactions[] = $history_row;
 		}
@@ -50,186 +50,154 @@ $transactions = $merged_transactions;
 $withdrawals = $pending_withdrawals;
 $wallet_history_count = count($withdrawals) + count($transactions);
 ?>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-	/* ══════════════════════════════════════════════════════════════
-	   RESET & BASE - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════════ */
 	*,
 	*::before,
 	*::after {
 		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
-		-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+		-webkit-tap-highlight-color: transparent;
 	}
 
 	:root {
-		/* Surfaces */
-		--surf-0: #ffffff;
-		--surf-1: #f7f8fa;
-		--surf-2: #eef0f4;
-		--surf-3: #e3e6ec;
+		--font: 'DM Sans', system-ui, sans-serif;
+		--mono: 'DM Mono', monospace;
 
-		/* Borders */
-		--bdr: #e2e5ea;
-		--bdr-2: #cdd1d9;
+		/* Surfaces */
+		--s0: #ffffff;
+		--s1: #f4f6f9;
+		--s2: #eaecf2;
+		--s3: #dde1ea;
+		--bdr: #e2e6ef;
+		--bdr2: #c8cedd;
 
 		/* Ink */
-		--ink-1: #0d1117;
-		--ink-2: #1e2531;
-		--ink-3: #4a5568;
-		--ink-4: #7a8699;
-		--ink-5: #a9b4c2;
+		--i1: #0c1120;
+		--i2: #1a2236;
+		--i3: #3d4e68;
+		--i4: #6b7a96;
+		--i5: #a0adbf;
 
 		/* Brand */
-		--blue: #2563eb;
-		--blue-dk: #1d4ed8;
-		--blue-lt: #eff6ff;
-		--blue-bd: #bfdbfe;
-		--blue-tx: #1e40af;
+		--blue: #1e54e8;
+		--blue-dk: #1740c0;
+		--blue-lt: #eef3fe;
+		--blue-bd: #c0d0fb;
+		--blue-tx: #1840b8;
 
-		--green: #16a34a;
-		--green-lt: #f0fdf4;
-		--green-bd: #bbf7d0;
-		--green-tx: #166534;
-
-		--red: #dc2626;
-		--red-dk: #b91c1c;
+		/* Semantic */
+		--green: #0f9d58;
+		--green-lt: #edfaf3;
+		--green-bd: #a8eecb;
+		--green-tx: #0a6e3e;
+		--red: #e53935;
+		--red-dk: #c62828;
 		--red-lt: #fef2f2;
 		--red-bd: #fecaca;
 		--red-tx: #991b1b;
-
 		--amber: #d97706;
 		--amber-lt: #fffbeb;
 		--amber-bd: #fde68a;
 		--amber-tx: #92400e;
-
 		--purple: #7c3aed;
 		--purple-lt: #faf5ff;
 		--purple-bd: #e9d5ff;
 		--purple-tx: #5b21b6;
-
 		--cyan: #0891b2;
 		--cyan-lt: #ecfeff;
 		--cyan-bd: #cffafe;
 		--cyan-tx: #164e63;
-
 		--pink: #db2777;
 		--pink-lt: #fdf2f8;
 		--pink-bd: #fbcfe8;
 		--pink-tx: #831843;
 
-		/* Typography */
-		--font: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-		--font-mono: 'Roboto Mono', 'Courier New', monospace;
-
 		/* Radii */
 		--r-xs: 4px;
-		--r-sm: 6px;
-		--r-md: 10px;
-		--r-lg: 14px;
-		--r-xl: 18px;
-		--r-2xl: 22px;
+		--r-sm: 8px;
+		--r-md: 12px;
+		--r-lg: 16px;
+		--r-xl: 20px;
 		--r-pill: 999px;
 
 		/* Shadows */
-		--sh-xs: 0 1px 3px rgba(13, 17, 23, .05);
-		--sh-sm: 0 2px 8px rgba(13, 17, 23, .06), 0 1px 3px rgba(13, 17, 23, .04);
-		--sh-md: 0 4px 16px rgba(13, 17, 23, .08), 0 1px 4px rgba(13, 17, 23, .04);
-		--sh-lg: 0 8px 24px rgba(13, 17, 23, .1), 0 2px 8px rgba(13, 17, 23, .05);
+		--sh-xs: 0 1px 3px rgba(12, 17, 32, .06);
+		--sh-sm: 0 2px 10px rgba(12, 17, 32, .07), 0 1px 2px rgba(12, 17, 32, .04);
+		--sh-md: 0 6px 20px rgba(12, 17, 32, .09), 0 2px 6px rgba(12, 17, 32, .05);
+		--sh-lg: 0 12px 32px rgba(12, 17, 32, .12), 0 4px 10px rgba(12, 17, 32, .06);
 	}
 
 	html {
 		-webkit-text-size-adjust: 100%;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
 		overflow-x: hidden;
-		scroll-behavior: smooth;
-		/* Prevent horizontal scroll on all devices */
 		width: 100%;
-		max-width: 100%;
 	}
 
 	html,
 	body {
 		width: 100%;
-		max-width: 100vw;
-		margin: 0;
-		padding: 0;
+		max-width: 100%;
 		overflow-x: hidden;
-		position: relative;
 	}
 
 	body {
 		font-family: var(--font);
-		color: var(--ink-1);
-		background: var(--surf-1);
+		color: var(--i1);
+		background: var(--s1);
 		line-height: 1.5;
-		overflow-x: hidden;
 		min-height: 100vh;
-		/* Better mobile scrolling */
+		-webkit-font-smoothing: antialiased;
 		-webkit-overflow-scrolling: touch;
 	}
 
-	/* Prevent zoom on input focus (iOS) */
 	input,
 	select,
 	textarea,
 	button {
 		font-size: 16px;
+		font-family: var(--font);
 	}
 
-	@supports (-webkit-touch-callout: none) {
-
-		/* iOS specific styles */
-		body {
-			min-height: -webkit-fill-available;
-		}
-	}
-
-	/* ══════════════════════════════════════════════════════════════
-	   ROOT CONTAINER - Enhanced
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   ROOT WRAPPER
+═══════════════════════════════════════════════ */
 	.wv {
 		width: 100%;
 		max-width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
-		padding: 20px 16px 48px;
+		gap: 14px;
+		padding: 14px 12px 60px;
 		overflow-x: hidden;
-		position: relative;
 	}
 
-	/* Ensure no child element causes overflow */
-	.wv>* {
-		max-width: 100%;
-		overflow-wrap: break-word;
-		word-wrap: break-word;
-	}
-
-	/* ══════════════════════════════════════════════════════════════
-	   ALERTS - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════ */
 	.wv-alert {
 		display: flex;
 		align-items: flex-start;
-		gap: 12px;
-		padding: 14px 18px;
+		gap: 10px;
+		padding: 13px 14px;
 		border-radius: var(--r-lg);
 		font-size: 13.5px;
 		font-weight: 500;
 		border: 1px solid transparent;
-		animation: wvSlideIn .3s cubic-bezier(0.16, 1, 0.3, 1);
+		animation: slideIn .3s cubic-bezier(.16, 1, .3, 1);
 		box-shadow: var(--sh-sm);
-		max-width: 100%;
-		overflow: hidden;
 	}
 
-	@keyframes wvSlideIn {
+	@keyframes slideIn {
 		from {
 			opacity: 0;
-			transform: translateY(-12px);
+			transform: translateY(-8px);
 		}
 
 		to {
@@ -253,7 +221,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	.wv-alert__ico {
 		width: 22px;
 		height: 22px;
-		border-radius: var(--r-sm);
+		border-radius: 6px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -261,8 +229,8 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	}
 
 	.wv-alert__ico svg {
-		width: 14px;
-		height: 14px;
+		width: 12px;
+		height: 12px;
 	}
 
 	.wv-alert--ok .wv-alert__ico {
@@ -288,156 +256,131 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		color: inherit;
 		opacity: .5;
 		font-size: 20px;
-		padding: 0 8px;
 		line-height: 1;
-		font-family: var(--font);
-		transition: opacity .2s;
-		flex-shrink: 0;
-		/* Better touch target */
-		min-width: 44px;
-		min-height: 44px;
+		min-width: 34px;
+		min-height: 34px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
+		transition: opacity .2s;
 	}
 
-	.wv-alert__close:hover,
-	.wv-alert__close:active {
+	.wv-alert__close:hover {
 		opacity: 1;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   HERO SECTION - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   HERO — dark card, mobile-first
+═══════════════════════════════════════════════ */
 	.wv-hero {
-		border-radius: var(--r-2xl);
-		background: #0b1022;
+		border-radius: var(--r-xl);
+		background: #080f22;
 		position: relative;
 		overflow: hidden;
-		box-shadow: var(--sh-md);
-		max-width: 100%;
+		box-shadow: var(--sh-lg);
+		width: 100%;
 	}
 
-	.wv-hero__orbs {
+	.wv-hero__bg {
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
 		background:
-			radial-gradient(ellipse 60% 90% at 95% 50%, rgba(37, 99, 235, .4) 0%, transparent 65%),
-			radial-gradient(ellipse 45% 65% at 5% 20%, rgba(124, 58, 237, .22) 0%, transparent 60%),
-			radial-gradient(ellipse 45% 55% at 50% 115%, rgba(16, 185, 129, .14) 0%, transparent 60%);
+			radial-gradient(ellipse 80% 70% at 110% 30%, rgba(30, 84, 232, .45) 0%, transparent 65%),
+			radial-gradient(ellipse 60% 60% at -10% 10%, rgba(124, 58, 237, .25) 0%, transparent 55%),
+			radial-gradient(ellipse 50% 80% at 50% 130%, rgba(16, 185, 129, .12) 0%, transparent 60%);
 	}
 
-	.wv-hero__grid {
+	.wv-hero__dots {
 		position: absolute;
 		inset: 0;
-		background-image:
-			linear-gradient(rgba(255, 255, 255, .02) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(255, 255, 255, .02) 1px, transparent 1px);
-		background-size: 40px 40px;
 		pointer-events: none;
-		opacity: 0.6;
+		opacity: .35;
+		background-image: radial-gradient(rgba(255, 255, 255, .08) 1px, transparent 1px);
+		background-size: 24px 24px;
 	}
 
 	.wv-hero__inner {
 		position: relative;
 		z-index: 1;
+		padding: 22px 18px 20px;
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 32px;
-		padding: 40px 44px;
-		flex-wrap: wrap;
-	}
-
-	.wv-hero__left {
-		flex: 1;
-		min-width: 0;
+		flex-direction: column;
+		gap: 18px;
 	}
 
 	.wv-hero__eyebrow {
 		display: inline-flex;
 		align-items: center;
-		gap: 7px;
+		gap: 6px;
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: .14em;
 		text-transform: uppercase;
-		color: rgba(255, 255, 255, .38);
-		margin-bottom: 12px;
+		color: rgba(255, 255, 255, .35);
+		margin-bottom: 8px;
 	}
 
 	.wv-hero__eyebrow svg {
-		width: 13px;
-		height: 13px;
+		width: 11px;
+		height: 11px;
 		flex-shrink: 0;
 	}
 
 	.wv-hero__title {
-		font-size: clamp(20px, 5vw, 38px);
-		font-weight: 700;
+		font-size: 22px;
+		font-weight: 800;
 		color: #fff;
-		letter-spacing: -.03em;
-		line-height: 1.1;
-		margin-bottom: 10px;
+		letter-spacing: -.04em;
+		line-height: 1.15;
+		margin-bottom: 6px;
 		word-wrap: break-word;
-		overflow-wrap: break-word;
-		hyphens: auto;
 	}
 
 	.wv-hero__sub {
-		font-size: clamp(13px, 2.5vw, 14px);
-		font-weight: 300;
-		color: rgba(255, 255, 255, .45);
+		font-size: 12.5px;
+		font-weight: 400;
+		color: rgba(255, 255, 255, .38);
 		line-height: 1.6;
-		max-width: 460px;
-		margin-bottom: 28px;
+		margin-bottom: 14px;
 	}
 
+	/* Stats — 2-col grid on mobile */
 	.wv-hero__stats {
-		display: flex;
-		gap: 12px;
-		flex-wrap: wrap;
-		margin-bottom: 24px;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-bottom: 14px;
 	}
 
 	.wv-hero__stat {
-		padding: 14px 20px;
-		border-radius: var(--r-lg);
+		padding: 11px 13px;
+		border-radius: var(--r-md);
 		background: rgba(255, 255, 255, .06);
-		border: 1px solid rgba(255, 255, 255, .09);
-		min-width: 140px;
-		transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
-		flex: 1;
-		/* Prevent overflow */
+		border: 1px solid rgba(255, 255, 255, .08);
+		min-width: 0;
 		overflow: hidden;
 	}
 
-	.wv-hero__stat:hover,
-	.wv-hero__stat:active {
-		border-color: rgba(255, 255, 255, .18);
-		background: rgba(255, 255, 255, .08);
-		transform: translateY(-2px);
-	}
-
 	.wv-hero__stat--green {
-		border-color: rgba(34, 197, 94, .25);
-		background: rgba(34, 197, 94, .08);
+		background: rgba(16, 185, 129, .1);
+		border-color: rgba(16, 185, 129, .25);
 	}
 
 	.wv-hero__stat--red {
-		border-color: rgba(244, 63, 94, .25);
-		background: rgba(244, 63, 94, .08);
+		background: rgba(229, 57, 53, .1);
+		border-color: rgba(229, 57, 53, .25);
 	}
 
 	.wv-hero__stat-lbl {
 		display: block;
-		font-size: clamp(9px, 2vw, 10px);
+		font-size: 9px;
 		font-weight: 700;
-		letter-spacing: .11em;
+		letter-spacing: .1em;
 		text-transform: uppercase;
-		color: rgba(255, 255, 255, .38);
-		margin-bottom: 8px;
+		color: rgba(255, 255, 255, .35);
+		margin-bottom: 5px;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -445,43 +388,42 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 
 	.wv-hero__stat-val {
 		display: block;
-		font-size: clamp(16px, 4vw, 20px);
-		font-weight: 700;
+		font-size: 15px;
+		font-weight: 800;
 		color: #fff;
-		letter-spacing: -.025em;
+		letter-spacing: -.03em;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.wv-hero__stat--green .wv-hero__stat-val {
-		color: #86efac;
+		color: #6ee7b7;
 	}
 
 	.wv-hero__stat--red .wv-hero__stat-val {
-		color: #fda4af;
+		color: #fca5a5;
 	}
 
 	.wv-hero__cta {
-		display: inline-flex;
+		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 9px;
-		padding: 12px 26px;
+		gap: 8px;
+		padding: 14px 20px;
 		border-radius: var(--r-pill);
 		background: var(--blue);
-		border: 1px solid rgba(255, 255, 255, .15);
+		border: 1px solid rgba(255, 255, 255, .18);
 		color: #fff;
 		font-family: var(--font);
-		font-size: 14px;
+		font-size: 15px;
 		font-weight: 700;
-		letter-spacing: -.01em;
 		text-decoration: none;
 		cursor: pointer;
-		box-shadow: 0 4px 20px rgba(37, 99, 235, .45);
-		transition: all .25s cubic-bezier(0.16, 1, 0.3, 1);
-		/* Better touch target */
-		min-height: 48px;
-		white-space: nowrap;
+		box-shadow: 0 4px 24px rgba(30, 84, 232, .45);
+		transition: all .25s;
+		min-height: 50px;
+		width: 100%;
 	}
 
 	.wv-hero__cta svg {
@@ -490,110 +432,110 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		flex-shrink: 0;
 	}
 
-	.wv-hero__cta:hover,
 	.wv-hero__cta:active {
 		background: var(--blue-dk);
-		transform: translateY(-2px);
-		box-shadow: 0 8px 28px rgba(37, 99, 235, .55);
+		transform: scale(.98);
 	}
 
-	.wv-hero__cta:active {
-		transform: translateY(0);
-	}
-
-	/* Balance bubble */
+	/* Balance pill — compact on mobile */
 	.wv-hero__bal {
-		flex-shrink: 0;
-		padding: 32px 38px;
-		border-radius: var(--r-xl);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		flex-wrap: wrap;
+		padding: 16px 18px;
+		border-radius: var(--r-lg);
 		background: rgba(255, 255, 255, .07);
 		border: 1px solid rgba(255, 255, 255, .12);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-		text-align: center;
-		min-width: 220px;
-		transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 	}
 
-	.wv-hero__bal:hover {
-		background: rgba(255, 255, 255, .09);
-		border-color: rgba(255, 255, 255, .18);
-	}
+	.wv-hero__bal-left {}
 
 	.wv-hero__bal-lbl {
 		display: block;
-		font-size: 10px;
+		font-size: 9.5px;
 		font-weight: 700;
-		letter-spacing: .14em;
+		letter-spacing: .13em;
 		text-transform: uppercase;
-		color: rgba(255, 255, 255, .38);
-		margin-bottom: 12px;
+		color: rgba(255, 255, 255, .35);
+		margin-bottom: 4px;
 	}
 
 	.wv-hero__bal-amt {
 		display: block;
-		font-size: clamp(28px, 8vw, 42px);
-		font-weight: 700;
+		font-size: 30px;
+		font-weight: 800;
 		color: #fff;
-		letter-spacing: -.035em;
+		letter-spacing: -.04em;
 		line-height: 1;
-		margin-bottom: 16px;
-		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
 	.wv-hero__bal-note {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		font-size: 11px;
+		gap: 5px;
+		font-size: 10.5px;
 		color: rgba(255, 255, 255, .3);
 		font-weight: 500;
+		margin-top: 6px;
 	}
 
 	.wv-hero__bal-note svg {
-		width: 12px;
-		height: 12px;
+		width: 10px;
+		height: 10px;
+	}
+
+	.wv-hero__bal-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 6px 12px;
+		border-radius: var(--r-pill);
+		background: rgba(110, 231, 183, .12);
+		border: 1px solid rgba(110, 231, 183, .2);
+		color: #6ee7b7;
+		font-size: 11px;
+		font-weight: 700;
+		white-space: nowrap;
 		flex-shrink: 0;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   CARD GRID - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
-	.wv-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-		gap: 20px;
-		width: 100%;
-		max-width: 100%;
+	.wv-hero__bal-chip svg {
+		width: 10px;
+		height: 10px;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   CARD - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   ACTION GRID
+═══════════════════════════════════════════════ */
+	.wv-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		width: 100%;
+	}
+
+	/* ═══════════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════════ */
 	.wv-card {
-		background: var(--surf-0);
+		background: var(--s0);
 		border: 1px solid var(--bdr);
 		border-radius: var(--r-xl);
-		box-shadow: var(--sh-xs);
+		box-shadow: var(--sh-sm);
 		overflow: hidden;
-		transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
-		max-width: 100%;
-	}
-
-	.wv-card:hover {
-		box-shadow: var(--sh-md);
-		transform: translateY(-2px);
+		width: 100%;
 	}
 
 	.wv-card__head {
-		padding: 18px 22px 16px;
+		padding: 15px 16px;
 		border-bottom: 1px solid var(--bdr);
 		display: flex;
 		align-items: center;
-		gap: 14px;
-		flex-wrap: wrap;
+		gap: 12px;
 	}
 
 	.wv-card__icon {
@@ -604,11 +546,6 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		transition: transform .2s;
-	}
-
-	.wv-card:hover .wv-card__icon {
-		transform: scale(1.08);
 	}
 
 	.wv-card__icon svg {
@@ -635,8 +572,8 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	}
 
 	.wv-card__icon--muted {
-		background: var(--surf-2);
-		color: var(--ink-4);
+		background: var(--s2);
+		color: var(--i4);
 		border: 1px solid var(--bdr);
 	}
 
@@ -651,30 +588,30 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		font-weight: 700;
 		letter-spacing: .1em;
 		text-transform: uppercase;
-		color: var(--ink-5);
-		margin-bottom: 3px;
+		color: var(--i5);
+		margin-bottom: 2px;
 	}
 
 	.wv-card__title {
 		font-size: 15px;
 		font-weight: 700;
-		color: var(--ink-1);
-		letter-spacing: -.018em;
+		color: var(--i1);
+		letter-spacing: -.02em;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
 	.wv-card__edit-btn {
-		width: 44px;
-		height: 44px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--r-sm);
-		border: 1px solid var(--bdr-2);
-		background: var(--surf-1);
+		border: 1px solid var(--bdr2);
+		background: var(--s1);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--ink-3);
+		color: var(--i3);
 		text-decoration: none;
 		flex-shrink: 0;
 		transition: all .2s;
@@ -685,32 +622,31 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		height: 14px;
 	}
 
-	.wv-card__edit-btn:hover,
-	.wv-card__edit-btn:active {
-		background: var(--surf-2);
+	.wv-card__edit-btn:hover {
+		background: var(--blue-lt);
 		color: var(--blue);
 		border-color: var(--blue-bd);
 	}
 
 	.wv-card__desc {
 		font-size: 13px;
-		color: var(--ink-4);
+		color: var(--i4);
 		line-height: 1.6;
-		padding: 15px 22px;
+		padding: 11px 16px;
 		border-bottom: 1px solid var(--bdr);
 	}
 
 	.wv-card__body {
-		padding: 22px;
+		padding: 16px;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   FORM - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════ */
 	.wv-form {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 13px;
 	}
 
 	.wv-field {
@@ -722,9 +658,9 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	.wv-label {
 		font-size: 11px;
 		font-weight: 700;
-		letter-spacing: .09em;
+		letter-spacing: .08em;
 		text-transform: uppercase;
-		color: var(--ink-3);
+		color: var(--i3);
 	}
 
 	.wv-input-wrap {
@@ -736,92 +672,84 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 
 	.wv-pfx {
 		position: absolute;
-		left: 14px;
+		left: 13px;
 		font-size: 15px;
 		font-weight: 700;
-		color: var(--ink-4);
+		color: var(--i4);
 		pointer-events: none;
 		z-index: 1;
 	}
 
 	.wv-input {
 		width: 100%;
-		min-height: 48px;
-		padding: 0 14px;
-		border: 1.5px solid var(--bdr-2);
+		min-height: 50px;
+		padding: 0 13px;
+		border: 1.5px solid var(--bdr2);
 		border-radius: var(--r-md);
-		background: var(--surf-1);
-		color: var(--ink-1);
+		background: var(--s1);
+		color: var(--i1);
 		font-family: var(--font);
 		font-size: 16px;
 		font-weight: 400;
 		transition: all .2s;
 		-webkit-appearance: none;
 		appearance: none;
-		/* Prevent zoom on iOS */
 		touch-action: manipulation;
 	}
 
 	.wv-input--pfx {
-		padding-left: 32px;
-	}
-
-	.wv-input:hover {
-		border-color: var(--ink-4);
-		background: var(--surf-0);
+		padding-left: 30px;
 	}
 
 	.wv-input:focus {
 		outline: none;
 		border-color: var(--blue);
-		box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
-		background: var(--surf-0);
+		box-shadow: 0 0 0 3px rgba(30, 84, 232, .1);
+		background: var(--s0);
 	}
 
 	.wv-input:disabled {
-		opacity: .5;
+		opacity: .45;
 		cursor: not-allowed;
 	}
 
 	.wv-input::placeholder {
-		color: var(--ink-5);
+		color: var(--i5);
 	}
 
 	.wv-hint {
 		font-size: 12px;
-		color: var(--ink-5);
+		color: var(--i5);
 		line-height: 1.5;
 	}
 
 	.wv-hint strong {
-		color: var(--ink-3);
+		color: var(--i3);
 		font-weight: 600;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   BUTTONS - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
 	.wv-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		gap: 8px;
-		padding: 12px 24px;
+		padding: 13px 20px;
 		border-radius: var(--r-md);
 		font-family: var(--font);
-		font-size: 16px;
+		font-size: 15px;
 		font-weight: 700;
 		border: 1.5px solid transparent;
 		cursor: pointer;
-		transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+		transition: all .2s cubic-bezier(.16, 1, .3, 1);
 		text-decoration: none;
 		white-space: nowrap;
 		letter-spacing: -.01em;
 		line-height: 1;
-		min-height: 48px;
-		/* Better touch target */
+		min-height: 50px;
 		touch-action: manipulation;
-		-webkit-tap-highlight-color: transparent;
 	}
 
 	.wv-btn svg {
@@ -838,110 +766,81 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		background: var(--blue);
 		border-color: var(--blue-dk);
 		color: #fff;
-		box-shadow: 0 2px 12px rgba(37, 99, 235, .25);
+		box-shadow: 0 2px 12px rgba(30, 84, 232, .3);
 	}
 
-	.wv-btn--blue:hover,
 	.wv-btn--blue:active {
 		background: var(--blue-dk);
-		box-shadow: 0 4px 20px rgba(37, 99, 235, .4);
-		transform: translateY(-1px);
-	}
-
-	.wv-btn--blue:active {
-		transform: translateY(0);
 	}
 
 	.wv-btn--red {
 		background: var(--red);
 		border-color: var(--red-dk);
 		color: #fff;
-		box-shadow: 0 2px 12px rgba(220, 38, 38, .25);
+		box-shadow: 0 2px 12px rgba(229, 57, 53, .3);
 	}
 
-	.wv-btn--red:hover,
 	.wv-btn--red:active {
 		background: var(--red-dk);
-		box-shadow: 0 4px 20px rgba(220, 38, 38, .4);
-		transform: translateY(-1px);
-	}
-
-	.wv-btn--red:active {
-		transform: translateY(0);
 	}
 
 	.wv-btn--ghost {
-		background: var(--surf-1);
-		border-color: var(--bdr-2);
-		color: var(--ink-3);
+		background: var(--s1);
+		border-color: var(--bdr2);
+		color: var(--i3);
 	}
 
-	.wv-btn--ghost:hover,
 	.wv-btn--ghost:active {
-		background: var(--surf-2);
-		color: var(--ink-2);
+		background: var(--s2);
 	}
 
 	.wv-btn--outline {
-		background: var(--surf-0);
-		border-color: var(--bdr-2);
-		color: var(--ink-2);
-	}
-
-	.wv-btn--outline:hover,
-	.wv-btn--outline:active {
-		background: var(--surf-1);
-		border-color: var(--blue);
-		color: var(--blue);
+		background: var(--s0);
+		border-color: var(--bdr2);
+		color: var(--i2);
 	}
 
 	.wv-btn--disabled {
-		background: var(--surf-2);
+		background: var(--s2);
 		border-color: var(--bdr);
-		color: var(--ink-4);
+		color: var(--i4);
 		cursor: not-allowed;
 		box-shadow: none;
 	}
 
-	.wv-btn--disabled:hover {
-		transform: none;
-	}
-
-	/* ══════════════════════════════════════════════════════════════
-	   BANK DETAILS - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   BANK DETAILS
+═══════════════════════════════════════════════ */
 	.wv-bank-form {
 		display: flex;
 		flex-direction: column;
-		gap: 15px;
+		gap: 13px;
 	}
 
 	.wv-bank-form__footer {
 		display: flex;
-		justify-content: flex-end;
-		gap: 10px;
-		padding-top: 6px;
-		flex-wrap: wrap;
+		flex-direction: column-reverse;
+		gap: 9px;
+		padding-top: 4px;
+	}
+
+	.wv-bank-form__footer .wv-btn {
+		width: 100%;
 	}
 
 	.wv-bank-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-		gap: 12px;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
 	}
 
 	.wv-bank-box {
-		padding: 14px 16px;
+		padding: 12px 13px;
 		border-radius: var(--r-md);
-		background: var(--surf-1);
+		background: var(--s1);
 		border: 1px solid var(--bdr);
-		transition: all .2s;
 		overflow: hidden;
-	}
-
-	.wv-bank-box:hover,
-	.wv-bank-box:active {
-		background: var(--surf-2);
+		min-width: 0;
 	}
 
 	.wv-bank-box--accent {
@@ -949,156 +848,143 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		border-color: var(--blue-bd);
 	}
 
-	.wv-bank-box--accent:hover {
-		background: #dbeafe;
-	}
-
 	.wv-bank-box__lbl {
 		display: block;
-		font-size: 10px;
+		font-size: 9.5px;
 		font-weight: 700;
 		letter-spacing: .1em;
 		text-transform: uppercase;
-		color: var(--ink-5);
-		margin-bottom: 6px;
+		color: var(--i5);
+		margin-bottom: 4px;
 	}
 
 	.wv-bank-box--accent .wv-bank-box__lbl {
-		color: rgba(30, 64, 175, .6);
+		color: rgba(24, 64, 184, .55);
 	}
 
 	.wv-bank-box__val {
 		display: block;
-		font-size: 13.5px;
+		font-size: 13px;
 		font-weight: 600;
-		color: var(--ink-2);
+		color: var(--i2);
+		overflow-wrap: anywhere;
 		word-break: break-all;
 		line-height: 1.4;
 	}
 
 	.wv-bank-box__val--mono {
-		font-family: var(--font-mono);
-		font-size: 13px;
+		font-family: var(--mono);
+		font-size: 12px;
 		color: var(--blue-tx);
 		letter-spacing: .03em;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   TRANSACTIONS PANEL - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   TRANSACTION PANEL
+═══════════════════════════════════════════════ */
 	.wv-tx {
-		background: var(--surf-0);
+		background: var(--s0);
 		border: 1px solid var(--bdr);
 		border-radius: var(--r-xl);
-		box-shadow: var(--sh-xs);
+		box-shadow: var(--sh-sm);
 		overflow: hidden;
-		transition: box-shadow .3s;
-		max-width: 100%;
-	}
-
-	.wv-tx:hover {
-		box-shadow: var(--sh-md);
+		width: 100%;
 	}
 
 	.wv-tx__head {
-		padding: 24px 26px 0;
+		padding: 16px 14px 0;
 	}
 
 	.wv-tx__title-row {
 		display: flex;
-		align-items: center;
-		gap: 14px;
-		margin-bottom: 20px;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 10px;
+		margin-bottom: 14px;
 		flex-wrap: wrap;
 	}
+
+	.wv-tx__heading-group {}
 
 	.wv-tx__eyebrow {
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: .13em;
 		text-transform: uppercase;
-		color: var(--ink-5);
-		margin-bottom: 3px;
+		color: var(--i5);
+		margin-bottom: 2px;
 	}
 
 	.wv-tx__h2 {
-		font-size: 22px;
-		font-weight: 700;
-		color: var(--ink-1);
-		letter-spacing: -.025em;
+		font-size: 19px;
+		font-weight: 800;
+		color: var(--i1);
+		letter-spacing: -.03em;
 	}
 
 	.wv-tx__count {
 		display: inline-flex;
 		align-items: center;
-		padding: 5px 14px;
+		padding: 5px 12px;
 		border-radius: var(--r-pill);
-		background: var(--surf-2);
+		background: var(--s2);
 		border: 1px solid var(--bdr);
-		font-size: 12px;
+		font-size: 11.5px;
 		font-weight: 600;
-		color: var(--ink-4);
+		color: var(--i4);
 		white-space: nowrap;
+		flex-shrink: 0;
+		margin-top: 2px;
 	}
 
-	/* Filter bar - Enhanced for mobile */
+	/* ── Filter bar ── */
 	.wv-filters {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: 8px;
-		flex-wrap: nowrap;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		padding-bottom: 20px;
+		padding-bottom: 14px;
 		border-bottom: 1px solid var(--bdr);
-		/* Hide scrollbar but keep functionality */
-		scrollbar-width: none;
-		-ms-overflow-style: none;
 	}
 
-	.wv-filters::-webkit-scrollbar {
+	.wv-filter-scroll {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		padding-bottom: 2px;
+	}
+
+	.wv-filter-scroll::-webkit-scrollbar {
 		display: none;
 	}
 
-	/* Add scroll indicator for mobile */
-	.wv-filters::after {
-		content: '';
-		position: absolute;
-		right: 0;
-		top: 0;
-		bottom: 20px;
-		width: 40px;
-		background: linear-gradient(to right, transparent, var(--surf-0));
-		pointer-events: none;
-		opacity: 0;
-		transition: opacity .3s;
-	}
-
-	@media (max-width: 640px) {
-		.wv-filters::after {
-			opacity: 1;
-		}
+	.wv-filter-row-bottom {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
 	}
 
 	.wv-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 8px 16px;
+		gap: 5px;
+		padding: 7px 13px;
 		border-radius: var(--r-pill);
 		font-size: 13px;
 		font-weight: 600;
 		font-family: var(--font);
-		border: 1.5px solid var(--bdr-2);
-		color: var(--ink-3);
-		background: var(--surf-0);
+		border: 1.5px solid var(--bdr2);
+		color: var(--i3);
+		background: var(--s0);
 		cursor: pointer;
 		transition: all .2s;
 		white-space: nowrap;
-		min-height: 40px;
+		min-height: 36px;
 		flex-shrink: 0;
 		touch-action: manipulation;
-		-webkit-tap-highlight-color: transparent;
 	}
 
 	.wv-pill__dot {
@@ -1110,28 +996,20 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		flex-shrink: 0;
 	}
 
-	.wv-pill:hover,
-	.wv-pill:active {
-		border-color: var(--blue);
-		color: var(--blue);
-		background: var(--blue-lt);
-	}
-
 	.wv-pill.is-on {
 		background: var(--pill-c, var(--blue));
 		border-color: transparent;
 		color: #fff;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, .2);
+		box-shadow: 0 2px 12px rgba(0, 0, 0, .18);
 	}
 
 	.wv-pill.is-on .wv-pill__dot {
 		opacity: 1;
-		background: rgba(255, 255, 255, .75);
+		background: rgba(255, 255, 255, .7);
 	}
 
-	/* Rows selector - Enhanced */
+	/* Rows dropdown */
 	.wv-rows-wrap {
-		margin-left: auto;
 		position: relative;
 		flex-shrink: 0;
 	}
@@ -1139,26 +1017,20 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	.wv-rows-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 8px;
-		padding: 8px 14px;
+		gap: 6px;
+		padding: 7px 12px;
 		border-radius: var(--r-pill);
 		font-size: 13px;
 		font-weight: 600;
 		font-family: var(--font);
-		color: var(--ink-3);
-		background: var(--surf-1);
-		border: 1.5px solid var(--bdr-2);
+		color: var(--i3);
+		background: var(--s1);
+		border: 1.5px solid var(--bdr2);
 		cursor: pointer;
 		transition: all .2s;
-		min-height: 40px;
+		min-height: 36px;
 		white-space: nowrap;
 		touch-action: manipulation;
-		-webkit-tap-highlight-color: transparent;
-	}
-
-	.wv-rows-btn:hover,
-	.wv-rows-btn:active {
-		background: var(--surf-2);
 	}
 
 	.wv-rows-btn svg {
@@ -1177,23 +1049,23 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 
 	.wv-rows-dd {
 		position: absolute;
-		top: calc(100% + 8px);
+		top: calc(100% + 6px);
 		right: 0;
 		z-index: 60;
-		background: var(--surf-0);
-		border: 1px solid var(--bdr-2);
+		background: var(--s0);
+		border: 1px solid var(--bdr2);
 		border-radius: var(--r-lg);
 		box-shadow: var(--sh-lg);
-		min-width: 160px;
+		min-width: 145px;
 		overflow: hidden;
 		display: none;
-		animation: wvDropdown .2s cubic-bezier(0.16, 1, 0.3, 1);
+		animation: dropDown .2s cubic-bezier(.16, 1, .3, 1);
 	}
 
-	@keyframes wvDropdown {
+	@keyframes dropDown {
 		from {
 			opacity: 0;
-			transform: translateY(-8px);
+			transform: translateY(-6px);
 		}
 
 		to {
@@ -1207,22 +1079,20 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	}
 
 	.wv-rows-opt {
-		padding: 12px 18px;
+		padding: 11px 15px;
 		font-size: 14px;
 		font-weight: 500;
-		color: var(--ink-2);
+		color: var(--i2);
 		cursor: pointer;
 		transition: background .15s;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		min-height: 48px;
-		touch-action: manipulation;
+		min-height: 44px;
 	}
 
-	.wv-rows-opt:hover,
 	.wv-rows-opt:active {
-		background: var(--surf-1);
+		background: var(--s1);
 	}
 
 	.wv-rows-opt.is-on {
@@ -1240,170 +1110,179 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		flex-shrink: 0;
 	}
 
-	/* Table - Enhanced scroll */
+	/* Desktop table — hidden on mobile */
 	.wv-table-wrap {
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		scrollbar-width: thin;
-		scrollbar-color: var(--bdr-2) var(--surf-1);
-		max-width: 100%;
-	}
-
-	.wv-table-wrap::-webkit-scrollbar {
-		height: 8px;
-	}
-
-	.wv-table-wrap::-webkit-scrollbar-track {
-		background: var(--surf-1);
-	}
-
-	.wv-table-wrap::-webkit-scrollbar-thumb {
-		background: var(--bdr-2);
-		border-radius: 4px;
-	}
-
-	.wv-table {
-		width: 100%;
-		border-collapse: collapse;
-		min-width: 650px;
-	}
-
-	.wv-table thead tr {
-		background: var(--surf-1);
-	}
-
-	.wv-table th {
-		padding: 12px 20px;
-		font-size: 10.5px;
-		font-weight: 700;
-		letter-spacing: .09em;
-		text-transform: uppercase;
-		color: var(--ink-4);
-		text-align: left;
-		border-bottom: 1px solid var(--bdr);
-		white-space: nowrap;
-	}
-
-	.wv-table td {
-		padding: 14px 20px;
-		border-top: 1px solid var(--bdr);
-		font-size: 13.5px;
-		color: var(--ink-1);
-		vertical-align: middle;
-	}
-
-	.wv-table tbody tr {
-		transition: background .15s;
-	}
-
-	.wv-table tbody tr:hover,
-	.wv-table tbody tr:active {
-		background: var(--surf-1);
-	}
-
-	.wv-td-num {
-		color: var(--ink-5) !important;
-		font-size: 12px !important;
-		font-family: var(--font-mono);
-	}
-
-	.wv-td-desc {
-		color: var(--ink-4) !important;
-		font-size: 13px !important;
-	}
-
-	.wv-td-date {
-		color: var(--ink-4) !important;
-		font-size: 12.5px !important;
-		white-space: nowrap;
-	}
-
-	.wv-td-cr {
-		color: var(--green) !important;
-		font-weight: 700;
-	}
-
-	.wv-td-dr {
-		color: var(--red) !important;
-		font-weight: 700;
-	}
-
-	/* Mobile list (hidden by default) */
-	.wv-mobile-list {
 		display: none;
-		gap: 14px;
-		padding: 14px;
 	}
 
-	.wv-mobile-card {
-		background: var(--surf-0);
-		border: 1px solid var(--bdr);
-		border-radius: var(--r-lg);
-		box-shadow: var(--sh-xs);
-		padding: 16px;
-		transition: all .2s;
-		overflow: hidden;
-		max-width: 100%;
+	/* ═══════════════════════════════════════════════
+   MOBILE TRANSACTION CARDS — PREMIUM REDESIGN
+═══════════════════════════════════════════════ */
+	.wv-mobile-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		padding: 0 0 4px;
 	}
 
-	.wv-mobile-card:hover,
-	.wv-mobile-card:active {
-		box-shadow: var(--sh-sm);
-		transform: translateY(-1px);
-	}
-
-	.wv-mobile-card__row {
+	.wv-tx-card {
+		padding: 14px 14px 13px;
+		border-bottom: 1px solid var(--s2);
 		display: grid;
-		grid-template-columns: 110px minmax(0, 1fr);
-		gap: 12px;
-		padding: 10px 0;
-		align-items: start;
+		grid-template-columns: 40px 1fr auto;
+		gap: 0 11px;
+		align-items: center;
+		transition: background .15s;
+		position: relative;
 	}
 
-	.wv-mobile-card__row+.wv-mobile-card__row {
-		border-top: 1px solid var(--surf-2);
+	.wv-tx-card:last-child {
+		border-bottom: none;
 	}
 
-	.wv-mobile-card__label {
-		font-size: 10.5px;
-		font-weight: 700;
-		letter-spacing: .08em;
-		text-transform: uppercase;
-		color: var(--ink-5);
-		padding-top: 2px;
+	.wv-tx-card:active {
+		background: var(--s1);
 	}
 
-	.wv-mobile-card__value {
+	/* Left: icon circle */
+	.wv-tx-card__ico {
+		width: 40px;
+		height: 40px;
+		border-radius: var(--r-md);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		align-self: center;
+	}
+
+	.wv-tx-card__ico svg {
+		width: 17px;
+		height: 17px;
+	}
+
+	.ico--deposit {
+		background: var(--purple-lt);
+		color: var(--purple);
+	}
+
+	.ico--winning {
+		background: var(--green-lt);
+		color: var(--green);
+	}
+
+	.ico--trade {
+		background: var(--amber-lt);
+		color: var(--amber);
+	}
+
+	.ico--withdrawal {
+		background: var(--red-lt);
+		color: var(--red);
+	}
+
+	.ico--referral {
+		background: var(--pink-lt);
+		color: var(--pink);
+	}
+
+	.ico--refund {
+		background: var(--cyan-lt);
+		color: var(--cyan);
+	}
+
+	.ico--default {
+		background: var(--s2);
+		color: var(--i4);
+	}
+
+	/* Center: text */
+	.wv-tx-card__body {
 		min-width: 0;
-		text-align: right;
-		font-size: 14px;
+	}
+
+	.wv-tx-card__type {
+		font-size: 13.5px;
+		font-weight: 700;
+		color: var(--i1);
+		letter-spacing: -.01em;
+		margin-bottom: 2px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.wv-tx-card__desc {
+		font-size: 12px;
+		color: var(--i4);
+		font-weight: 400;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		margin-bottom: 3px;
+	}
+
+	.wv-tx-card__meta {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.wv-tx-card__date {
+		font-size: 11px;
+		color: var(--i5);
 		font-weight: 500;
-		color: var(--ink-1);
-		overflow-wrap: anywhere;
-		word-break: break-word;
-		line-height: 1.5;
 	}
 
-	.wv-mobile-card__value .wv-badge {
-		margin-left: auto;
+	/* Right: amount + status */
+	.wv-tx-card__right {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 5px;
+		flex-shrink: 0;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   BADGES - Enhanced
-	══════════════════════════════════════════════════════════════ */
-	.wv-badge {
+	.wv-tx-card__amt {
+		font-size: 15px;
+		font-weight: 800;
+		letter-spacing: -.025em;
+		line-height: 1;
+	}
+
+	.amt-cr {
+		color: var(--green);
+	}
+
+	.amt-dr {
+		color: var(--red);
+	}
+
+	/* Row number bubble */
+	.wv-tx-card__num {
+		font-size: 10px;
+		font-weight: 700;
+		color: var(--i5);
+		font-family: var(--mono);
+	}
+
+	/* ═══════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════ */
+	.badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
-		padding: 5px 12px;
+		gap: 3px;
+		padding: 3px 8px;
 		border-radius: var(--r-pill);
-		font-size: 11.5px;
+		font-size: 10.5px;
 		font-weight: 700;
 		white-space: nowrap;
 		flex-shrink: 0;
 	}
 
-	.wv-badge-dot {
+	.badge-dot {
 		width: 4px;
 		height: 4px;
 		border-radius: 50%;
@@ -1411,128 +1290,139 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		flex-shrink: 0;
 	}
 
-	.wv-badge--deposit {
+	.badge--deposit {
 		background: var(--purple-lt);
 		color: var(--purple-tx);
 	}
 
-	.wv-badge--winning {
+	.badge--winning {
 		background: var(--green-lt);
 		color: var(--green-tx);
 	}
 
-	.wv-badge--trade {
+	.badge--trade {
 		background: var(--amber-lt);
 		color: var(--amber-tx);
 	}
 
-	.wv-badge--withdrawal {
+	.badge--withdrawal {
 		background: var(--red-lt);
 		color: var(--red-tx);
 	}
 
-	.wv-badge--referral {
+	.badge--referral {
 		background: var(--pink-lt);
 		color: var(--pink-tx);
 	}
 
-	.wv-badge--refund {
+	.badge--refund {
 		background: var(--cyan-lt);
 		color: var(--cyan-tx);
 	}
 
-	.wv-badge--default {
-		background: var(--surf-2);
-		color: var(--ink-3);
+	.badge--default {
+		background: var(--s2);
+		color: var(--i3);
 	}
 
-	.wv-badge--success {
+	.badge--success {
 		background: var(--green-lt);
 		color: var(--green-tx);
 	}
 
-	.wv-badge--processed {
+	.badge--processed {
 		background: var(--blue-lt);
 		color: var(--blue-tx);
 	}
 
-	.wv-badge--pending {
+	.badge--pending {
 		background: var(--amber-lt);
 		color: var(--amber-tx);
 	}
 
-	.wv-badge--rejected {
+	.badge--rejected {
 		background: var(--red-lt);
 		color: var(--red-tx);
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   EMPTY STATE
-	══════════════════════════════════════════════════════════════ */
-	.wv-empty td {
+	/* Pending row accent */
+	.wv-tx-card--pending::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 8px;
+		bottom: 8px;
+		width: 3px;
+		border-radius: 0 3px 3px 0;
+		background: var(--amber);
+	}
+
+	/* ═══════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════ */
+	.wv-empty-msg {
 		text-align: center;
-		padding: 60px 20px;
-		color: var(--ink-4);
+		padding: 40px 20px;
+		color: var(--i4);
 		font-size: 14px;
 	}
 
 	.wv-empty-ico {
 		display: block;
-		margin: 0 auto 14px;
-		width: 32px;
-		height: 32px;
-		opacity: .25;
+		margin: 0 auto 12px;
+		width: 28px;
+		height: 28px;
+		opacity: .2;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   PAGINATION - Enhanced Mobile
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   PAGINATION — mobile-optimized
+═══════════════════════════════════════════════ */
 	.wv-pagination {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 14px;
-		padding: 16px 22px;
+		flex-direction: column;
+		gap: 10px;
+		padding: 13px 14px;
 		border-top: 1px solid var(--bdr);
-		flex-wrap: wrap;
 	}
 
 	.wv-page-info {
-		font-size: 13px;
-		color: var(--ink-4);
+		font-size: 12.5px;
+		color: var(--i4);
 		font-weight: 500;
+		text-align: center;
 	}
 
 	.wv-page-btns {
 		display: flex;
-		gap: 6px;
+		gap: 5px;
 		align-items: center;
 		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	.wv-page-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-width: 40px;
-		min-height: 40px;
-		padding: 0 10px;
+		min-width: 38px;
+		min-height: 38px;
+		padding: 0 8px;
 		border-radius: var(--r-md);
-		border: 1.5px solid var(--bdr-2);
-		background: var(--surf-0);
-		color: var(--ink-2);
+		border: 1.5px solid var(--bdr2);
+		background: var(--s0);
+		color: var(--i2);
 		font-family: var(--font);
 		font-size: 14px;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all .2s;
 		touch-action: manipulation;
-		-webkit-tap-highlight-color: transparent;
 	}
 
-	.wv-page-btn:hover:not(:disabled),
 	.wv-page-btn:active:not(:disabled) {
-		background: var(--surf-2);
+		background: var(--s2);
 		border-color: var(--blue);
 	}
 
@@ -1540,29 +1430,27 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		background: var(--blue);
 		color: #fff;
 		border-color: var(--blue);
-		box-shadow: 0 2px 8px rgba(37, 99, 235, .3);
+		box-shadow: 0 2px 10px rgba(30, 84, 232, .3);
 	}
 
 	.wv-page-btn:disabled {
-		opacity: .35;
+		opacity: .32;
 		cursor: not-allowed;
 	}
 
 	.wv-page-dots {
-		padding: 0 6px;
-		color: var(--ink-4);
+		padding: 0 3px;
+		color: var(--i4);
 		font-size: 14px;
-		align-self: center;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   REVEAL ANIMATION
-	══════════════════════════════════════════════════════════════ */
+	/* ═══════════════════════════════════════════════
+   REVEAL ANIMATION
+═══════════════════════════════════════════════ */
 	[data-rev] {
 		opacity: 0;
-		transform: translateY(16px);
-		transition: opacity .5s cubic-bezier(0.16, 1, 0.3, 1),
-			transform .5s cubic-bezier(0.16, 1, 0.3, 1);
+		transform: translateY(12px);
+		transition: opacity .5s cubic-bezier(.16, 1, .3, 1), transform .5s cubic-bezier(.16, 1, .3, 1);
 	}
 
 	[data-rev].on {
@@ -1570,721 +1458,341 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		transform: none;
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   RESPONSIVE BREAKPOINTS - ENHANCED
-	══════════════════════════════════════════════════════════════ */
-
-	/* ── 1024px and below ── */
-	@media (max-width: 1024px) {
-		.wv-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.wv-hero__inner {
-			padding: 30px 32px;
-			gap: 28px;
-		}
-
-		.wv-hero__stats {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	/* ── 768px and below (Tablet) ── */
-	@media (max-width: 768px) {
+	/* ═══════════════════════════════════════════════
+   TABLET+ (640px)
+═══════════════════════════════════════════════ */
+	@media (min-width:640px) {
 		.wv {
-			padding: 14px 12px 36px;
-			gap: 16px;
+			padding: 20px 20px 56px;
+			gap: 20px;
 		}
 
 		.wv-hero__inner {
-			flex-direction: column;
-			align-items: stretch;
-			padding: 24px 20px;
-			gap: 22px;
+			padding: 32px 36px;
+			flex-direction: row;
+			align-items: center;
+			gap: 32px;
 		}
 
 		.wv-hero__left {
-			width: 100%;
+			flex: 1;
+			min-width: 0;
 		}
 
 		.wv-hero__title {
-			font-size: clamp(22px, 5vw, 26px);
-		}
-
-		.wv-hero__sub {
-			font-size: 13px;
-			margin-bottom: 20px;
-		}
-
-		.wv-hero__stats {
-			margin-bottom: 18px;
-			gap: 10px;
-		}
-
-		.wv-hero__stat {
-			min-width: unset;
-			padding: 12px 16px;
-		}
-
-		.wv-hero__cta {
-			width: 100%;
-			justify-content: center;
-			padding: 14px 24px;
-		}
-
-		.wv-hero__bal {
-			width: 100%;
-			min-width: unset;
-			text-align: center;
-			padding: 22px 24px;
-		}
-
-		.wv-hero__bal-amt {
-			font-size: clamp(30px, 7vw, 36px);
-		}
-
-		.wv-bank-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.wv-tx__head {
-			padding: 18px 20px 0;
-		}
-
-		.wv-filters {
-			gap: 7px;
-			padding-bottom: 18px;
-		}
-
-		.wv-card__body {
-			padding: 18px;
-		}
-
-		.wv-card__head {
-			padding: 15px 18px;
-		}
-
-		.wv-card__desc {
-			padding: 13px 18px;
-		}
-	}
-
-	/* ── 640px and below (Mobile) ── */
-	@media (max-width: 640px) {
-		.wv {
-			padding: 10px 10px 32px;
-			gap: 14px;
-		}
-
-		.wv-alert {
-			padding: 12px 14px;
-			font-size: 13px;
-			gap: 10px;
-		}
-
-		.wv-alert__ico {
-			width: 20px;
-			height: 20px;
-		}
-
-		.wv-alert__ico svg {
-			width: 13px;
-			height: 13px;
-		}
-
-		.wv-alert__close {
-			min-width: 40px;
-			min-height: 40px;
-		}
-
-		.wv-hero {
-			border-radius: var(--r-xl);
-		}
-
-		.wv-hero__inner {
-			padding: 20px 16px;
-			gap: 18px;
-		}
-
-		.wv-hero__title {
-			font-size: clamp(20px, 5vw, 23px);
-		}
-
-		.wv-hero__sub {
-			font-size: 13px;
-			margin-bottom: 18px;
-		}
-
-		.wv-hero__stats {
-			grid-template-columns: 1fr;
-			gap: 8px;
-			margin-bottom: 16px;
-		}
-
-		.wv-hero__stat {
-			padding: 12px 14px;
-		}
-
-		.wv-hero__stat-val {
-			font-size: clamp(16px, 4vw, 18px);
-		}
-
-		.wv-hero__cta {
-			padding: 13px 22px;
-			font-size: 14px;
-			min-height: 50px;
-		}
-
-		.wv-hero__bal {
-			padding: 18px;
-		}
-
-		.wv-hero__bal-amt {
-			font-size: clamp(28px, 7vw, 32px);
-			margin-bottom: 12px;
-		}
-
-		.wv-card {
-			border-radius: var(--r-lg);
-		}
-
-		.wv-card__body {
-			padding: 16px;
-		}
-
-		.wv-card__head {
-			padding: 14px 16px;
-		}
-
-		.wv-card__desc {
-			padding: 12px 16px;
-			font-size: 12.5px;
-		}
-
-		.wv-card__icon {
-			width: 36px;
-			height: 36px;
-		}
-
-		.wv-card__icon svg {
-			width: 15px;
-			height: 15px;
-		}
-
-		.wv-card__title {
-			font-size: 14px;
-		}
-
-		.wv-card__edit-btn {
-			width: 40px;
-			height: 40px;
-		}
-
-		.wv-input {
-			min-height: 50px;
-			font-size: 16px;
-			padding: 0 14px;
-		}
-
-		.wv-input--pfx {
-			padding-left: 34px;
-		}
-
-		.wv-btn {
-			font-size: 15px;
-			padding: 12px 20px;
-			min-height: 50px;
-		}
-
-		.wv-field {
-			gap: 8px;
-		}
-
-		.wv-label {
-			font-size: 11px;
-		}
-
-		.wv-bank-form {
-			gap: 14px;
-		}
-
-		.wv-bank-form__footer {
-			flex-direction: column-reverse;
-			gap: 10px;
-		}
-
-		.wv-bank-form__footer .wv-btn {
-			width: 100%;
-		}
-
-		.wv-bank-box {
-			padding: 13px 14px;
-		}
-
-		.wv-tx__head {
-			padding: 16px 16px 0;
-		}
-
-		.wv-tx__title-row {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 10px;
-			margin-bottom: 16px;
-		}
-
-		.wv-tx__h2 {
-			font-size: 19px;
-		}
-
-		.wv-tx__count {
-			font-size: 11.5px;
-		}
-
-		.wv-filters {
-			flex-wrap: nowrap;
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-			scrollbar-width: none;
-			padding-bottom: 16px;
-			gap: 6px;
-			position: relative;
-		}
-
-		.wv-filters::-webkit-scrollbar {
-			display: none;
-		}
-
-		.wv-pill {
-			flex: 0 0 auto;
-			font-size: 13px;
-			padding: 8px 15px;
-			min-height: 40px;
-		}
-
-		.wv-rows-wrap {
-			width: 100%;
-			margin-left: 0;
-		}
-
-		.wv-rows-btn {
-			width: 100%;
-			justify-content: space-between;
-			min-height: 44px;
-			font-size: 14px;
-		}
-
-		.wv-rows-dd {
-			left: 0;
-			right: 0;
-			width: 100%;
-		}
-
-		/* Hide desktop table, show mobile cards */
-		.wv-table-wrap {
-			display: none;
-		}
-
-		.wv-mobile-list {
-			display: grid;
-		}
-
-		.wv-mobile-card {
-			padding: 14px;
-		}
-
-		.wv-mobile-card__row {
-			grid-template-columns: 1fr;
-			gap: 6px;
-			padding: 9px 0;
-		}
-
-		.wv-mobile-card__label {
-			font-size: 10.5px;
-		}
-
-		.wv-mobile-card__value {
-			text-align: left;
-			font-size: 14px;
-		}
-
-		.wv-mobile-card__value .wv-badge {
-			margin-left: 0;
-		}
-
-		.wv-pagination {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 12px;
-			padding: 14px 16px;
-		}
-
-		.wv-page-info {
-			text-align: center;
-			font-size: 12.5px;
-		}
-
-		.wv-page-btns {
-			justify-content: center;
-		}
-
-		.wv-page-btn {
-			min-width: 40px;
-			min-height: 40px;
-			font-size: 14px;
-		}
-	}
-
-	/* ── 480px and below (Small Mobile) ── */
-	@media (max-width: 480px) {
-		.wv {
-			padding: 8px 8px 28px;
-			gap: 12px;
-		}
-
-		.wv-alert {
-			padding: 11px 12px;
-			font-size: 12.5px;
-			gap: 8px;
-		}
-
-		.wv-hero__inner {
-			padding: 16px 14px;
-			gap: 16px;
-		}
-
-		.wv-hero__title {
-			font-size: clamp(19px, 5vw, 21px);
-		}
-
-		.wv-hero__sub {
-			font-size: 12.5px;
-		}
-
-		.wv-hero__eyebrow {
-			font-size: 9.5px;
-		}
-
-		.wv-hero__stat {
-			padding: 11px 13px;
-		}
-
-		.wv-hero__stat-lbl {
-			font-size: 9.5px;
-		}
-
-		.wv-hero__stat-val {
-			font-size: clamp(15px, 4vw, 17px);
-		}
-
-		.wv-hero__bal {
-			padding: 16px;
-		}
-
-		.wv-hero__bal-amt {
-			font-size: clamp(26px, 7vw, 28px);
-		}
-
-		.wv-hero__bal-note {
-			font-size: 10.5px;
-		}
-
-		.wv-card__body {
-			padding: 14px;
-		}
-
-		.wv-card__head {
-			padding: 13px 14px;
-		}
-
-		.wv-card__desc {
-			padding: 11px 14px;
-			font-size: 12px;
-		}
-
-		.wv-card__title {
-			font-size: 13.5px;
-		}
-
-		.wv-card__label {
-			font-size: 10px;
-		}
-
-		.wv-btn {
-			font-size: 14px;
-			padding: 11px 18px;
-			min-height: 48px;
-		}
-
-		.wv-btn svg {
-			width: 14px;
-			height: 14px;
-		}
-
-		.wv-input {
-			min-height: 48px;
-			font-size: 16px;
-			padding: 0 12px;
-		}
-
-		.wv-input--pfx {
-			padding-left: 32px;
-		}
-
-		.wv-pfx {
-			font-size: 14px;
-			left: 12px;
-		}
-
-		.wv-bank-box {
-			padding: 12px 13px;
-		}
-
-		.wv-bank-box__val {
-			font-size: 13px;
-		}
-
-		.wv-tx__head {
-			padding: 14px 14px 0;
-		}
-
-		.wv-tx__h2 {
-			font-size: 18px;
-		}
-
-		.wv-tx__count {
-			font-size: 11px;
-			padding: 4px 11px;
-		}
-
-		.wv-filters {
-			gap: 5px;
-		}
-
-		.wv-pill {
-			font-size: 12.5px;
-			padding: 7px 14px;
-			min-height: 38px;
-		}
-
-		.wv-mobile-list {
-			padding: 12px;
-			gap: 12px;
-		}
-
-		.wv-mobile-card {
-			padding: 13px;
-		}
-
-		.wv-mobile-card__row {
-			padding: 8px 0;
-		}
-
-		.wv-mobile-card__label {
-			font-size: 10px;
-		}
-
-		.wv-mobile-card__value {
-			font-size: 13.5px;
-		}
-
-		.wv-badge {
-			font-size: 11px;
-			padding: 4px 10px;
-		}
-
-		.wv-pagination {
-			padding: 12px 14px;
-		}
-
-		.wv-page-btn {
-			min-width: 38px;
-			min-height: 38px;
-			font-size: 13px;
-		}
-	}
-
-	/* ── 375px and below (Extra Small Mobile) ── */
-	@media (max-width: 375px) {
-		.wv {
-			padding: 6px 6px 24px;
-			gap: 10px;
-		}
-
-		.wv-alert {
-			padding: 10px 11px;
-			font-size: 12px;
-		}
-
-		.wv-hero__inner {
-			padding: 14px 12px;
-		}
-
-		.wv-hero__title {
-			font-size: clamp(18px, 5vw, 19px);
-		}
-
-		.wv-hero__sub {
-			font-size: 12px;
-		}
-
-		.wv-hero__stat {
-			padding: 10px 12px;
-		}
-
-		.wv-hero__stat-val {
-			font-size: clamp(14px, 4vw, 16px);
-		}
-
-		.wv-hero__bal {
-			padding: 14px;
-		}
-
-		.wv-hero__bal-amt {
-			font-size: clamp(24px, 7vw, 26px);
-		}
-
-		.wv-card__body {
-			padding: 12px;
-		}
-
-		.wv-card__head {
-			padding: 12px 13px;
-		}
-
-		.wv-card__desc {
-			padding: 10px 13px;
-		}
-
-		.wv-btn {
-			font-size: 13px;
-			padding: 10px 16px;
-			min-height: 46px;
-		}
-
-		.wv-input {
-			min-height: 46px;
-		}
-
-		.wv-mobile-card {
-			padding: 12px;
-		}
-
-		.wv-tx__head {
-			padding: 12px 12px 0;
-		}
-
-		.wv-tx__h2 {
-			font-size: 17px;
-		}
-
-		.wv-page-btn {
-			min-width: 36px;
-			min-height: 36px;
-			font-size: 12.5px;
-		}
-	}
-
-	/* ── 320px (Smallest Devices) ── */
-	@media (max-width: 320px) {
-		.wv {
-			padding: 5px 5px 20px;
-		}
-
-		.wv-hero__inner {
-			padding: 12px 10px;
-		}
-
-		.wv-hero__title {
-			font-size: 17px;
-		}
-
-		.wv-hero__sub {
-			font-size: 11.5px;
-		}
-
-		.wv-hero__bal-amt {
-			font-size: 24px;
-		}
-
-		.wv-card__body {
-			padding: 11px;
-		}
-
-		.wv-card__head {
-			padding: 11px 12px;
-		}
-
-		.wv-btn {
-			font-size: 12.5px;
-			padding: 9px 14px;
-			min-height: 44px;
-		}
-
-		.wv-input {
-			min-height: 44px;
-		}
-
-		.wv-mobile-card {
-			padding: 11px;
-		}
-
-		.wv-page-btn {
-			min-width: 34px;
-			min-height: 34px;
-			font-size: 12px;
-		}
-	}
-
-	/* ══════════════════════════════════════════════════════════════
-	   LANDSCAPE MOBILE OPTIMIZATIONS
-	══════════════════════════════════════════════════════════════ */
-	@media (max-height: 500px) and (orientation: landscape) {
-		.wv-hero__inner {
-			flex-direction: row;
-			padding: 20px 24px;
+			font-size: 28px;
 		}
 
 		.wv-hero__stats {
 			grid-template-columns: repeat(4, 1fr);
-			gap: 8px;
+			gap: 10px;
+		}
+
+		.wv-hero__stat-val {
+			font-size: 17px;
+		}
+
+		.wv-hero__cta {
+			width: auto;
 		}
 
 		.wv-hero__bal {
-			min-width: 200px;
-			padding: 20px 24px;
+			flex-direction: column;
+			align-items: flex-start;
+			width: 230px;
+			flex-shrink: 0;
+			padding: 22px 24px;
+		}
+
+		.wv-hero__bal-amt {
+			font-size: 34px;
+		}
+
+		.wv-tx__title-row {
+			flex-direction: row;
+			align-items: center;
+			flex-wrap: nowrap;
+			margin-bottom: 16px;
+		}
+
+		.wv-filters {
+			flex-direction: row;
+			align-items: center;
+			flex-wrap: nowrap;
+		}
+
+		.wv-filter-row-bottom {
+			display: contents;
+		}
+
+		.wv-filter-scroll {
+			flex: 1;
+		}
+
+		.wv-bank-form__footer {
+			flex-direction: row;
+			justify-content: flex-end;
+		}
+
+		.wv-bank-form__footer .wv-btn {
+			width: auto;
+		}
+
+		.wv-pagination {
+			flex-direction: row;
+			justify-content: space-between;
+		}
+
+		.wv-page-info {
+			text-align: left;
 		}
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   SAFE AREA INSETS (iPhone X+, notches, etc.)
-	══════════════════════════════════════════════════════════════ */
-	@supports (padding: max(0px)) {
+	/* ═══════════════════════════════════════════════
+   DESKTOP (900px+)
+═══════════════════════════════════════════════ */
+	@media (min-width:900px) {
 		.wv {
-			padding-left: max(10px, env(safe-area-inset-left));
-			padding-right: max(10px, env(safe-area-inset-right));
-			padding-bottom: max(32px, env(safe-area-inset-bottom));
+			padding: 24px 28px 64px;
+			gap: 24px;
 		}
 
-		.wv-alert {
-			margin-left: max(0px, env(safe-area-inset-left));
-			margin-right: max(0px, env(safe-area-inset-right));
+		.wv-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 24px;
+		}
+
+		.wv-hero__title {
+			font-size: 34px;
+		}
+
+		.wv-hero__bal {
+			width: 250px;
+		}
+
+		.wv-hero__stats {
+			grid-template-columns: repeat(4, 1fr);
+		}
+
+		.wv-tx__head {
+			padding: 22px 24px 0;
+		}
+
+		.wv-tx__h2 {
+			font-size: 21px;
+		}
+
+		/* Show table, hide mobile cards */
+		.wv-table-wrap {
+			display: block;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: thin;
+			scrollbar-color: var(--bdr2) var(--s1);
+		}
+
+		.wv-table-wrap::-webkit-scrollbar {
+			height: 6px;
+		}
+
+		.wv-table-wrap::-webkit-scrollbar-track {
+			background: var(--s1);
+		}
+
+		.wv-table-wrap::-webkit-scrollbar-thumb {
+			background: var(--bdr2);
+			border-radius: 4px;
+		}
+
+		.wv-mobile-list {
+			display: none !important;
+		}
+
+		.wv-table {
+			width: 100%;
+			border-collapse: collapse;
+			min-width: 600px;
+		}
+
+		.wv-table thead tr {
+			background: var(--s1);
+		}
+
+		.wv-table th {
+			padding: 10px 20px;
+			font-size: 10.5px;
+			font-weight: 700;
+			letter-spacing: .09em;
+			text-transform: uppercase;
+			color: var(--i4);
+			text-align: left;
+			border-bottom: 1px solid var(--bdr);
+			white-space: nowrap;
+		}
+
+		.wv-table td {
+			padding: 13px 20px;
+			border-top: 1px solid var(--bdr);
+			font-size: 13.5px;
+			color: var(--i1);
+			vertical-align: middle;
+		}
+
+		.wv-table tbody tr:hover {
+			background: var(--s1);
+		}
+
+		.td-date {
+			color: var(--i4) !important;
+			font-size: 12.5px !important;
+			white-space: nowrap;
+		}
+
+		.td-desc {
+			color: var(--i4) !important;
+			font-size: 13px !important;
+		}
+
+		.td-num {
+			color: var(--i5) !important;
+			font-size: 12px !important;
+			font-family: var(--mono);
+		}
+
+		.td-cr {
+			color: var(--green) !important;
+			font-weight: 700;
+		}
+
+		.td-dr {
+			color: var(--red) !important;
+			font-weight: 700;
+		}
+
+		.wv-empty td {
+			text-align: center;
+			padding: 60px 20px;
+			color: var(--i4);
+			font-size: 14px;
+		}
+
+		.wv-pagination {
+			flex-direction: row;
+			justify-content: space-between;
+			padding: 15px 22px;
+		}
+
+		.wv-page-info {
+			text-align: left;
 		}
 	}
 
-	/* ══════════════════════════════════════════════════════════════
-	   ACCESSIBILITY ENHANCEMENTS
-	══════════════════════════════════════════════════════════════ */
-	@media (prefers-reduced-motion: reduce) {
+	@media (max-width: 768px) {
+
+		.main-area,
+		.page-grid {
+			width: 100% !important;
+			max-width: 100% !important;
+			overflow-x: hidden !important;
+			padding: 10px !important;
+		}
+
+		body {
+			overflow-x: hidden !important;
+		}
+
+		.wv {
+			padding: 10px !important;
+			gap: 12px !important;
+		}
+
+		.wv-card,
+		.wv-hero,
+		.wv-tx {
+			width: 100% !important;
+		}
+
+		.wv-hero__inner {
+			padding: 16px !important;
+			gap: 14px !important;
+		}
+
+		.wv-hero__stats {
+			grid-template-columns: 1fr 1fr !important;
+		}
+
+		.wv-hero__bal {
+			flex-direction: column !important;
+			align-items: flex-start !important;
+			width: 100% !important;
+		}
+
+		.wv-hero__bal-amt {
+			font-size: 26px !important;
+		}
+
+		.wv-bank-grid {
+			grid-template-columns: 1fr !important;
+		}
+
+		.wv-bank-box {
+			width: 100% !important;
+		}
+
+		.wv-btn,
+		.wv-input {
+			width: 100% !important;
+		}
+
+		.wv-input-wrap {
+			width: 100%;
+		}
+
+		.wv-page-btns {
+			justify-content: center !important;
+			flex-wrap: wrap !important;
+		}
+	}
+
+	@media (max-width: 480px) {
+
+		.wv-tx-card {
+			grid-template-columns: 36px 1fr !important;
+			gap: 8px !important;
+		}
+
+		.wv-tx-card__right {
+			grid-column: 2;
+			align-items: flex-start !important;
+		}
+
+		.wv-tx-card__amt {
+			font-size: 14px !important;
+		}
+	}
+
+	/* ═══════════════════════════════════════════════
+   SAFE AREA
+═══════════════════════════════════════════════ */
+	@supports (padding:max(0px)) {
+		.wv {
+			padding-left: max(12px, env(safe-area-inset-left));
+			padding-right: max(12px, env(safe-area-inset-right));
+			padding-bottom: max(60px, env(safe-area-inset-bottom));
+		}
+	}
+
+	/* ═══════════════════════════════════════════════
+   ACCESSIBILITY
+═══════════════════════════════════════════════ */
+	@media (prefers-reduced-motion:reduce) {
 
 		*,
 		*::before,
 		*::after {
-			animation-duration: 0.01ms !important;
-			animation-iteration-count: 1 !important;
-			transition-duration: 0.01ms !important;
-			scroll-behavior: auto !important;
+			animation-duration: .01ms !important;
+			transition-duration: .01ms !important;
 		}
 
 		[data-rev] {
@@ -2293,31 +1801,16 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		}
 	}
 
-	/* Focus visible (keyboard navigation) */
 	*:focus-visible {
 		outline: 2px solid var(--blue);
 		outline-offset: 2px;
-	}
-
-	/* High contrast mode support */
-	@media (prefers-contrast: high) {
-
-		.wv-card,
-		.wv-hero,
-		.wv-tx {
-			border-width: 2px;
-		}
-
-		.wv-btn {
-			border-width: 2px;
-		}
 	}
 </style>
 
 <?php if ($this->session->flashdata('error')): ?>
 	<div class="wv-alert wv-alert--err" role="alert">
 		<div class="wv-alert__ico">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 				<circle cx="12" cy="12" r="10" />
 				<line x1="12" y1="8" x2="12" y2="12" />
 				<line x1="12" y1="16" x2="12.01" y2="16" />
@@ -2331,7 +1824,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 <?php if ($this->session->flashdata('success')): ?>
 	<div class="wv-alert wv-alert--ok" role="alert">
 		<div class="wv-alert__ico">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 				<polyline points="20 6 9 17 4 12" />
 			</svg>
 		</div>
@@ -2344,12 +1837,12 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 
 	<!-- ══ HERO ══ -->
 	<header class="wv-hero" data-rev>
-		<div class="wv-hero__orbs" aria-hidden="true"></div>
-		<div class="wv-hero__grid" aria-hidden="true"></div>
+		<div class="wv-hero__bg" aria-hidden="true"></div>
+		<div class="wv-hero__dots" aria-hidden="true"></div>
 		<div class="wv-hero__inner">
 			<div class="wv-hero__left">
 				<p class="wv-hero__eyebrow" aria-hidden="true">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<rect x="2" y="5" width="20" height="14" rx="3" />
 						<path d="M2 10h20" />
 					</svg>
@@ -2378,7 +1871,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 				</div>
 
 				<a href="<?php echo site_url('wallet/add_balance'); ?>" class="wv-hero__cta">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 						<line x1="12" y1="5" x2="12" y2="19" />
 						<line x1="5" y1="12" x2="19" y2="12" />
 					</svg>
@@ -2387,13 +1880,21 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			</div>
 
 			<div class="wv-hero__bal" role="region" aria-label="Available balance">
-				<p class="wv-hero__bal-lbl">Available Balance</p>
-				<span class="wv-hero__bal-amt">₹<?php echo number_format((float)$user->wallet_balance, 2); ?></span>
-				<div class="wv-hero__bal-note">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+				<div class="wv-hero__bal-left">
+					<p class="wv-hero__bal-lbl">Available Balance</p>
+					<span class="wv-hero__bal-amt">₹<?php echo number_format((float)$user->wallet_balance, 2); ?></span>
+					<div class="wv-hero__bal-note">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						</svg>
+						Secured &amp; Encrypted
+					</div>
+				</div>
+				<div class="wv-hero__bal-chip">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+						<polyline points="20 6 9 17 4 12" />
 					</svg>
-					Secured &amp; Encrypted
+					Active
 				</div>
 			</div>
 		</div>
@@ -2444,7 +1945,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 						type="submit"
 						class="wv-btn wv-btn--full <?php echo $bank_details_saved ? 'wv-btn--red' : 'wv-btn--disabled'; ?>"
 						<?php echo $bank_details_saved ? '' : 'disabled aria-disabled="true"'; ?>>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 							<line x1="12" y1="5" x2="12" y2="19" />
 							<polyline points="19 12 12 19 5 12" />
 						</svg>
@@ -2513,7 +2014,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 								<a class="wv-btn wv-btn--ghost" href="<?php echo site_url('wallet?history=' . $history_filter); ?>">Cancel</a>
 							<?php endif; ?>
 							<button type="submit" class="wv-btn wv-btn--blue">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 									<polyline points="20 6 9 17 4 12" />
 								</svg>
 								<?php echo $bank_details_saved ? 'Update Details' : 'Save Details'; ?>
@@ -2542,8 +2043,8 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 					<?php if (!$bank_details_saved): ?>
 						<a class="wv-btn wv-btn--outline wv-btn--full"
 							href="<?php echo site_url('wallet?edit_bank=1&history=' . $history_filter); ?>"
-							style="margin-top:18px;">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+							style="margin-top:16px;">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 								<line x1="12" y1="5" x2="12" y2="19" />
 								<line x1="5" y1="12" x2="19" y2="12" />
 							</svg>
@@ -2560,56 +2061,61 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 	<section class="wv-tx" data-rev aria-label="Transaction history">
 		<div class="wv-tx__head">
 			<div class="wv-tx__title-row">
-				<div>
+				<div class="wv-tx__heading-group">
 					<p class="wv-tx__eyebrow">Ledger</p>
 					<h2 class="wv-tx__h2">Transaction History</h2>
 				</div>
 				<span class="wv-tx__count" id="wvCount" aria-live="polite"><?php echo $wallet_history_count; ?> records</span>
 			</div>
-			<div class="wv-filters" role="group" aria-label="Filter transactions">
-				<?php
-				$wv_filters = [
-					'all'         => ['label' => 'All',         'color' => '#2563eb'],
-					'deposits'    => ['label' => 'Deposits',    'color' => '#7c3aed'],
-					'winnings'    => ['label' => 'Winnings',    'color' => '#16a34a'],
-					'withdrawals' => ['label' => 'Withdrawals', 'color' => '#dc2626'],
-					'trades'      => ['label' => 'Trades',      'color' => '#d97706'],
-					'refunds'     => ['label' => 'Refunds',     'color' => '#0891b2'],
-				];
-				foreach ($wv_filters as $fk => $fv): ?>
-					<button
-						class="wv-pill <?php echo $history_filter === $fk ? 'is-on' : ''; ?>"
-						data-filter="<?php echo $fk; ?>"
-						data-color="<?php echo $fv['color']; ?>"
-						style="<?php echo $history_filter === $fk ? '--pill-c:' . $fv['color'] : ''; ?>"
-						aria-pressed="<?php echo $history_filter === $fk ? 'true' : 'false'; ?>"
-						type="button">
-						<span class="wv-pill__dot" aria-hidden="true"></span>
-						<?php echo $fv['label']; ?>
-					</button>
-				<?php endforeach; ?>
 
-				<div class="wv-rows-wrap">
-					<button class="wv-rows-btn" id="wvRowsBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-							<line x1="8" y1="6" x2="21" y2="6" />
-							<line x1="8" y1="12" x2="21" y2="12" />
-							<line x1="8" y1="18" x2="21" y2="18" />
-							<line x1="3" y1="6" x2="3.01" y2="6" />
-							<line x1="3" y1="12" x2="3.01" y2="12" />
-							<line x1="3" y1="18" x2="3.01" y2="18" />
-						</svg>
-						<span id="wvRowsLbl">10 rows</span>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="wvChevron" aria-hidden="true">
-							<polyline points="6 9 12 15 18 9" />
-						</svg>
-					</button>
-					<div class="wv-rows-dd" id="wvRowsDd" role="listbox" aria-label="Rows per page">
-						<div class="wv-rows-opt is-on" data-rows="10" role="option" aria-selected="true">10 rows</div>
-						<div class="wv-rows-opt" data-rows="25" role="option" aria-selected="false">25 rows</div>
-						<div class="wv-rows-opt" data-rows="50" role="option" aria-selected="false">50 rows</div>
-						<div class="wv-rows-opt" data-rows="100" role="option" aria-selected="false">100 rows</div>
-						<div class="wv-rows-opt" data-rows="99999" role="option" aria-selected="false">All rows</div>
+			<!-- Filter bar -->
+			<div class="wv-filters" role="group" aria-label="Filter transactions" id="wvFilters">
+				<div class="wv-filter-scroll" aria-label="Transaction type filters">
+					<?php
+					$wv_filters = [
+						'all'         => ['label' => 'All',         'color' => '#1e54e8'],
+						'deposits'    => ['label' => 'Deposits',    'color' => '#7c3aed'],
+						'winnings'    => ['label' => 'Winnings',    'color' => '#0f9d58'],
+						'withdrawals' => ['label' => 'Withdrawals', 'color' => '#e53935'],
+						'trades'      => ['label' => 'Trades',      'color' => '#d97706'],
+						'refunds'     => ['label' => 'Refunds',     'color' => '#0891b2'],
+					];
+					foreach ($wv_filters as $fk => $fv): ?>
+						<button
+							class="wv-pill <?php echo $history_filter === $fk ? 'is-on' : ''; ?>"
+							data-filter="<?php echo $fk; ?>"
+							data-color="<?php echo $fv['color']; ?>"
+							style="<?php echo $history_filter === $fk ? '--pill-c:' . $fv['color'] : ''; ?>"
+							aria-pressed="<?php echo $history_filter === $fk ? 'true' : 'false'; ?>"
+							type="button">
+							<span class="wv-pill__dot" aria-hidden="true"></span>
+							<?php echo $fv['label']; ?>
+						</button>
+					<?php endforeach; ?>
+				</div>
+				<div class="wv-filter-row-bottom">
+					<div class="wv-rows-wrap">
+						<button class="wv-rows-btn" id="wvRowsBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<line x1="8" y1="6" x2="21" y2="6" />
+								<line x1="8" y1="12" x2="21" y2="12" />
+								<line x1="8" y1="18" x2="21" y2="18" />
+								<line x1="3" y1="6" x2="3.01" y2="6" />
+								<line x1="3" y1="12" x2="3.01" y2="12" />
+								<line x1="3" y1="18" x2="3.01" y2="18" />
+							</svg>
+							<span id="wvRowsLbl">10 rows</span>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="wvChevron" aria-hidden="true">
+								<polyline points="6 9 12 15 18 9" />
+							</svg>
+						</button>
+						<div class="wv-rows-dd" id="wvRowsDd" role="listbox" aria-label="Rows per page">
+							<div class="wv-rows-opt is-on" data-rows="10" role="option" aria-selected="true">10 rows</div>
+							<div class="wv-rows-opt" data-rows="25" role="option" aria-selected="false">25 rows</div>
+							<div class="wv-rows-opt" data-rows="50" role="option" aria-selected="false">50 rows</div>
+							<div class="wv-rows-opt" data-rows="100" role="option" aria-selected="false">100 rows</div>
+							<div class="wv-rows-opt" data-rows="99999" role="option" aria-selected="false">All rows</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -2629,91 +2135,89 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 					</tr>
 				</thead>
 				<tbody id="wvBody">
-					<?php if (!empty($withdrawals)):
+					<?php
+					if (!empty($withdrawals)):
 						foreach ($withdrawals as $wr):
 							$ws = strtolower(trim((string)$wr->status));
 							if (in_array($ws, ['approved', 'success', 'completed'])) {
 								$sl = 'Success';
-								$sc = 'wv-badge--success';
+								$sc = 'badge--success';
 							} elseif (in_array($ws, ['pending', 'processing'])) {
 								$sl = 'Pending';
-								$sc = 'wv-badge--pending';
+								$sc = 'badge--pending';
 							} elseif (in_array($ws, ['rejected', 'failed', 'declined'])) {
 								$sl = 'Rejected';
-								$sc = 'wv-badge--rejected';
+								$sc = 'badge--rejected';
 							} else {
 								$sl = ucfirst($ws);
-								$sc = 'wv-badge--pending';
+								$sc = 'badge--pending';
 							}
 					?>
 							<tr data-ft="withdrawals" data-history-item="1">
-								<td class="wv-td-num">—</td>
-								<td><span class="wv-badge wv-badge--withdrawal"><span class="wv-badge-dot" aria-hidden="true"></span>Withdrawal</span></td>
-								<td class="wv-td-desc">Withdrawal request</td>
-								<td class="wv-td-dr">− ₹<?php echo number_format((float)$wr->amount, 2); ?></td>
-								<td><span class="wv-badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></td>
-								<td class="wv-td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></td>
+								<td class="td-num">—</td>
+								<td><span class="badge badge--withdrawal"><span class="badge-dot" aria-hidden="true"></span>Withdrawal</span></td>
+								<td class="td-desc">Withdrawal request</td>
+								<td class="td-dr">− ₹<?php echo number_format((float)$wr->amount, 2); ?></td>
+								<td><span class="badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></td>
+								<td class="td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></td>
 							</tr>
 					<?php endforeach;
 					endif; ?>
 
-					<?php if (!empty($transactions)):
+					<?php
+					if (!empty($transactions)):
 						foreach ($transactions as $index => $tx):
-							$is_cr    = strtolower((string)$tx->type) === 'credit';
+							$is_cr   = strtolower((string)$tx->type) === 'credit';
 							$type_lbl = isset($tx->history_type_label) ? $tx->history_type_label : 'Transaction';
-							$b_class  = isset($tx->history_badge_class) ? $tx->history_badge_class : 'wv-badge--default';
-							$tx_ft    = isset($tx->history_filter)      ? $tx->history_filter      : 'all';
-							$desc     = isset($tx->history_description)  ? $tx->history_description  : '';
-
+							$b_class = isset($tx->history_badge_class) ? $tx->history_badge_class : 'badge--default';
+							$tx_ft   = isset($tx->history_filter)      ? $tx->history_filter      : 'all';
+							$desc    = isset($tx->history_description)  ? $tx->history_description : '';
 							if (isset($tx->history_type_label)) {
-								$sc = isset($tx->history_status_class) ? $tx->history_status_class : ($is_cr ? 'wv-badge--success' : 'wv-badge--processed');
+								$sc = isset($tx->history_status_class) ? $tx->history_status_class : ($is_cr ? 'badge--success' : 'badge--processed');
 								$sl = isset($tx->history_status_label) ? $tx->history_status_label : ($is_cr ? 'Success' : 'Processed');
 							} elseif ($tx->source_type === 'deposit') {
 								$type_lbl = 'Deposit';
-								$b_class = 'wv-badge--deposit';
+								$b_class = 'badge--deposit';
 								$tx_ft = 'deposits';
 								$desc = 'Wallet top-up';
 							} elseif ($tx->source_type === 'question_result') {
 								$type_lbl = 'Winning';
-								$b_class = 'wv-badge--winning';
+								$b_class = 'badge--winning';
 								$tx_ft = 'winnings';
 								$desc = 'Question result payout';
 							} elseif ($tx->source_type === 'trade_entry') {
 								$type_lbl = 'Trade';
-								$b_class = 'wv-badge--trade';
+								$b_class = 'badge--trade';
 								$tx_ft = 'trades';
 								$desc = 'Trade entry fee';
 							} elseif ($tx->source_type === 'withdrawal') {
 								$type_lbl = 'Withdrawal';
-								$b_class = 'wv-badge--withdrawal';
+								$b_class = 'badge--withdrawal';
 								$tx_ft = 'withdrawals';
 								$desc = 'Withdrawal processed';
 							} elseif ($tx->source_type === 'referral_bonus') {
 								$type_lbl = 'Referral';
-								$b_class = 'wv-badge--referral';
+								$b_class = 'badge--referral';
 								$tx_ft = 'all';
 								$desc = 'Referral bonus';
 							} elseif ($tx->source_type === 'refund') {
 								$type_lbl = 'Refund';
-								$b_class = 'wv-badge--refund';
+								$b_class = 'badge--refund';
 								$tx_ft = 'refunds';
 								$desc = 'Refund credited';
 							}
-
 							if (!isset($tx->history_type_label)) {
-								$sc = $is_cr ? 'wv-badge--success' : 'wv-badge--processed';
+								$sc = $is_cr ? 'badge--success' : 'badge--processed';
 								$sl = $is_cr ? 'Success' : 'Processed';
 							}
 					?>
 							<tr data-ft="<?php echo $tx_ft; ?>" data-history-item="1">
-								<td class="wv-td-num">—</td>
-								<td><span class="wv-badge <?php echo $b_class; ?>"><span class="wv-badge-dot" aria-hidden="true"></span><?php echo html_escape($type_lbl); ?></span></td>
-								<td class="wv-td-desc"><?php echo html_escape($desc); ?></td>
-								<td class="<?php echo $is_cr ? 'wv-td-cr' : 'wv-td-dr'; ?>">
-									<?php echo $is_cr ? '+' : '−'; ?> ₹<?php echo number_format((float)$tx->amount, 2); ?>
-								</td>
-								<td><span class="wv-badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></td>
-								<td class="wv-td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($tx->created_at))); ?></td>
+								<td class="td-num">—</td>
+								<td><span class="badge <?php echo $b_class; ?>"><span class="badge-dot" aria-hidden="true"></span><?php echo html_escape($type_lbl); ?></span></td>
+								<td class="td-desc"><?php echo html_escape($desc); ?></td>
+								<td class="<?php echo $is_cr ? 'td-cr' : 'td-dr'; ?>"><?php echo $is_cr ? '+' : '−'; ?> ₹<?php echo number_format((float)$tx->amount, 2); ?></td>
+								<td><span class="badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></td>
+								<td class="td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($tx->created_at))); ?></td>
 							</tr>
 					<?php endforeach;
 					endif; ?>
@@ -2721,126 +2225,124 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			</table>
 		</div>
 
-		<!-- Mobile Cards -->
+		<!-- Mobile List — New Premium Card Design -->
 		<div class="wv-mobile-list" id="wvMobileList" aria-label="Transactions list">
-			<?php if (!empty($withdrawals)):
+			<?php
+			/* Helper: map source_type to icon SVG and ico class */
+			function wv_get_ico($source_type, $type_lbl)
+			{
+				$map = [
+					'deposit'          => ['ico--deposit',    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>'],
+					'question_result'  => ['ico--winning',    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'],
+					'trade_entry'      => ['ico--trade',      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'],
+					'withdrawal'       => ['ico--withdrawal', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>'],
+					'withdrawal_request' => ['ico--withdrawal', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>'],
+					'referral_bonus'   => ['ico--referral',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>'],
+					'refund'           => ['ico--refund',     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>'],
+				];
+				if (isset($map[$source_type])) return $map[$source_type];
+				return ['ico--default', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'];
+			}
+
+			/* Pending withdrawals */
+			if (!empty($withdrawals)):
 				foreach ($withdrawals as $wr):
 					$ws = strtolower(trim((string)$wr->status));
 					if (in_array($ws, ['approved', 'success', 'completed'])) {
 						$sl = 'Success';
-						$sc = 'wv-badge--success';
+						$sc = 'badge--success';
 					} elseif (in_array($ws, ['pending', 'processing'])) {
 						$sl = 'Pending';
-						$sc = 'wv-badge--pending';
+						$sc = 'badge--pending';
 					} elseif (in_array($ws, ['rejected', 'failed', 'declined'])) {
 						$sl = 'Rejected';
-						$sc = 'wv-badge--rejected';
+						$sc = 'badge--rejected';
 					} else {
 						$sl = ucfirst($ws);
-						$sc = 'wv-badge--pending';
+						$sc = 'badge--pending';
 					}
+					list($ico_cls, $ico_svg) = wv_get_ico('withdrawal_request', 'Withdrawal');
 			?>
-					<div class="wv-mobile-card" data-ft="withdrawals" data-history-item="1">
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">#</div>
-							<div class="wv-mobile-card__value wv-td-num">—</div>
+					<div class="wv-tx-card wv-tx-card--pending" data-ft="withdrawals" data-history-item="1">
+						<div class="wv-tx-card__ico <?php echo $ico_cls; ?>"><?php echo $ico_svg; ?></div>
+						<div class="wv-tx-card__body">
+							<div class="wv-tx-card__type">Withdrawal</div>
+							<div class="wv-tx-card__desc">Withdrawal request</div>
+							<div class="wv-tx-card__meta">
+								<span class="wv-tx-card__date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></span>
+							</div>
 						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Type</div>
-							<div class="wv-mobile-card__value"><span class="wv-badge wv-badge--withdrawal"><span class="wv-badge-dot" aria-hidden="true"></span>Withdrawal</span></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Description</div>
-							<div class="wv-mobile-card__value wv-td-desc">Withdrawal request</div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Amount</div>
-							<div class="wv-mobile-card__value wv-td-dr">− ₹<?php echo number_format((float)$wr->amount, 2); ?></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Status</div>
-							<div class="wv-mobile-card__value"><span class="wv-badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Date &amp; Time</div>
-							<div class="wv-mobile-card__value wv-td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></div>
+						<div class="wv-tx-card__right">
+							<span class="wv-tx-card__amt amt-dr">− ₹<?php echo number_format((float)$wr->amount, 2); ?></span>
+							<span class="badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span>
+							<span class="wv-tx-card__num"># —</span>
 						</div>
 					</div>
 			<?php endforeach;
 			endif; ?>
 
-			<?php if (!empty($transactions)):
+			<?php
+			if (!empty($transactions)):
 				foreach ($transactions as $index => $tx):
-					$is_cr    = strtolower((string)$tx->type) === 'credit';
+					$is_cr   = strtolower((string)$tx->type) === 'credit';
 					$type_lbl = isset($tx->history_type_label) ? $tx->history_type_label : 'Transaction';
-					$b_class  = isset($tx->history_badge_class) ? $tx->history_badge_class : 'wv-badge--default';
-					$tx_ft    = isset($tx->history_filter)      ? $tx->history_filter      : 'all';
-					$desc     = isset($tx->history_description) ? $tx->history_description : '';
-
+					$b_class = isset($tx->history_badge_class) ? $tx->history_badge_class : 'badge--default';
+					$tx_ft   = isset($tx->history_filter)      ? $tx->history_filter      : 'all';
+					$desc    = isset($tx->history_description)  ? $tx->history_description : '';
+					$src     = isset($tx->source_type) ? $tx->source_type : '';
 					if (isset($tx->history_type_label)) {
-						$sc = isset($tx->history_status_class) ? $tx->history_status_class : ($is_cr ? 'wv-badge--success' : 'wv-badge--processed');
+						$sc = isset($tx->history_status_class) ? $tx->history_status_class : ($is_cr ? 'badge--success' : 'badge--processed');
 						$sl = isset($tx->history_status_label) ? $tx->history_status_label : ($is_cr ? 'Success' : 'Processed');
-					} elseif ($tx->source_type === 'deposit') {
+					} elseif ($src === 'deposit') {
 						$type_lbl = 'Deposit';
-						$b_class = 'wv-badge--deposit';
+						$b_class = 'badge--deposit';
 						$tx_ft = 'deposits';
 						$desc = 'Wallet top-up';
-					} elseif ($tx->source_type === 'question_result') {
+					} elseif ($src === 'question_result') {
 						$type_lbl = 'Winning';
-						$b_class = 'wv-badge--winning';
+						$b_class = 'badge--winning';
 						$tx_ft = 'winnings';
 						$desc = 'Question result payout';
-					} elseif ($tx->source_type === 'trade_entry') {
+					} elseif ($src === 'trade_entry') {
 						$type_lbl = 'Trade';
-						$b_class = 'wv-badge--trade';
+						$b_class = 'badge--trade';
 						$tx_ft = 'trades';
 						$desc = 'Trade entry fee';
-					} elseif ($tx->source_type === 'withdrawal') {
+					} elseif ($src === 'withdrawal') {
 						$type_lbl = 'Withdrawal';
-						$b_class = 'wv-badge--withdrawal';
+						$b_class = 'badge--withdrawal';
 						$tx_ft = 'withdrawals';
 						$desc = 'Withdrawal processed';
-					} elseif ($tx->source_type === 'referral_bonus') {
+					} elseif ($src === 'referral_bonus') {
 						$type_lbl = 'Referral';
-						$b_class = 'wv-badge--referral';
+						$b_class = 'badge--referral';
 						$tx_ft = 'all';
 						$desc = 'Referral bonus';
-					} elseif ($tx->source_type === 'refund') {
+					} elseif ($src === 'refund') {
 						$type_lbl = 'Refund';
-						$b_class = 'wv-badge--refund';
+						$b_class = 'badge--refund';
 						$tx_ft = 'refunds';
 						$desc = 'Refund credited';
 					}
-
 					if (!isset($tx->history_type_label)) {
-						$sc = $is_cr ? 'wv-badge--success' : 'wv-badge--processed';
+						$sc = $is_cr ? 'badge--success' : 'badge--processed';
 						$sl = $is_cr ? 'Success' : 'Processed';
 					}
+					list($ico_cls, $ico_svg) = wv_get_ico($src, $type_lbl);
 			?>
-					<div class="wv-mobile-card" data-ft="<?php echo $tx_ft; ?>" data-history-item="1">
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">#</div>
-							<div class="wv-mobile-card__value wv-td-num">—</div>
+					<div class="wv-tx-card" data-ft="<?php echo $tx_ft; ?>" data-history-item="1">
+						<div class="wv-tx-card__ico <?php echo $ico_cls; ?>"><?php echo $ico_svg; ?></div>
+						<div class="wv-tx-card__body">
+							<div class="wv-tx-card__type"><?php echo html_escape($type_lbl); ?></div>
+							<div class="wv-tx-card__desc"><?php echo html_escape($desc); ?></div>
+							<div class="wv-tx-card__meta">
+								<span class="wv-tx-card__date"><?php echo html_escape(date('d M Y, h:i A', strtotime($tx->created_at))); ?></span>
+							</div>
 						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Type</div>
-							<div class="wv-mobile-card__value"><span class="wv-badge <?php echo $b_class; ?>"><span class="wv-badge-dot" aria-hidden="true"></span><?php echo html_escape($type_lbl); ?></span></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Description</div>
-							<div class="wv-mobile-card__value wv-td-desc"><?php echo html_escape($desc); ?></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Amount</div>
-							<div class="wv-mobile-card__value <?php echo $is_cr ? 'wv-td-cr' : 'wv-td-dr'; ?>"><?php echo $is_cr ? '+' : '−'; ?> ₹<?php echo number_format((float)$tx->amount, 2); ?></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Status</div>
-							<div class="wv-mobile-card__value"><span class="wv-badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></div>
-						</div>
-						<div class="wv-mobile-card__row">
-							<div class="wv-mobile-card__label">Date &amp; Time</div>
-							<div class="wv-mobile-card__value wv-td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($tx->created_at))); ?></div>
+						<div class="wv-tx-card__right">
+							<span class="wv-tx-card__amt <?php echo $is_cr ? 'amt-cr' : 'amt-dr'; ?>"><?php echo $is_cr ? '+' : '−'; ?> ₹<?php echo number_format((float)$tx->amount, 2); ?></span>
+							<span class="badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span>
+							<span class="wv-tx-card__num"># —</span>
 						</div>
 					</div>
 			<?php endforeach;
@@ -2873,7 +2375,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		/* ── Auto-dismiss alerts ── */
 		document.querySelectorAll('.wv-alert').forEach(function(el) {
 			setTimeout(function() {
-				el.style.transition = 'opacity .4s ease, transform .4s ease';
+				el.style.transition = 'opacity .4s, transform .4s';
 				el.style.opacity = '0';
 				el.style.transform = 'translateY(-8px)';
 				setTimeout(function() {
@@ -2888,13 +2390,11 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		var rowsLbl = document.getElementById('wvRowsLbl');
 
 		function closeRows() {
-			if (rowsDd) {
-				rowsDd.classList.remove('open');
-				rowsBtn.classList.remove('open');
-				rowsBtn.setAttribute('aria-expanded', 'false');
-			}
+			if (!rowsDd) return;
+			rowsDd.classList.remove('open');
+			rowsBtn.classList.remove('open');
+			rowsBtn.setAttribute('aria-expanded', 'false');
 		}
-
 		if (rowsBtn) {
 			rowsBtn.addEventListener('click', function(e) {
 				e.stopPropagation();
@@ -2946,23 +2446,20 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			});
 		});
 
-		/* ── Get visible rows ── */
-		function getActiveSelector() {
-			return window.matchMedia('(max-width: 640px)').matches ?
-				'#wvMobileList [data-history-item="1"][data-ft]' :
-				'#wvBody tr[data-history-item="1"][data-ft]';
+		function isMobile() {
+			return window.innerWidth < 900;
 		}
 
 		function getRows() {
-			var all = Array.from(document.querySelectorAll(getActiveSelector()));
-			return currentFilter === 'all' ?
-				all :
-				all.filter(function(r) {
-					return r.dataset.ft === currentFilter;
-				});
+			var sel = isMobile() ?
+				'#wvMobileList [data-history-item="1"][data-ft]' :
+				'#wvBody tr[data-history-item="1"][data-ft]';
+			var all = Array.from(document.querySelectorAll(sel));
+			return currentFilter === 'all' ? all : all.filter(function(r) {
+				return r.dataset.ft === currentFilter;
+			});
 		}
 
-		/* ── Make page button ── */
 		function makeBtn(label, disabled, active) {
 			var b = document.createElement('button');
 			b.className = 'wv-page-btn' + (active ? ' is-on' : '');
@@ -2973,7 +2470,6 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			return b;
 		}
 
-		/* ── Render ── */
 		function render() {
 			var rows = getRows();
 			var total = rows.length;
@@ -2983,53 +2479,50 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			var start = (currentPage - 1) * limit;
 			var end = start + limit;
 
-			/* Hide/show rows */
-			Array.from(document.querySelectorAll('#wvBody tr[data-history-item="1"][data-ft], #wvMobileList [data-history-item="1"][data-ft]')).forEach(function(r) {
+			/* Hide ALL items in both views */
+			Array.from(document.querySelectorAll(
+				'#wvBody tr[data-history-item="1"][data-ft], #wvMobileList [data-history-item="1"][data-ft]'
+			)).forEach(function(r) {
 				r.style.display = 'none';
 			});
+
+			/* Show paginated items for active view + update numbers */
 			rows.forEach(function(r, i) {
 				r.style.display = (i >= start && i < end) ? '' : 'none';
-				var nc = r.querySelector('.wv-td-num');
-				if (nc) nc.textContent = i + 1;
+				/* Update sequence number */
+				var numEl = r.querySelector('.td-num, .wv-tx-card__num');
+				if (numEl) numEl.textContent = (r.tagName === 'TR') ? (i + 1) : ('# ' + (i + 1));
 			});
 
 			/* Empty state */
-			var emptyRow = document.getElementById('wvEmpty');
-			var emptyMobile = document.getElementById('wvEmptyMobile');
+			var emptyTr = document.getElementById('wvEmptyTr');
+			var emptyMob = document.getElementById('wvEmptyMob');
 			if (total === 0) {
-				if (!emptyRow) {
-					emptyRow = document.createElement('tr');
-					emptyRow.id = 'wvEmpty';
-					emptyRow.className = 'wv-empty';
-					emptyRow.innerHTML = '<td colspan="6">' +
-						'<svg class="wv-empty-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
-						'<rect x="2" y="7" width="20" height="14" rx="2"/>' +
-						'<path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>' +
-						'</svg>' +
-						'No transactions found for this filter.</td>';
-					document.getElementById('wvBody').appendChild(emptyRow);
+				if (!emptyTr) {
+					emptyTr = document.createElement('tr');
+					emptyTr.id = 'wvEmptyTr';
+					emptyTr.className = 'wv-empty';
+					emptyTr.innerHTML = '<td colspan="6"><div class="wv-empty-msg">' +
+						'<svg class="wv-empty-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>' +
+						'No transactions found for this filter.</div></td>';
+					document.getElementById('wvBody').appendChild(emptyTr);
 				}
-				emptyRow.style.display = '';
-				if (!emptyMobile) {
-					emptyMobile = document.createElement('div');
-					emptyMobile.id = 'wvEmptyMobile';
-					emptyMobile.className = 'wv-mobile-card wv-empty';
-					emptyMobile.innerHTML =
-						'<div style="text-align:center;padding:20px 10px;color:var(--ink-4);font-size:14px;">' +
-						'<svg class="wv-empty-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
-						'<rect x="2" y="7" width="20" height="14" rx="2"/>' +
-						'<path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>' +
-						'</svg>' +
+				emptyTr.style.display = '';
+				if (!emptyMob) {
+					emptyMob = document.createElement('div');
+					emptyMob.id = 'wvEmptyMob';
+					emptyMob.innerHTML = '<div class="wv-empty-msg">' +
+						'<svg class="wv-empty-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>' +
 						'No transactions found for this filter.</div>';
-					document.getElementById('wvMobileList').appendChild(emptyMobile);
+					document.getElementById('wvMobileList').appendChild(emptyMob);
 				}
-				emptyMobile.style.display = '';
+				emptyMob.style.display = '';
 			} else {
-				if (emptyRow) emptyRow.style.display = 'none';
-				if (emptyMobile) emptyMobile.style.display = 'none';
+				if (emptyTr) emptyTr.style.display = 'none';
+				if (emptyMob) emptyMob.style.display = 'none';
 			}
 
-			/* Count label */
+			/* Count badge */
 			var countEl = document.getElementById('wvCount');
 			if (countEl) countEl.textContent = total + ' record' + (total !== 1 ? 's' : '');
 
@@ -3085,12 +2578,16 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			});
 			bc.appendChild(nextBtn);
 
-			/* Hide pagination when unnecessary */
 			var pagEl = document.getElementById('wvPagination');
 			if (pagEl) pagEl.style.display = (pages <= 1 && total <= limit) ? 'none' : 'flex';
 		}
 
 		render();
-		window.addEventListener('resize', render);
+
+		var resizeTimer;
+		window.addEventListener('resize', function() {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(render, 100);
+		});
 	}());
 </script>

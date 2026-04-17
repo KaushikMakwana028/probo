@@ -32,6 +32,8 @@ class Questions extends CI_Controller
 		if ($selected_category) {
 			$selected_category->questions = $this->Category_model->get_visible_questions_by_category_for_user($selected_category->id, $user->id);
 		}
+
+		$categories = $this->Category_model->get_all_categories_with_visible_question_counts_for_user($user->id);
 		$category_payload = $this->build_category_payload($user, $selected_category);
 
 		// ✅ ADD THIS BLOCK
@@ -54,7 +56,7 @@ class Questions extends CI_Controller
 			'title' => 'Questions',
 			'page_type' => 'dashboard',
 			'user' => $user,
-			'categories' => $this->Category_model->get_all_categories(),
+			'categories' => $categories,
 			'selected_category' => $selected_category,
 			'user_answers' => $category_payload['user_answers'],
 			'answered_count' => $category_payload['answered_count'],
@@ -183,7 +185,7 @@ class Questions extends CI_Controller
 			'title' => 'Answer Question',
 			'page_type' => 'dashboard',
 			'user' => $user,
-			'categories' => $this->Category_model->get_all_categories(),
+			'categories' => $this->Category_model->get_all_categories_with_visible_question_counts_for_user($user->id),
 			'selected_category' => $selected_category,
 			'selected_question' => $question,
 			'selected_answer_state' => $selected_answer_state,

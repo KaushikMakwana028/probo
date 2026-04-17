@@ -96,12 +96,49 @@
 </script>
 <script>
 	(function() {
+		window.adminSwalAlert = function(message, icon, title) {
+			if (typeof Swal === 'undefined') {
+				return;
+			}
+
+			return Swal.fire({
+				icon: icon || 'info',
+				title: title || '',
+				text: message,
+				confirmButtonColor: '#2563eb'
+			});
+		};
+
+		window.adminSwalConfirm = function(message, options) {
+			if (typeof Swal === 'undefined') {
+				return Promise.resolve(window.confirm(message));
+			}
+
+			var config = Object.assign({
+				icon: 'warning',
+				text: message,
+				showCancelButton: true,
+				confirmButtonText: 'Yes',
+				cancelButtonText: 'Cancel',
+				confirmButtonColor: '#2563eb',
+				cancelButtonColor: '#94a3b8'
+			}, options || {});
+
+			return Swal.fire(config).then(function(result) {
+				return !!result.isConfirmed;
+			});
+		};
+
 		function collectFlashMessages() {
 			var selectors = [
 				'.message.error',
 				'.message.success',
+				'.dr-flash',
 				'.question-list-flash',
+				'.vq-flash',
 				'.question-edit-flash',
+				'.question-edit-flash-error',
+				'.question-edit-flash-success',
 				'.users-flash',
 				'.user-edit-flash',
 				'.user-detail-flash',
@@ -146,16 +183,8 @@
 				element.addEventListener('click', function(event) {
 					event.preventDefault();
 					var href = element.getAttribute('href');
-					Swal.fire({
-						icon: 'warning',
-						text: message,
-						showCancelButton: true,
-						confirmButtonText: 'Yes',
-						cancelButtonText: 'Cancel',
-						confirmButtonColor: '#2563eb',
-						cancelButtonColor: '#94a3b8'
-					}).then(function(result) {
-						if (result.isConfirmed && href) {
+					adminSwalConfirm(message).then(function(confirmed) {
+						if (confirmed && href) {
 							window.location.href = href;
 						}
 					});

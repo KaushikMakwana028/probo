@@ -33,6 +33,22 @@ class Category_model extends CI_Model
 		return $this->db->get()->result();
 	}
 
+	public function get_all_categories_with_visible_question_counts_for_user($user_id)
+	{
+		$categories = $this->get_all_categories();
+
+		if (empty($categories)) {
+			return array();
+		}
+
+		foreach ($categories as $category) {
+			$visible_questions = $this->get_visible_questions_by_category_for_user((int) $category->id, (int) $user_id);
+			$category->question_count = count($visible_questions);
+		}
+
+		return $categories;
+	}
+
 	public function get_all_categories_with_questions()
 	{
 		$categories = $this->get_all_categories();

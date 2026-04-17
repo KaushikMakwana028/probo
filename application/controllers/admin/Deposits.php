@@ -314,7 +314,18 @@ class Deposits extends CI_Controller
             ], ['id' => $id]);
 
             // ================================
-            // 5️⃣ UPDATE SESSION (IF SAME USER)
+            // 5️⃣ ADD USER NOTIFICATION
+            // ================================
+            $this->User_model->add_notification([
+                'user_id'    => (int) $req->user_id,
+                'title'      => 'Deposit approved',
+                'message'    => 'Your deposit of ₹' . number_format((float) $req->amount, 2) . ' has been approved and added to your wallet.',
+                'type'       => 'wallet',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            // ================================
+            // 6️⃣ UPDATE SESSION (IF SAME USER)
             // ================================
             $updatedUser = $this->db->get_where('users', ['id' => $req->user_id])->row();
             // Update session if the approved user is currently logged in

@@ -1,609 +1,706 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
 <style>
 	:root {
-		--q2-bg: #f5f6fa;
-		--q2-card: #ffffff;
-		--q2-ink: #0e1117;
-		--q2-text: #4b5263;
-		--q2-muted: #8b92a5;
-		--q2-line: #e8eaf0;
-		--q2-blue: #3b6ef6;
-		--q2-blue-soft: #eef2ff;
-		--q2-blue-mid: #c7d4fd;
-		--q2-green: #18a058;
-		--q2-green-soft: #e6f6ec;
-		--q2-red: #d84040;
-		--q2-red-soft: #fce8e8;
-		--q2-amber: #d97706;
-		--q2-amber-soft: #fef3c7;
-		--q2-shadow: 0 2px 16px rgba(14, 17, 23, 0.06);
-		--q2-shadow-lg: 0 12px 36px rgba(14, 17, 23, 0.1);
+		--ql-bg: #f0f4ff;
+		--ql-surface: #ffffff;
+		--ql-surface2: #f7f9fc;
+		--ql-ink: #0d1321;
+		--ql-text: #3d4a63;
+		--ql-muted: #7a8499;
+		--ql-line: #e4e9f4;
+		--ql-blue: #2f5be8;
+		--ql-blue-bg: #eef2fd;
+		--ql-blue-border: #c5d0f9;
+		--ql-green: #0fa966;
+		--ql-green-bg: #e8f9f1;
+		--ql-green-border: #a3dfc2;
+		--ql-red: #dc3545;
+		--ql-red-bg: #fdeef0;
+		--ql-red-border: #f4b8bf;
+		--ql-amber: #c97c10;
+		--ql-amber-bg: #fef5e4;
+		--ql-amber-border: #f5d08a;
+		--ql-shadow: 0 1px 4px rgba(15, 23, 60, 0.07), 0 4px 16px rgba(15, 23, 60, 0.05);
+		--ql-shadow-hover: 0 4px 20px rgba(15, 23, 60, 0.12), 0 1px 4px rgba(15, 23, 60, 0.06);
+		--ql-r: 18px;
+		--ql-r-sm: 12px;
+		--ql-r-pill: 999px;
 	}
 
-	.q2-wrap {
+	.ql-wrap {
 		font-family: 'Roboto', sans-serif;
-		color: var(--q2-ink);
-		display: grid;
-		gap: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
-	/* ── CATEGORY HEADER ─────────────────────────────────── */
-	.q2-cat-header {
+	/* ── CAT HEADER ── */
+	.ql-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 16px;
+		gap: 14px;
 		flex-wrap: wrap;
+		padding: 22px 24px;
+		background: var(--ql-surface);
+		border: 1px solid var(--ql-line);
+		border-radius: var(--ql-r);
+		box-shadow: var(--ql-shadow);
 	}
 
-	.q2-cat-left {
+	.ql-header-left {
 		display: flex;
 		align-items: center;
-		gap: 14px;
+		gap: 16px;
 	}
 
-	.q2-cat-icon {
-		width: 52px;
-		height: 52px;
-		border-radius: 16px;
-		background: var(--q2-blue-soft);
-		border: 1.5px solid var(--q2-blue-mid);
+	.ql-header-icon {
+		width: 48px;
+		height: 48px;
+		border-radius: 14px;
+		background: var(--ql-blue-bg);
+		border: 1.5px solid var(--ql-blue-border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 20px;
-		color: var(--q2-blue);
+		font-size: 18px;
+		color: var(--ql-blue);
 		flex-shrink: 0;
 	}
 
-	.q2-cat-name {
-		font-size: clamp(22px, 3vw, 30px);
+	.ql-header-title {
+		font-size: clamp(18px, 2.5vw, 24px);
 		font-weight: 700;
-		letter-spacing: -0.03em;
-		margin-bottom: 3px;
-		line-height: 1;
+		letter-spacing: -0.02em;
+		color: var(--ql-ink);
+		line-height: 1.2;
 	}
 
-	.q2-cat-desc {
+	.ql-header-sub {
 		font-size: 13px;
-		color: var(--q2-muted);
+		color: var(--ql-muted);
+		margin-top: 3px;
+		font-weight: 400;
 	}
 
-	.q2-status-pill {
+	.ql-live-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 7px;
+		gap: 8px;
 		padding: 8px 16px;
-		border-radius: 999px;
-		font-size: 12px;
+		border-radius: var(--ql-r-pill);
+		font-size: 11px;
 		font-weight: 600;
-		background: var(--q2-green-soft);
-		color: var(--q2-green);
-		border: 1px solid rgba(24, 160, 88, 0.2);
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		background: var(--ql-green-bg);
+		color: var(--ql-green);
+		border: 1px solid var(--ql-green-border);
 	}
 
-	.q2-status-dot {
+	.ql-live-dot {
 		width: 7px;
 		height: 7px;
 		border-radius: 50%;
-		background: var(--q2-green);
-		animation: blink 1.8s ease-in-out infinite;
+		background: var(--ql-green);
+		animation: ql-pulse 1.8s ease-in-out infinite;
+		flex-shrink: 0;
 	}
 
-	@keyframes blink {
+	@keyframes ql-pulse {
 
 		0%,
 		100% {
 			opacity: 1;
+			transform: scale(1);
 		}
 
 		50% {
-			opacity: 0.3;
+			opacity: 0.35;
+			transform: scale(0.8);
 		}
 	}
 
-	/* ── STATS BAR ─────────────────────────────────── */
-	.q2-stats {
+	/* ── STATS ROW ── */
+	.ql-stats {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 1px;
-		background: var(--q2-line);
-		border: 1px solid var(--q2-line);
-		border-radius: 18px;
+		gap: 12px;
+	}
+
+	.ql-stat {
+		background: var(--ql-surface);
+		border: 1px solid var(--ql-line);
+		border-radius: var(--ql-r-sm);
+		padding: 16px 18px;
+		box-shadow: var(--ql-shadow);
+		position: relative;
 		overflow: hidden;
-		box-shadow: var(--q2-shadow);
 	}
 
-	.q2-stat {
-		background: var(--q2-card);
-		padding: 18px 20px;
-		text-align: center;
+	.ql-stat::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		border-radius: 3px 3px 0 0;
+		background: var(--ql-line);
 	}
 
-	.q2-stat-num {
+	.ql-stat.s-total::before {
+		background: var(--ql-ink);
+	}
+
+	.ql-stat.s-answered::before {
+		background: var(--ql-blue);
+	}
+
+	.ql-stat.s-correct::before {
+		background: var(--ql-green);
+	}
+
+	.ql-stat.s-wrong::before {
+		background: var(--ql-red);
+	}
+
+	.ql-stat-val {
 		font-size: 28px;
 		font-weight: 700;
 		letter-spacing: -0.04em;
 		line-height: 1;
-		margin-bottom: 6px;
-		font-family: 'IBM Plex Mono', monospace;
+		margin-bottom: 5px;
 	}
 
-	.q2-stat-num.col-default {
-		color: var(--q2-ink);
+	.ql-stat.s-total .ql-stat-val {
+		color: var(--ql-ink);
 	}
 
-	.q2-stat-num.col-blue {
-		color: var(--q2-blue);
+	.ql-stat.s-answered .ql-stat-val {
+		color: var(--ql-blue);
 	}
 
-	.q2-stat-num.col-green {
-		color: var(--q2-green);
+	.ql-stat.s-correct .ql-stat-val {
+		color: var(--ql-green);
 	}
 
-	.q2-stat-num.col-red {
-		color: var(--q2-red);
+	.ql-stat.s-wrong .ql-stat-val {
+		color: var(--ql-red);
 	}
 
-	.q2-stat-label {
+	.ql-stat-label {
 		font-size: 11px;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: var(--q2-muted);
+		color: var(--ql-muted);
 	}
 
-	/* ── QUESTION CARDS ─────────────────────────────────── */
-	.q2-list {
-		display: grid;
-		gap: 14px;
+	/* ── QUESTION CARDS ── */
+	.ql-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 
-	.q2-card {
-		background: var(--q2-card);
-		border: 1.5px solid var(--q2-line);
-		border-radius: 20px;
-		padding: 0;
-		overflow: hidden;
-		text-decoration: none;
-		color: var(--q2-ink);
+	.ql-card {
 		display: block;
-		transition: all 0.22s ease;
-		box-shadow: var(--q2-shadow);
+		text-decoration: none;
+		color: var(--ql-ink);
+		background: var(--ql-surface);
+		border: 1.5px solid var(--ql-line);
+		border-radius: var(--ql-r);
+		overflow: hidden;
+		box-shadow: var(--ql-shadow);
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 		position: relative;
 	}
 
-	.q2-card:hover {
+	.ql-card:hover {
 		transform: translateY(-3px);
-		box-shadow: var(--q2-shadow-lg);
-		border-color: var(--q2-blue-mid);
+		box-shadow: var(--ql-shadow-hover);
+		border-color: var(--ql-blue-border);
 	}
 
-	/* State left border accent */
-	.q2-card::before {
+	.ql-card::after {
 		content: '';
 		position: absolute;
 		left: 0;
 		top: 0;
 		bottom: 0;
 		width: 4px;
-		border-radius: 4px 0 0 4px;
 	}
 
-	.q2-card.pending::before {
-		background: var(--q2-blue);
+	.ql-card.state-pending::after {
+		background: var(--ql-blue);
 	}
 
-	.q2-card.correct::before {
-		background: var(--q2-green);
+	.ql-card.state-correct {
+		border-color: var(--ql-green-border);
+		background: linear-gradient(135deg, #fff 0%, #f4fdf8 100%);
 	}
 
-	.q2-card.wrong::before {
-		background: var(--q2-red);
+	.ql-card.state-correct::after {
+		background: var(--ql-green);
 	}
 
-	/* State backgrounds */
-	.q2-card.correct {
-		border-color: rgba(24, 160, 88, 0.2);
-		background: linear-gradient(180deg, #fff, #f6fdf8);
+	.ql-card.state-wrong {
+		border-color: var(--ql-red-border);
+		background: linear-gradient(135deg, #fff 0%, #fdf4f5 100%);
 	}
 
-	.q2-card.wrong {
-		border-color: rgba(216, 64, 64, 0.2);
-		background: linear-gradient(180deg, #fff, #fef6f6);
+	.ql-card.state-wrong::after {
+		background: var(--ql-red);
 	}
 
-	.q2-card-inner {
+	.ql-card-body {
 		padding: 20px 22px 20px 26px;
 	}
 
-	/* Top row */
-	.q2-card-top {
+	/* card top row */
+	.ql-card-row {
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
 		gap: 14px;
-		margin-bottom: 16px;
+		margin-bottom: 14px;
 	}
 
-	.q2-card-main {
+	.ql-card-title-group {
 		display: flex;
 		align-items: flex-start;
-		gap: 14px;
+		gap: 12px;
 		flex: 1;
+		min-width: 0;
 	}
 
-	.q2-num {
-		width: 30px;
-		height: 30px;
-		border-radius: 9px;
-		background: var(--q2-blue-soft);
-		border: 1px solid var(--q2-blue-mid);
+	.ql-idx {
+		width: 32px;
+		height: 32px;
+		border-radius: 10px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 12px;
 		font-weight: 700;
-		color: var(--q2-blue);
 		flex-shrink: 0;
-		font-family: 'IBM Plex Mono', monospace;
+		background: var(--ql-blue-bg);
+		color: var(--ql-blue);
+		border: 1px solid var(--ql-blue-border);
 	}
 
-	.q2-num.n-green {
-		background: var(--q2-green-soft);
-		border-color: rgba(24, 160, 88, 0.25);
-		color: var(--q2-green);
+	.ql-card.state-correct .ql-idx {
+		background: var(--ql-green-bg);
+		color: var(--ql-green);
+		border-color: var(--ql-green-border);
 	}
 
-	.q2-num.n-red {
-		background: var(--q2-red-soft);
-		border-color: rgba(216, 64, 64, 0.25);
-		color: var(--q2-red);
+	.ql-card.state-wrong .ql-idx {
+		background: var(--ql-red-bg);
+		color: var(--ql-red);
+		border-color: var(--ql-red-border);
 	}
 
-	.q2-question {
+	.ql-question-text {
 		font-size: 15px;
-		font-weight: 600;
-		line-height: 1.5;
-		color: var(--q2-ink);
+		font-weight: 500;
+		line-height: 1.55;
+		color: var(--ql-ink);
 		flex: 1;
+		min-width: 0;
 	}
 
-	.q2-badge {
+	.ql-status-tag {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		padding: 6px 13px;
-		border-radius: 999px;
+		padding: 5px 12px;
+		border-radius: var(--ql-r-pill);
 		font-size: 11px;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		white-space: nowrap;
 		flex-shrink: 0;
+		border: 1px solid transparent;
 	}
 
-	.badge-open {
-		background: var(--q2-blue-soft);
-		color: var(--q2-blue);
-		border: 1px solid var(--q2-blue-mid);
+	.tag-pending {
+		background: var(--ql-blue-bg);
+		color: var(--ql-blue);
+		border-color: var(--ql-blue-border);
 	}
 
-	.badge-wait {
-		background: var(--q2-amber-soft);
-		color: var(--q2-amber);
-		border: 1px solid rgba(217, 119, 6, 0.2);
+	.tag-review {
+		background: var(--ql-amber-bg);
+		color: var(--ql-amber);
+		border-color: var(--ql-amber-border);
 	}
 
-	.badge-won {
-		background: var(--q2-green-soft);
-		color: var(--q2-green);
-		border: 1px solid rgba(24, 160, 88, 0.25);
+	.tag-not-open {
+		background: var(--ql-surface2);
+		color: var(--ql-muted);
+		border-color: var(--ql-line);
 	}
 
-	.badge-lost {
-		background: var(--q2-red-soft);
-		color: var(--q2-red);
-		border: 1px solid rgba(216, 64, 64, 0.25);
+	.tag-waiting {
+		background: var(--ql-amber-bg);
+		color: var(--ql-amber);
+		border-color: var(--ql-amber-border);
 	}
 
-	/* Odds row */
-	.q2-odds {
+	.tag-won {
+		background: var(--ql-green-bg);
+		color: var(--ql-green);
+		border-color: var(--ql-green-border);
+	}
+
+	.tag-lost {
+		background: var(--ql-red-bg);
+		color: var(--ql-red);
+		border-color: var(--ql-red-border);
+	}
+
+	/* odds row */
+	.ql-odds-row {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-bottom: 14px;
+		gap: 8px;
+		margin-bottom: 12px;
 		flex-wrap: wrap;
 	}
 
-	.q2-odd {
+	.ql-odds-label {
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--ql-muted);
+		margin-right: 2px;
+	}
+
+	.ql-odd-chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 8px;
-		padding: 8px 14px;
-		border-radius: 12px;
+		gap: 7px;
+		padding: 6px 14px;
+		border-radius: var(--ql-r-sm);
 		font-size: 13px;
 		font-weight: 600;
 	}
 
-	.odd-yes {
-		background: var(--q2-green-soft);
-		color: var(--q2-green);
-		border: 1px solid rgba(24, 160, 88, 0.18);
+	.ql-odd-chip.yes {
+		background: var(--ql-green-bg);
+		color: var(--ql-green);
+		border: 1px solid var(--ql-green-border);
 	}
 
-	.odd-no {
-		background: var(--q2-red-soft);
-		color: var(--q2-red);
-		border: 1px solid rgba(216, 64, 64, 0.18);
+	.ql-odd-chip.no {
+		background: var(--ql-red-bg);
+		color: var(--ql-red);
+		border: 1px solid var(--ql-red-border);
 	}
 
-	.q2-odd-val {
-		font-family: 'IBM Plex Mono', monospace;
-		font-weight: 600;
-	}
-
-	.q2-separator {
-		width: 4px;
-		height: 4px;
-		border-radius: 50%;
-		background: var(--q2-line);
-	}
-
-	/* Users joined strip */
-	.q2-users-bar {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 14px;
-		border-radius: 12px;
-		background: linear-gradient(90deg, #fff1f2, #fce8e8);
-		border: 1px solid rgba(216, 64, 64, 0.12);
-		margin-bottom: 14px;
-		width: fit-content;
-	}
-
-	.q2-users-bar i {
-		font-size: 13px;
-		color: var(--q2-red);
-	}
-
-	.q2-users-bar strong {
-		font-size: 13px;
+	.ql-odd-chip .chip-label {
+		font-size: 10px;
 		font-weight: 700;
-		color: var(--q2-red);
+		letter-spacing: 0.06em;
+		opacity: 0.7;
 	}
 
-	.q2-users-bar span {
+	.ql-odd-chip .chip-val {
+		font-weight: 700;
+	}
+
+	/* users strip */
+	.ql-users-strip {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		padding: 7px 14px;
+		border-radius: var(--ql-r-sm);
+		background: var(--ql-surface2);
+		border: 1px solid var(--ql-line);
+		margin-bottom: 12px;
 		font-size: 12px;
-		color: #c27070;
+		color: var(--ql-text);
 		font-weight: 500;
 	}
 
-	/* Footer row */
-	.q2-card-foot {
+	.ql-users-strip strong {
+		color: var(--ql-ink);
+		font-weight: 700;
+	}
+
+	/* footer */
+	.ql-card-footer {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 12px;
 		padding-top: 14px;
-		border-top: 1px solid var(--q2-line);
+		border-top: 1px solid var(--ql-line);
+		flex-wrap: wrap;
 	}
 
-	.q2-foot-left {
+	.ql-card.state-correct .ql-card-footer {
+		border-color: var(--ql-green-border);
+	}
+
+	.ql-card.state-wrong .ql-card-footer {
+		border-color: var(--ql-red-border);
+	}
+
+	.ql-footer-left {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 7px;
 		font-size: 12px;
-		color: var(--q2-muted);
+		color: var(--ql-muted);
 		font-weight: 500;
 	}
 
-	.q2-foot-left i {
-		font-size: 11px;
-	}
-
-	.q2-foot-right {
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 13px;
-		font-weight: 600;
-		color: var(--q2-text);
-	}
-
-	.q2-foot-right.win {
-		color: var(--q2-green);
-	}
-
-	.q2-foot-right.loss {
-		color: var(--q2-red);
-	}
-
-	/* Hover arrow */
-	.q2-arrow-wrap {
+	.ql-footer-right {
 		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+
+	.ql-payout {
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.ql-payout.win {
+		color: var(--ql-green);
+	}
+
+	.ql-payout.loss {
+		color: var(--ql-red);
+	}
+
+	.ql-payout.neutral {
+		color: var(--ql-text);
+	}
+
+	.ql-trade-btn {
+		display: inline-flex;
 		align-items: center;
 		gap: 6px;
 		font-size: 12px;
-		color: var(--q2-blue);
 		font-weight: 600;
+		color: var(--ql-blue);
 		opacity: 0;
 		transition: opacity 0.2s;
 	}
 
-	.q2-card:hover .q2-arrow-wrap {
+	.ql-card:hover .ql-trade-btn {
 		opacity: 1;
 	}
 
-	/* ── EMPTY STATES ─────────────────────────────────── */
-	.q2-empty {
+	/* empty states */
+	.ql-empty {
 		text-align: center;
-		padding: 60px 24px;
-		border-radius: 20px;
-		border: 1.5px dashed var(--q2-line);
-		background: var(--q2-card);
+		padding: 64px 24px;
+		background: var(--ql-surface);
+		border: 1.5px dashed var(--ql-line);
+		border-radius: var(--ql-r);
 	}
 
-	.q2-empty-icon {
-		width: 60px;
-		height: 60px;
-		border-radius: 20px;
-		background: var(--q2-blue-soft);
+	.ql-empty-icon {
+		width: 56px;
+		height: 56px;
+		border-radius: 18px;
+		background: var(--ql-blue-bg);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 22px;
-		color: var(--q2-blue);
+		font-size: 20px;
+		color: var(--ql-blue);
 		margin: 0 auto 16px;
+		border: 1.5px solid var(--ql-blue-border);
 	}
 
-	.q2-empty h3 {
+	.ql-empty h3 {
 		font-size: 18px;
 		font-weight: 700;
+		color: var(--ql-ink);
 		margin-bottom: 8px;
+		letter-spacing: -0.01em;
 	}
 
-	.q2-empty p {
+	.ql-empty p {
 		font-size: 14px;
-		color: var(--q2-muted);
-		max-width: 320px;
+		color: var(--ql-muted);
+		max-width: 300px;
 		margin: 0 auto;
 		line-height: 1.7;
 	}
 
 	@media (max-width: 680px) {
-		.q2-stats {
+		.ql-stats {
 			grid-template-columns: repeat(2, 1fr);
+			gap: 10px;
 		}
 
-		.q2-card-inner {
+		.ql-card-body {
 			padding: 16px 18px 16px 22px;
 		}
 
-		.q2-cat-header {
-			flex-direction: column;
-			align-items: flex-start;
+		.ql-header {
+			padding: 18px 18px;
+		}
+
+		.ql-header-left {
+			gap: 12px;
+		}
+
+		.ql-card-row {
+			flex-wrap: wrap;
+		}
+
+		.ql-status-tag {
+			margin-left: auto;
+		}
+
+		.ql-trade-btn {
+			display: none;
 		}
 	}
 </style>
 
-<div class="q2-wrap">
+<div class="ql-wrap">
 
 	<?php if ($selected_category && !empty($selected_category->questions)): ?>
 
-		<!-- CATEGORY HEADER -->
-		<div class="q2-cat-header">
-			<div class="q2-cat-left">
-				<div class="q2-cat-icon"><i class="fa-solid fa-question"></i></div>
+		<!-- Header -->
+		<div class="ql-header">
+			<div class="ql-header-left">
+				<div class="ql-header-icon"><i class="fa-solid fa-bolt"></i></div>
 				<div>
-					<div class="q2-cat-name"><?php echo html_escape($selected_category->name); ?> Questions</div>
-					<div class="q2-cat-desc">This category is active now — select any question to trade</div>
+					<div class="ql-header-title"><?php echo html_escape($selected_category->name); ?></div>
+					<div class="ql-header-sub">Select any question below to trade</div>
 				</div>
 			</div>
-			<div class="q2-status-pill">
-				<div class="q2-status-dot"></div>
-				Active category
+			<div class="ql-live-badge">
+				<div class="ql-live-dot"></div>
+				Live
 			</div>
 		</div>
 
-		<!-- STATS BAR -->
-		<div class="q2-stats">
-			<div class="q2-stat">
-				<div class="q2-stat-num col-default"><?php echo (int) $total_questions; ?></div>
-				<div class="q2-stat-label">Total</div>
+		<!-- Stats -->
+		<div class="ql-stats">
+			<div class="ql-stat s-total">
+				<div class="ql-stat-val"><?php echo (int)$total_questions; ?></div>
+				<div class="ql-stat-label">Total</div>
 			</div>
-			<div class="q2-stat">
-				<div class="q2-stat-num col-blue"><?php echo (int) $answered_count; ?></div>
-				<div class="q2-stat-label">Answered</div>
+			<div class="ql-stat s-answered">
+				<div class="ql-stat-val"><?php echo (int)$answered_count; ?></div>
+				<div class="ql-stat-label">Answered</div>
 			</div>
-			<div class="q2-stat">
-				<div class="q2-stat-num col-green"><?php echo (int) $correct_count; ?></div>
-				<div class="q2-stat-label">Correct</div>
+			<div class="ql-stat s-correct">
+				<div class="ql-stat-val"><?php echo (int)$correct_count; ?></div>
+				<div class="ql-stat-label">Correct</div>
 			</div>
-			<div class="q2-stat">
-				<div class="q2-stat-num col-red"><?php echo (int) $wrong_count; ?></div>
-				<div class="q2-stat-label">Wrong</div>
+			<div class="ql-stat s-wrong">
+				<div class="ql-stat-val"><?php echo (int)$wrong_count; ?></div>
+				<div class="ql-stat-label">Wrong</div>
 			</div>
 		</div>
 
-		<!-- QUESTION LIST -->
-		<div class="q2-list">
+		<!-- List -->
+		<div class="ql-list">
 			<?php foreach ($selected_category->questions as $index => $question_item): ?>
 				<?php
-				$answer_state  = isset($user_answers[(int) $question_item->id]) ? $user_answers[(int) $question_item->id] : NULL;
-				$status        = 'pending';
-				$status_label  = 'Open';
-				$badge_class   = 'badge-open';
-				$amount_text   = 'Not answered';
-				$amount_class  = '';
+				$answer_state = isset($user_answers[(int)$question_item->id]) ? $user_answers[(int)$question_item->id] : NULL;
+				$question_status = strtolower(trim((string)(isset($question_item->status) ? $question_item->status : '')));
+				$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
+				$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
+				$now_ts = time();
+				$is_trade_open = $question_status === 'open'
+					&& ($start_ts === FALSE || $now_ts >= $start_ts)
+					&& ($end_ts === FALSE || $now_ts <= $end_ts);
+				$state        = 'state-pending';
+				$tag_class    = 'tag-pending';
+				$tag_icon     = 'fa-solid fa-circle';
+				$tag_label    = 'Open';
+				$payout_text  = 'Not answered';
+				$payout_class = 'neutral';
 
 				if ($answer_state) {
 					if (!empty($answer_state->settled_at)) {
-						$is_correct   = strtolower((string) $answer_state->answer) === strtolower((string) $question_item->answer_key);
-						$status       = $is_correct ? 'correct' : 'wrong';
-						$status_label = $is_correct ? 'Won' : 'Lost';
-						$badge_class  = $is_correct ? 'badge-won' : 'badge-lost';
-						$amount_text  = $is_correct ? '₹' . number_format((float) $answer_state->payout_amount, 2) : '₹0.00';
-						$amount_class = $is_correct ? 'win' : 'loss';
+						$is_correct   = strtolower((string)$answer_state->answer) === strtolower((string)$question_item->answer_key);
+						$state        = $is_correct ? 'state-correct' : 'state-wrong';
+						$tag_class    = $is_correct ? 'tag-won' : 'tag-lost';
+						$tag_icon     = $is_correct ? 'fa-solid fa-check' : 'fa-solid fa-xmark';
+						$tag_label    = $is_correct ? 'Won' : 'Lost';
+						$payout_text  = $is_correct ? '+ ₹' . number_format((float)$answer_state->payout_amount, 2) : '₹0.00';
+						$payout_class = $is_correct ? 'win' : 'loss';
 					} else {
-						$status       = 'pending';
-						$status_label = 'Waiting';
-						$badge_class  = 'badge-wait';
-						$amount_text  = 'Stake ₹' . number_format((float) $answer_state->stake_amount, 2);
+						$tag_class    = 'tag-review';
+						$tag_icon     = 'fa-solid fa-eye';
+						$tag_label    = 'Review question';
+						$payout_text  = 'Stake ₹' . number_format((float)$answer_state->stake_amount, 2);
+						$payout_class = 'neutral';
 					}
+				} elseif (!$is_trade_open) {
+					$tag_class = 'tag-not-open';
+					$tag_icon = 'fa-solid fa-lock';
+					$tag_label = 'Not open';
 				}
-
-				$num_class = ($status === 'correct') ? 'n-green' : (($status === 'wrong') ? 'n-red' : '');
 				?>
-				<a class="q2-card <?php echo $status; ?>" href="<?php echo site_url('questions/answer/' . (int) $question_item->id); ?>">
-					<div class="q2-card-inner">
-						<div class="q2-card-top">
-							<div class="q2-card-main">
-								<div class="q2-num <?php echo $num_class; ?>"><?php echo $index + 1; ?></div>
-								<div class="q2-question"><?php echo html_escape($question_item->question); ?></div>
+				<a class="ql-card <?php echo $state; ?>" href="<?php echo site_url('questions/answer/' . (int)$question_item->id); ?>">
+					<div class="ql-card-body">
+
+						<div class="ql-card-row">
+							<div class="ql-card-title-group">
+								<div class="ql-idx"><?php echo $index + 1; ?></div>
+								<div class="ql-question-text"><?php echo html_escape($question_item->question); ?></div>
 							</div>
-							<span class="q2-badge <?php echo $badge_class; ?>">
-								<?php if ($status === 'correct'): ?><i class="fa-solid fa-check"></i>
-								<?php elseif ($status === 'wrong'): ?><i class="fa-solid fa-xmark"></i>
-								<?php elseif ($status_label === 'Waiting'): ?><i class="fa-solid fa-clock"></i>
-								<?php else: ?><i class="fa-solid fa-circle" style="font-size:7px"></i>
-								<?php endif; ?>
-								<?php echo $status_label; ?>
+							<span class="ql-status-tag <?php echo $tag_class; ?>">
+								<i class="<?php echo $tag_icon; ?>" style="font-size:9px"></i>
+								<?php echo $tag_label; ?>
 							</span>
 						</div>
 
-						<div class="q2-odds">
-							<div class="q2-odd odd-yes">
-								<span>YES</span>
-								<span class="q2-odd-val">₹<?php echo number_format((float) $question_item->yes_price, 2); ?></span>
+						<div class="ql-odds-row">
+							<span class="ql-odds-label">Odds</span>
+							<div class="ql-odd-chip yes">
+								<span class="chip-label">YES</span>
+								<span class="chip-val">₹<?php echo number_format((float)$question_item->yes_price, 2); ?></span>
 							</div>
-							<div class="q2-separator"></div>
-							<div class="q2-odd odd-no">
-								<span>NO</span>
-								<span class="q2-odd-val">₹<?php echo number_format((float) $question_item->no_price, 2); ?></span>
+							<div class="ql-odd-chip no">
+								<span class="chip-label">NO</span>
+								<span class="chip-val">₹<?php echo number_format((float)$question_item->no_price, 2); ?></span>
 							</div>
 						</div>
 
-						<div class="q2-users-bar">
-							<i class="fa fa-users"></i>
-							<strong><?php echo (int) (isset($question_item->total_users) ? $question_item->total_users : 0); ?></strong>
-							<span>users joined</span>
+						<div class="ql-users-strip">
+							<i class="fa-solid fa-users" style="font-size:12px;color:var(--ql-muted)"></i>
+							<strong><?php echo (int)(isset($question_item->total_users) ? $question_item->total_users : 0); ?></strong>
+							traders joined
 						</div>
 
-						<div class="q2-card-foot">
-							<div class="q2-foot-left">
+						<div class="ql-card-footer">
+							<div class="ql-footer-left">
 								<?php if ($answer_state): ?>
-									<i class="fa-solid fa-lock"></i> Answer locked
+									<i class="fa-solid fa-eye" style="font-size:11px"></i> Review question
+								<?php elseif ($is_trade_open): ?>
+									<i class="fa-solid fa-circle-dot" style="font-size:11px;color:var(--ql-blue)"></i> Open to trade
 								<?php else: ?>
-									<i class="fa-solid fa-arrow-pointer"></i> Open to trade
+									<i class="fa-solid fa-lock" style="font-size:11px"></i> Not open for trade
 								<?php endif; ?>
 							</div>
-							<div style="display:flex;align-items:center;gap:14px">
-								<span class="q2-foot-right <?php echo $amount_class; ?>"><?php echo $amount_text; ?></span>
-								<span class="q2-arrow-wrap">Trade <i class="fa-solid fa-arrow-right"></i></span>
+							<div class="ql-footer-right">
+								<span class="ql-payout <?php echo $payout_class; ?>"><?php echo $payout_text; ?></span>
+								<span class="ql-trade-btn">Trade <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
 							</div>
 						</div>
+
 					</div>
 				</a>
 			<?php endforeach; ?>
@@ -611,18 +708,18 @@
 
 	<?php elseif ($selected_category): ?>
 
-		<div class="q2-empty">
-			<div class="q2-empty-icon"><i class="fa-solid fa-inbox"></i></div>
-			<h3>No Questions Found</h3>
-			<p>This category has no questions yet. Please choose another category from the list above.</p>
+		<div class="ql-empty">
+			<div class="ql-empty-icon"><i class="fa-solid fa-inbox"></i></div>
+			<h3>No Questions Yet</h3>
+			<p>This category has no questions. Please choose another category from the list above.</p>
 		</div>
 
 	<?php else: ?>
 
-		<div class="q2-empty">
-			<div class="q2-empty-icon"><i class="fa-solid fa-grid-2"></i></div>
+		<div class="ql-empty">
+			<div class="ql-empty-icon"><i class="fa-solid fa-hand-pointer"></i></div>
 			<h3>Pick a Category</h3>
-			<p>Select any category capsule above and all its questions will load here instantly — no page refresh needed.</p>
+			<p>Select any category above and its questions will appear here instantly — no page reload.</p>
 		</div>
 
 	<?php endif; ?>

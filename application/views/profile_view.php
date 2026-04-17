@@ -643,7 +643,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 				if (file) {
 					// Validate file size (2MB)
 					if (file.size > 2 * 1024 * 1024) {
-						alert('File size must be less than 2MB');
+						if (typeof userSwalAlert === 'function') {
+							userSwalAlert('File size must be less than 2MB', 'error');
+						}
 						this.value = '';
 						return;
 					}
@@ -651,7 +653,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 					// Validate file type
 					const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 					if (!validTypes.includes(file.type)) {
-						alert('Please upload a valid image file (JPG, PNG, GIF, or WebP)');
+						if (typeof userSwalAlert === 'function') {
+							userSwalAlert('Please upload a valid image file (JPG, PNG, GIF, or WebP)', 'error');
+						}
 						this.value = '';
 						return;
 					}
@@ -703,7 +707,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 			passwordForm.addEventListener('submit', function(e) {
 				if (newPassword.value.length < 6) {
 					e.preventDefault();
-					alert('Password must be at least 6 characters long!');
+					if (typeof userSwalAlert === 'function') {
+						userSwalAlert('Password must be at least 6 characters long!', 'error');
+					}
 					newPassword.focus();
 				}
 			});

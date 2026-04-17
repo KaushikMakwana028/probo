@@ -23,12 +23,6 @@
 					<label>No Price</label>
 					<strong>Rs <?php echo number_format((float) $question->no_price, 2); ?></strong>
 				</div>
-				<div class="form-group">
-					<label>Multiplier</label>
-					<input type="number" step="0.01" name="multiplier"
-						value="<?php echo $question->multiplier ?? 1.25; ?>"
-						class="form-control" required>
-				</div>
 			</div>
 
 			<div class="question-edit-links">
@@ -82,6 +76,11 @@
 				<div class="form-group">
 					<label for="no_price">No Price</label>
 					<input type="number" id="no_price" name="no_price" min="0.01" step="0.01" value="<?php echo set_value('no_price', number_format((float) $question->no_price, 2, '.', '')); ?>" required>
+				</div>
+
+				<div class="form-group">
+					<label for="multiplier">Multiplier</label>
+					<input type="number" id="multiplier" name="multiplier" min="0.01" step="0.01" value="<?php echo set_value('multiplier', number_format((float) ($question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
 				</div>
 
 				<div class="form-group">

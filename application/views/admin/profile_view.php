@@ -761,14 +761,18 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 				// Validate file type
 				const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 				if (!validTypes.includes(file.type)) {
-					alert('❌ Please select a valid image file (JPG, PNG, GIF, or WebP)');
+					if (typeof adminSwalAlert === 'function') {
+						adminSwalAlert('Please select a valid image file (JPG, PNG, GIF, or WebP)', 'error');
+					}
 					this.value = '';
 					return;
 				}
 
 				// Validate file size (max 5MB)
 				if (file.size > 5 * 1024 * 1024) {
-					alert('❌ Image size must be less than 5MB');
+					if (typeof adminSwalAlert === 'function') {
+						adminSwalAlert('Image size must be less than 5MB', 'error');
+					}
 					this.value = '';
 					return;
 				}
@@ -806,14 +810,18 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 
 			if (newPassword !== confirmPassword) {
 				e.preventDefault();
-				alert('❌ New password and confirmation password do not match!');
+				if (typeof adminSwalAlert === 'function') {
+					adminSwalAlert('New password and confirmation password do not match!', 'error');
+				}
 				document.getElementById('confirm_password').focus();
 				return false;
 			}
 
 			if (newPassword.length < 8) {
 				e.preventDefault();
-				alert('❌ Password must be at least 8 characters long!');
+				if (typeof adminSwalAlert === 'function') {
+					adminSwalAlert('Password must be at least 8 characters long!', 'error');
+				}
 				document.getElementById('new_password').focus();
 				return false;
 			}

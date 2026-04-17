@@ -85,6 +85,7 @@ class Questions extends CI_Controller
 		$this->get_admin();
 		$this->form_validation->set_rules('category_id', 'Category', 'required|integer');
 		$this->form_validation->set_rules('question_count', 'Question count', 'required|integer|greater_than[0]|less_than_equal_to[100]');
+		$this->form_validation->set_rules('multiplier', 'Multiplier', 'required|numeric|greater_than[0]');
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
@@ -103,6 +104,7 @@ class Questions extends CI_Controller
 		$questions_input = $this->input->post('questions');
 		$yes_prices = $this->input->post('yes_prices');
 		$no_prices = $this->input->post('no_prices');
+		$multiplier = (float) $this->input->post('multiplier', TRUE);
 		$start_time = trim((string) $this->input->post('start_time', TRUE));
 		$end_time = trim((string) $this->input->post('end_time', TRUE));
 		$start_time_sql = $this->normalize_datetime_input($start_time);
@@ -129,7 +131,6 @@ class Questions extends CI_Controller
 			$question_text = isset($questions_input[$i]) ? trim($questions_input[$i]) : '';
 			$yes_price = isset($yes_prices[$i]) ? (float) $yes_prices[$i] : 0;
 			$no_price = isset($no_prices[$i]) ? (float) $no_prices[$i] : 0;
-			$multiplier = (float) $this->input->post('multiplier');
 
 			if ($question_text === '') {
 				$this->session->set_flashdata('error', 'Please fill all question textboxes before saving.');
@@ -214,6 +215,7 @@ class Questions extends CI_Controller
 		$this->form_validation->set_rules('question', 'Question', 'required|trim');
 		$this->form_validation->set_rules('yes_price', 'Yes price', 'required|numeric');
 		$this->form_validation->set_rules('no_price', 'No price', 'required|numeric');
+		$this->form_validation->set_rules('multiplier', 'Multiplier', 'required|numeric|greater_than[0]');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[draft,open,closed]');
 
 		if ($this->form_validation->run() === FALSE) {
