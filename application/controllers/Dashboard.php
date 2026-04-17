@@ -92,6 +92,32 @@ class Dashboard extends CI_Controller
 		$this->load->view('includes/footer', $data);
 	}
 
+	public function notifications()
+	{
+		$user = $this->User_model->get_by_id($this->session->userdata('user_id'));
+
+		if (!$user) {
+			$this->session->sess_destroy();
+			redirect('login');
+		}
+
+		$notifications = $this->User_model->get_notifications_by_user($user->id, NULL);
+		$unread_notifications = $this->User_model->count_unread_notifications($user->id);
+
+		$data = array(
+			'title' => 'Notifications',
+			'page_type' => 'dashboard',
+			'user' => $user,
+			'notifications' => $notifications,
+			'unread_notifications' => $unread_notifications,
+			'active_page' => 'notifications'
+		);
+
+		$this->load->view('includes/header', $data);
+		$this->load->view('notifications_view', $data);
+		$this->load->view('includes/footer', $data);
+	}
+
 	public function mark_notifications_read()
 	{
 		$user = $this->User_model->get_by_id($this->session->userdata('user_id'));
@@ -103,6 +129,50 @@ class Dashboard extends CI_Controller
 
 		$this->User_model->mark_all_notifications_read($user->id);
 		$this->session->set_flashdata('success', 'Notifications marked as read.');
-		redirect('dashboard');
+
+		$redirect_to = trim((string) $this->input->get('redirect_to', TRUE));
+		if ($redirect_to !== '') {
+			redirect($redirect_to);
+		}
+
+		redirect('dashboard/notifications');
+	}
+
+	public function mark_notification_read()
+	{
+		$user = $this->User_model->get_by_id($this->session->userdata('user_id'));
+
+		if (!$user) {
+			$this->output
+				->set_status_header(401)
+				->set_content_type('application/json')
+				->set_output(json_encode(array(
+					'success' => false,
+					'message' => 'Unauthorized'
+				)));
+			return;
+		}
+
+		$notification_id = (int) $this->input->post('notification_id');
+		if ($notification_id <= 0) {
+			$this->output
+				->set_status_header(400)
+				->set_content_type('application/json')
+				->set_output(json_encode(array(
+					'success' => false,
+					'message' => 'Invalid notification id'
+				)));
+			return;
+		}
+
+		$updated = $this->User_model->mark_notification_read($user->id, $notification_id);
+		$unread_notifications = $this->User_model->count_unread_notifications($user->id);
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => (bool) $updated,
+				'unread_notifications' => $unread_notifications
+			)));
 	}
 }

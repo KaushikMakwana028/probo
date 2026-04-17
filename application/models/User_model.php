@@ -327,7 +327,9 @@ class User_model extends CI_Model {
 
 		$this->db->where('user_id', (int) $user_id);
 		$this->db->order_by('id', 'DESC');
-		$this->db->limit(max(1, (int) $limit));
+		if ($limit !== NULL) {
+			$this->db->limit(max(1, (int) $limit));
+		}
 		return $this->db->get($this->notifications_table)->result();
 	}
 
@@ -349,6 +351,18 @@ class User_model extends CI_Model {
 		}
 
 		$this->db->where('user_id', (int) $user_id);
+		return $this->db->update($this->notifications_table, array('is_read' => 1));
+	}
+
+	public function mark_notification_read($user_id, $notification_id)
+	{
+		if (!$this->db->table_exists($this->notifications_table)) {
+			return FALSE;
+		}
+
+		$this->db->where('user_id', (int) $user_id);
+		$this->db->where('id', (int) $notification_id);
+		$this->db->where('is_read', 0);
 		return $this->db->update($this->notifications_table, array('is_read' => 1));
 	}
 

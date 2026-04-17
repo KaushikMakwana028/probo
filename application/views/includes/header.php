@@ -370,6 +370,7 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 			font-size: 14px;
 			transition: all 0.2s;
 			margin-bottom: 4px;
+			position: relative;
 		}
 
 		.sidebar-nav a:hover {
@@ -387,6 +388,22 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 			width: 20px;
 			text-align: center;
 			font-size: 18px;
+		}
+
+		.sidebar-notify-dot {
+			margin-left: auto;
+			min-width: 22px;
+			height: 22px;
+			padding: 0 6px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.18);
+			color: #fff;
+			font-size: 11px;
+			font-weight: 800;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
 		}
 
 		body.sidebar-collapsed .sidebar {
@@ -503,6 +520,7 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 			cursor: pointer;
 			transition: all 0.2s;
 			box-shadow: var(--shadow-xs);
+			text-decoration: none;
 		}
 
 		.notification-trigger:hover {
@@ -1166,42 +1184,12 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 
 					<div class="topbar-actions">
 						<div class="notification-menu" id="notificationMenu">
-							<button class="notification-trigger" id="notificationTrigger" type="button" aria-label="Notifications">
+							<a class="notification-trigger" id="notificationTrigger" href="<?php echo site_url('dashboard/notifications'); ?>" aria-label="Notifications">
 								<i class="fa-regular fa-bell"></i>
 								<?php if ((int) $unread_notifications > 0): ?>
 									<span class="notification-badge"><?php echo (int) $unread_notifications; ?></span>
 								<?php endif; ?>
-							</button>
-							<div class="notification-dropdown">
-								<div class="notification-head">
-									<div>
-										<h3>Notifications</h3>
-										<p>Trades, wallet and system updates</p>
-									</div>
-									<a class="notification-mark" href="<?php echo site_url('dashboard/mark-notifications-read'); ?>">
-										<i class="fa-solid fa-check"></i>
-										Mark all read
-									</a>
-								</div>
-								<div class="notification-list">
-									<?php if (!empty($notifications)): ?>
-										<?php foreach ($notifications as $n): ?>
-											<div class="notification-item <?php echo empty($n->is_read) ? 'unread' : ''; ?>">
-												<strong><?php echo html_escape($n->title); ?></strong>
-												<p><?php echo html_escape($n->message); ?></p>
-												<?php if (!empty($n->created_at)): ?>
-													<span><?php echo html_escape($n->created_at); ?></span>
-												<?php endif; ?>
-											</div>
-										<?php endforeach; ?>
-									<?php else: ?>
-										<div class="notification-empty">
-											<i class="fa-regular fa-bell-slash"></i>
-											<p>No notifications yet. Your latest market and wallet alerts will appear here.</p>
-										</div>
-									<?php endif; ?>
-								</div>
-							</div>
+							</a>
 						</div>
 
 						<div class="profile-menu" id="profileMenu">
@@ -1233,4 +1221,3 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 
 				<div class="page-grid">
 				<?php endif; ?>
-
