@@ -220,7 +220,7 @@ class Login extends CI_Controller {
 			'reset_token_expiry' => $expiry
 		));
 
-		$this->email->from('trilexadvisories@gmail.com', 'PROBO');
+		$this->email->from('trilexadvisories@gmail.com', 'PROGO11');
 		$this->email->to($user->email);
 		$this->email->subject('Your Password Reset Code');
 		$this->email->message("Hello ".$user->name.",\r\n\r\nYour password reset code is: ".$code."\r\n\r\nEnter this code in the reset form. This code will expire in 1 hour.");

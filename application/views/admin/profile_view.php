@@ -30,6 +30,10 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		box-sizing: border-box;
 	}
 
+	:root {
+		--f-body: 'Roboto', sans-serif;
+	}
+
 	/* Flash Messages */
 	.message {
 		display: flex;
@@ -381,7 +385,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		background: #f9fafb;
 		color: #111827;
 		font-weight: 500;
-		font-family: inherit;
+		font-family: var(--f-body);
 	}
 
 	.form-group input:focus,
@@ -424,7 +428,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 		position: relative;
 		overflow: hidden;
-		font-family: inherit;
+		font-family: var(--f-body);
 	}
 
 	.btn-primary::before {

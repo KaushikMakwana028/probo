@@ -537,6 +537,10 @@
 </div>
 
 <style>
+    :root {
+        --f-body: 'Roboto', sans-serif;
+    }
+
     *,
     *::before,
     *::after {
@@ -544,7 +548,7 @@
     }
 
     .ps-wrap {
-        font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+        font-family: var(--f-body);
         padding: 0 0 48px;
         max-width: 1200px;
     }
@@ -785,7 +789,7 @@
         font-size: 0.88rem;
         color: #111827;
         background: #fff;
-        font-family: inherit;
+        font-family: var(--f-body);
         transition: border-color 0.18s, box-shadow 0.18s;
         outline: none;
     }
@@ -953,7 +957,7 @@
         font-size: 0.78rem;
         color: #6B7280;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
         padding: 4px 8px;
         border-radius: 6px;
         transition: background 0.15s;
@@ -982,7 +986,7 @@
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
         transition: all 0.18s;
     }
 
@@ -1003,7 +1007,7 @@
         font-size: 0.88rem;
         font-weight: 500;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
         transition: all 0.18s;
     }
 
@@ -1160,7 +1164,7 @@
         text-decoration: none;
         border: none;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
         transition: background 0.18s;
     }
 
@@ -1301,7 +1305,7 @@
         padding: 9px 14px;
         border-radius: 999px;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
     }
 
     .ps-doc-lang-btn.is-active {

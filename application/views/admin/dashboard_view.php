@@ -345,7 +345,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 <div class="db2-page">
 	<section class="db2-hero">
 		<div>
-			<h2 class="db2-hero-title">PROBO Admin Dashboard</h2>
+			<h2 class="db2-hero-title">PROGO11 Admin Dashboard</h2>
 			<p class="db2-hero-sub">Platform overview for accounts, categories and questions.</p>
 		</div>
 		<div class="db2-chip">

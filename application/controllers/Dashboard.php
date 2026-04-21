@@ -69,7 +69,7 @@ class Dashboard extends CI_Controller
 		$unread_notifications = $this->User_model->count_unread_notifications($user->id);
 		$register_url = site_url('login/register');
 
-		$share_message = 'Join PROBO and use my referral code ' . $referral_code .
+		$share_message = 'Join PROGO11 and use my referral code ' . $referral_code .
 			'. Earn ₹' . number_format((float)$referral_settings['referrer_bonus'], 2) .
 			' on signup! Sign up here: ' . $register_url;
 

@@ -1138,28 +1138,31 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 					<div class="brand-logo">
 						<!-- <div class="brand-icon">📋</div> -->
 						<div class="brand-text">
-							<h2>PROBO</h2>
+							<h2>PROGO11</h2>
 							<!-- <p>Assessment</p> -->
+						</div>
+					</div>
+				</div>
 
 				<div class="sidebar-section">
 					<div class="sidebar-label">Navigation</div>
 					<nav class="sidebar-nav">
-						<a class="<?php echo (isset($active_page) && $active_page === 'dashboard') ? 'active' : ''; ?>" href="<?php echo site_url('dashboard'); ?>">
+						<a class="<?php echo (isset($active_page) && $active_page === 'dashboard') ? 'active' : ''; ?>" href="<?php echo site_url('dashboard'); ?>" title="Dashboard">
 							<i class="fa-solid fa-chart-pie"></i>
 							<span>Dashboard</span>
 						</a>
 
-						<a class="<?php echo (isset($active_page) && $active_page === 'questions') ? 'active' : ''; ?>" href="<?php echo site_url('questions'); ?>">
+						<a class="<?php echo (isset($active_page) && $active_page === 'questions') ? 'active' : ''; ?>" href="<?php echo site_url('questions'); ?>" title="Questions">
 							<i class="fa-solid fa-clipboard-question"></i>
 							<span>Questions</span>
 						</a>
 
-						<a href="<?php echo site_url('wallet/add_balance'); ?>">
+						<a href="<?php echo site_url('wallet/add_balance'); ?>" title="Add Balance">
 							<i class="fas fa-wallet"></i>
 							<span>Add Balance</span>
 						</a>
 
-						<a class="<?php echo (isset($active_page) && $active_page === 'referral') ? 'active' : ''; ?>" href="<?php echo site_url('referral'); ?>">
+						<a class="<?php echo (isset($active_page) && $active_page === 'referral') ? 'active' : ''; ?>" href="<?php echo site_url('referral'); ?>" title="Referral Program">
 							<i class="fa-solid fa-gift"></i>
 							<span>Referral Program</span>
 						</a>
@@ -1209,6 +1212,11 @@ if (isset($page_type) && $page_type === 'dashboard' && isset($user)) {
 								<a href="<?php echo site_url('profile'); ?>">
 									<span class="profile-dropdown-icon"><i class="fa-solid fa-user"></i></span>
 									<span>Profile</span>
+								</a>
+
+								<a href="<?php echo site_url('history'); ?>">
+									<span class="profile-dropdown-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+									<span>History</span>
 								</a>
 								<a class="danger-link" href="<?php echo site_url('logout'); ?>">
 									<span class="profile-dropdown-icon"><i class="fa-solid fa-right-from-bracket"></i></span>

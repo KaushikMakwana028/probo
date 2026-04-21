@@ -60,6 +60,9 @@ class Questions extends CI_Controller
 				// admin added users
 				$admin_users = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
 
+				$question_item->real_users = $real_users;
+				$question_item->admin_users = $admin_users;
+
 				// final
 				$question_item->total_users = $real_users + $admin_users;
 			}
@@ -78,6 +81,125 @@ class Questions extends CI_Controller
 		$this->load->view('admin/includes/header', $data);
 		$this->load->view('admin/questions_list_view', $data);
 		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function detail($id)
+	{
+		$admin = $this->get_admin();
+		$context = $this->build_question_detail_context((int) $id);
+
+		if (!$context) {
+			$this->session->set_flashdata('error', 'Question details could not be loaded.');
+			redirect('admin/questions/view');
+		}
+
+		$data = array(
+			'title' => 'Question Details',
+			'page_type' => 'dashboard',
+			'admin' => $admin,
+			'active_page' => 'questions_view',
+			'categories' => $this->Category_model->get_all_categories(),
+			'selected_category' => $context['selected_category'],
+			'selected_question' => $context['selected_question'],
+			'total_questions' => $this->Category_model->count_all_questions()
+		);
+
+		$this->load->view('admin/includes/header', $data);
+		$this->load->view('admin/question_detail_view', $data);
+		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function detail_users($id)
+	{
+		$admin = $this->get_admin();
+		$context = $this->build_question_detail_context((int) $id);
+
+		if (!$context) {
+			$this->session->set_flashdata('error', 'Question details could not be loaded.');
+			redirect('admin/questions/view');
+		}
+
+		$data = array(
+			'title' => 'Question User Details',
+			'page_type' => 'dashboard',
+			'admin' => $admin,
+			'active_page' => 'questions_view',
+			'categories' => $this->Category_model->get_all_categories(),
+			'selected_category' => $context['selected_category'],
+			'selected_question' => $context['selected_question'],
+			'total_questions' => $this->Category_model->count_all_questions()
+		);
+
+		$this->load->view('admin/includes/header', $data);
+		$this->load->view('admin/question_user_details_view', $data);
+		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function detail_users_data($id)
+	{
+		$this->get_admin();
+		$context = $this->build_question_detail_context((int) $id);
+
+		if (!$context) {
+			$this->output
+				->set_content_type('application/json')
+				->set_status_header(404)
+				->set_output(json_encode(array(
+					'status' => 'error',
+					'message' => 'Question not found.'
+				)));
+			return;
+		}
+
+		// 🔥 GET FILTER INPUTS
+		$from = $this->input->get('from', TRUE);
+		$to   = $this->input->get('to', TRUE);
+
+		// 🔥 CONVERT TO MYSQL DATETIME FORMAT
+		$from_sql = !empty($from) ? date('Y-m-d H:i:s', strtotime($from)) : '';
+		$to_sql   = !empty($to)   ? date('Y-m-d H:i:s', strtotime($to)) : '';
+
+		// 🔥 FETCH DATA FROM MODEL
+		$report = $this->Category_model->get_question_user_trade_report((int) $id, array(
+			'search' => $this->input->get('search', TRUE),
+			'answer' => $this->input->get('answer', TRUE),
+			'result' => $this->input->get('result', TRUE),
+			'page' => $this->input->get('page', TRUE),
+			'per_page' => $this->input->get('per_page', TRUE),
+			'from' => $from_sql,
+			'to'   => $to_sql
+		));
+
+		// 🔥 FORMAT RESPONSE
+		$rows = array();
+		foreach ($report['rows'] as $row) {
+			$rows[] = array(
+				'id' => (int) $row->id,
+				'user_id' => (int) $row->user_id,
+				'name' => (string) $row->name,
+				'mobile' => (string) $row->mobile,
+				'email' => (string) $row->email,
+				'answer' => strtolower((string) $row->answer),
+				'quantity' => (int) $row->quantity,
+				'stake_amount' => (float) $row->stake_amount,
+				'payout_amount' => (float) $row->payout_amount,
+				'win_amount' => (float) $row->payout_amount,
+				'result_status' => (string) $row->result_status,
+				'price' => (float) $row->price,
+				'created_at' => $row->created_at
+			);
+		}
+
+		// 🔥 OUTPUT JSON
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status' => 'ok',
+				'rows' => $rows,
+				'total' => (int) $report['total'],
+				'page' => (int) $report['page'],
+				'per_page' => (int) $report['per_page']
+			)));
 	}
 
 	public function create()
@@ -280,13 +402,14 @@ class Questions extends CI_Controller
 		$this->Category_model->record_price_history($id, $yes_price, $no_price);
 
 		$this->session->set_flashdata('success', 'Question updated successfully. Please save the answer key again from View Questions.');
-		redirect('admin/questions/view?category_id=' . $category_id);
+		redirect('admin/questions/detail/' . $id);
 	}
 
 	public function save_answer_keys()
 	{
 		$this->get_admin();
 		$category_id = (int) $this->input->post('category_id');
+		$selected_question_id = (int) $this->input->post('question_id');
 		$category = $this->Category_model->get_category_with_questions($category_id);
 
 		if (!$category || empty($category->questions)) {
@@ -295,10 +418,14 @@ class Questions extends CI_Controller
 		}
 
 		$answer_keys = $this->input->post('answer_keys');
+		if ($selected_question_id <= 0 && is_array($answer_keys)) {
+			$answer_key_ids = array_keys($answer_keys);
+			$selected_question_id = !empty($answer_key_ids) ? (int) $answer_key_ids[0] : 0;
+		}
 
 		if (!is_array($answer_keys) || !$this->Category_model->save_answer_keys($category_id, $answer_keys)) {
 			$this->session->set_flashdata('error', 'Please select at least one valid Yes or No answer key.');
-			redirect('admin/questions/view?category_id=' . $category_id);
+			redirect($selected_question_id > 0 ? 'admin/questions/detail/' . $selected_question_id : 'admin/questions/view?category_id=' . $category_id);
 		}
 
 		$resolved_any = FALSE;
@@ -326,7 +453,7 @@ class Questions extends CI_Controller
 		}
 
 		$this->session->set_flashdata('success', $resolved_any ? 'Answer key saved successfully and winning amount credited to user wallets.' : 'Answer key saved successfully.');
-		redirect('admin/questions/view?category_id=' . $category_id);
+		redirect($selected_question_id > 0 ? 'admin/questions/detail/' . $selected_question_id : 'admin/questions/view?category_id=' . $category_id);
 	}
 
 	public function delete($id)
@@ -390,6 +517,49 @@ class Questions extends CI_Controller
 		}
 
 		return $admin;
+	}
+
+	private function build_question_detail_context($id)
+	{
+		$id = (int) $id;
+		$question = $this->Category_model->get_question($id);
+
+		if (!$question) {
+			return NULL;
+		}
+
+		$selected_category = $this->Category_model->get_category_with_questions((int) $question->category_id);
+		$selected_question = NULL;
+
+		if ($selected_category && !empty($selected_category->questions)) {
+			foreach ($selected_category->questions as $question_item) {
+				$trade_breakdown = $this->Category_model->get_question_trade_breakdown((int) $question_item->id);
+				$question_item->trade_totals = $trade_breakdown;
+				$question_item->user_counts = array(
+					'yes_users' => isset($trade_breakdown['yes_users']) ? (int) $trade_breakdown['yes_users'] : 0,
+					'no_users' => isset($trade_breakdown['no_users']) ? (int) $trade_breakdown['no_users'] : 0
+				);
+
+				$real_users = $this->Category_model->get_total_users_by_question($question_item->id);
+				$admin_users = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
+				$question_item->real_users = $real_users;
+				$question_item->admin_users = $admin_users;
+				$question_item->total_users = $real_users + $admin_users;
+
+				if ((int) $question_item->id === $id) {
+					$selected_question = $question_item;
+				}
+			}
+		}
+
+		if (!$selected_question) {
+			return NULL;
+		}
+
+		return array(
+			'selected_category' => $selected_category,
+			'selected_question' => $selected_question
+		);
 	}
 
 	private function set_validation_error_flashdata()

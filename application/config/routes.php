@@ -78,6 +78,7 @@ $route['wallet/request-withdrawal'] = 'wallet/request_withdrawal';
 $route['profile'] = 'profile';
 $route['profile/update'] = 'profile/update';
 $route['profile/change-password'] = 'profile/change_password';
+$route['history'] = 'history';
 
 $route['admin'] = 'admin/login';
 $route['admin/login'] = 'admin/login';
@@ -99,6 +100,9 @@ $route['admin/categories/delete/(:num)'] = 'admin/categories/delete/$1';
 $route['admin/questions'] = 'admin/questions';
 $route['admin/questions/add'] = 'admin/questions/add';
 $route['admin/questions/view'] = 'admin/questions/view';
+$route['admin/questions/detail/(:num)'] = 'admin/questions/detail/$1';
+$route['admin/questions/detail-users/(:num)'] = 'admin/questions/detail_users/$1';
+$route['admin/questions/detail-users-data/(:num)'] = 'admin/questions/detail_users_data/$1';
 $route['admin/questions/create'] = 'admin/questions/create';
 $route['admin/questions/edit/(:num)'] = 'admin/questions/edit/$1';
 $route['admin/questions/update/(:num)'] = 'admin/questions/update/$1';

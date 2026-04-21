@@ -270,7 +270,7 @@
 		border: 1px solid #d1d5db;
 		border-radius: 16px;
 		font-size: 14px;
-		font-family: inherit;
+		font-family: 'Roboto', sans-serif;
 		background: #fff;
 	}
 

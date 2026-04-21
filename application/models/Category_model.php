@@ -617,4 +617,126 @@ class Category_model extends CI_Model
 			->where('question_id', (int)$question_id)
 			->count_all_results('user_question_answers');
 	}
+
+	public function get_question_user_trade_report($question_id, $filters = array())
+	{
+		if (
+			!$this->db->table_exists($this->answer_table) ||
+			!$this->db->table_exists($this->question_table) ||
+			!$this->db->table_exists('users')
+		) {
+			return array('rows' => array(), 'total' => 0);
+		}
+
+		$question_id = (int) $question_id;
+		$search = strtolower(trim((string) ($filters['search'] ?? '')));
+		$answer_filter = strtolower(trim((string) ($filters['answer'] ?? 'all')));
+		$result_filter = strtolower(trim((string) ($filters['result'] ?? 'all')));
+		$from = trim((string) ($filters['from'] ?? ''));
+		$to   = trim((string) ($filters['to'] ?? ''));
+		$page = max(1, (int) ($filters['page'] ?? 1));
+		$per_page = max(1, min(100, (int) ($filters['per_page'] ?? 10)));
+		$offset = ($page - 1) * $per_page;
+
+		$base_sql = "
+        FROM {$this->answer_table} a
+        INNER JOIN {$this->question_table} q ON q.id = a.question_id
+        INNER JOIN users u ON u.id = a.user_id
+        WHERE a.question_id = ?
+    ";
+		$params = array($question_id);
+
+		// 🔍 SEARCH
+		if ($search !== '') {
+			$base_sql .= " AND (LOWER(u.name) LIKE ? OR LOWER(u.mobile) LIKE ? OR LOWER(u.email) LIKE ?)";
+			$term = '%' . $search . '%';
+			$params[] = $term;
+			$params[] = $term;
+			$params[] = $term;
+		}
+
+		// 🎯 ANSWER FILTER
+		if (in_array($answer_filter, array('yes', 'no'), TRUE)) {
+			$base_sql .= " AND LOWER(a.answer) = ?";
+			$params[] = $answer_filter;
+		}
+
+		// 🧠 RESULT FILTER
+		if ($result_filter === 'win') {
+			$base_sql .= " AND a.settled_at IS NOT NULL AND LOWER(a.answer) = LOWER(COALESCE(q.answer_key, ''))";
+		} elseif ($result_filter === 'lose') {
+			$base_sql .= " AND a.settled_at IS NOT NULL AND LOWER(a.answer) <> LOWER(COALESCE(q.answer_key, '')) AND COALESCE(q.answer_key, '') <> ''";
+		} elseif ($result_filter === 'pending') {
+			$base_sql .= " AND a.settled_at IS NULL";
+		}
+
+		// 🔥 TIME FILTER (FIXED → created_at)
+		if ($from !== '') {
+			$base_sql .= " AND a.created_at >= ?";
+			$params[] = $from;
+		}
+
+		if ($to !== '') {
+			$base_sql .= " AND a.created_at <= ?";
+			$params[] = $to;
+		}
+
+		// 📊 COUNT
+		$count_sql = "SELECT COUNT(*) AS total " . $base_sql;
+		$count_row = $this->db->query($count_sql, $params)->row();
+		$total = (int) ($count_row->total ?? 0);
+
+		// 📋 LIST
+		$list_sql = "
+        SELECT
+            a.id,
+            a.user_id,
+            a.answer,
+            a.price,
+            a.quantity,
+            a.stake_amount,
+            a.payout_amount,
+            a.created_at,
+            u.name,
+            u.mobile,
+            u.email,
+            q.answer_key,
+            CASE
+                WHEN a.settled_at IS NOT NULL AND LOWER(a.answer) = LOWER(COALESCE(q.answer_key, '')) THEN 1
+                WHEN a.settled_at IS NOT NULL AND LOWER(a.answer) <> LOWER(COALESCE(q.answer_key, '')) AND COALESCE(q.answer_key, '') <> '' THEN 2
+                ELSE 3
+            END AS result_priority
+        " . $base_sql . "
+        ORDER BY result_priority ASC, a.created_at ASC
+        LIMIT ? OFFSET ?
+    ";
+
+		$list_params = $params;
+		$list_params[] = $per_page;
+		$list_params[] = $offset;
+
+		$rows = $this->db->query($list_sql, $list_params)->result();
+
+		// 🎯 RESULT STATUS
+		foreach ($rows as $row) {
+			$answer = strtolower($row->answer ?? '');
+			$key = strtolower($row->answer_key ?? '');
+			$is_settled = !empty($row->answer_key);
+
+			$row->result_status = 'pending';
+
+			if ($is_settled && $key !== '') {
+				$row->result_status = ($answer === $key) ? 'win' : 'lose';
+			}
+
+			$row->win_amount = ($row->result_status === 'win') ? (float) $row->payout_amount : 0.0;
+		}
+
+		return array(
+			'rows' => $rows,
+			'total' => $total,
+			'page' => $page,
+			'per_page' => $per_page
+		);
+	}
 }

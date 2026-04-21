@@ -22,6 +22,7 @@
 			--accent-soft: #eef2ff;
 			--red: #ef4444;
 			--sidebar-w: 264px;
+			--f-body: 'Roboto', sans-serif;
 		}
 
 		*,
@@ -33,7 +34,7 @@
 		}
 
 		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			font-family: var(--f-body) !important;
 			color: var(--text);
 			background: var(--bg);
 			min-height: 100vh;
@@ -82,7 +83,7 @@
 			font-size: 15px;
 			outline: none;
 			transition: border-color .2s, box-shadow .2s;
-			font-family: inherit;
+			font-family: var(--f-body);
 		}
 
 		input:focus,
@@ -126,7 +127,7 @@
 			cursor: pointer;
 			transition: transform .2s, box-shadow .2s;
 			box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
-			font-family: inherit;
+			font-family: var(--f-body);
 		}
 
 		.btn-primary:hover {
@@ -461,7 +462,7 @@
 			border-radius: 999px;
 			padding: 4px 10px 4px 4px;
 			cursor: pointer;
-			font-family: inherit;
+			font-family: var(--f-body);
 			/* kill all native button chrome */
 			-webkit-appearance: none;
 			appearance: none;
@@ -803,7 +804,7 @@
 			<!-- SIDEBAR -->
 			<aside class="sidebar" id="adminSidebar">
 				<div class="sidebar-brand">
-					<p class="sidebar-brand-name">PROBO</p>
+					<p class="sidebar-brand-name">PROGO11</p>
 					<p class="sidebar-brand-sub">Admin Panel</p>
 				</div>
 
@@ -836,13 +837,13 @@
 							<a class="<?= ($active_page ?? '') == 'users' ? 'active' : '' ?>"
 								href="<?= site_url('admin/users') ?>">
 								<i class="fa fa-list"></i>
-								<span>All Users</span>
+								<span> All Users</span>
 							</a>
 
 							<a class="<?= ($active_page ?? '') == 'users_add' ? 'active' : '' ?>"
 								href="<?= site_url('admin/users/add_users_to_question') ?>">
 								<i class="fa fa-user-plus"></i>
-								<span>Add Users</span>
+								<span> Add Users</span>
 							</a>
 
 						</div>
@@ -863,12 +864,12 @@
 						<div class="sidebar-subnav">
 							<a class="<?php echo (isset($active_page) && $active_page === 'questions_add') ? 'active' : ''; ?>"
 								href="<?php echo site_url('admin/questions/add'); ?>">
-								<i class="fa-solid fa-plus"></i><span>Add Question</span>
+								<i class="fa-solid fa-plus"></i><span> Add Question</span>
 							</a>
 
 							<a class="<?php echo (isset($active_page) && $active_page === 'questions_view') ? 'active' : ''; ?>"
 								href="<?php echo site_url('admin/questions/view'); ?>">
-								<i class="fa-solid fa-eye"></i><span>View Questions</span>
+								<i class="fa-solid fa-eye"></i><span> View Questions</span>
 							</a>
 						</div>
 					</div>
@@ -907,12 +908,12 @@
 						<div class="sidebar-subnav">
 							<a class="<?php echo (isset($active_page) && $active_page === 'referrals_add') ? 'active' : ''; ?>"
 								href="<?php echo site_url('admin/referrals/add'); ?>">
-								<i class="fa-solid fa-plus"></i><span>Add Referral</span>
+								<i class="fa-solid fa-plus"></i><span> Add Referral</span>
 							</a>
 
 							<a class="<?php echo (isset($active_page) && $active_page === 'referrals_list') ? 'active' : ''; ?>"
 								href="<?php echo site_url('admin/referrals/list'); ?>">
-								<i class="fa-solid fa-list"></i><span>List Referral</span>
+								<i class="fa-solid fa-list"></i><span> List Referral</span>
 							</a>
 						</div>
 					</div>

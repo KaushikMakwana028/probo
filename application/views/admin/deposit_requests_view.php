@@ -482,10 +482,11 @@ $all_sorted = array_merge(
         --radius-sm: 6px;
         --radius-md: 10px;
         --radius-lg: 14px;
+        --f-body: 'Roboto', sans-serif;
     }
 
     .dr-wrap {
-        font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+        font-family: var(--f-body);
         padding: 16px 12px 48px;
         max-width: 1280px;
         width: 100%;
@@ -551,7 +552,7 @@ $all_sorted = array_merge(
         color: var(--gray-600);
         cursor: pointer;
         transition: all .15s;
-        font-family: inherit;
+        font-family: var(--f-body);
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -931,7 +932,7 @@ $all_sorted = array_merge(
         font-weight: 600;
         font-size: 0.9rem;
         color: var(--green-800);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--f-body);
     }
 
     .dr-receipt-btn {
@@ -1038,7 +1039,7 @@ $all_sorted = array_merge(
         font-weight: 600;
         cursor: pointer;
         transition: all .15s;
-        font-family: inherit;
+        font-family: var(--f-body);
         white-space: nowrap;
     }
 
@@ -1238,7 +1239,7 @@ $all_sorted = array_merge(
         font-size: 1.05rem;
         font-weight: 700;
         color: var(--green-800);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--f-body);
     }
 
     .dr-mcard__meta {
@@ -1297,7 +1298,7 @@ $all_sorted = array_merge(
         font-size: 0.84rem;
         font-weight: 600;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--f-body);
         transition: all .15s;
     }
 
@@ -1455,7 +1456,7 @@ $all_sorted = array_merge(
         font-weight: 600;
         color: var(--gray-700);
         font-size: 0.9rem;
-        font-family: 'Roboto', sans-serif;
+        font-family: var(--f-body);
     }
 
     /* ══════════════════════════════════════════════════

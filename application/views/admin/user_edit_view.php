@@ -664,7 +664,7 @@ $has_image   = !empty($user->profile_image);
 
 		/* Typography */
 		--f-body: 'Roboto', system-ui, -apple-system, sans-serif;
-		--f-display: 'DM Serif Display', Georgia, serif;
+		--f-display: 'Roboto', sans-serif;
 
 		/* Radii */
 		--rad-sm: 6px;

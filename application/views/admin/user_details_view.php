@@ -431,9 +431,9 @@ if ($has_address)          $profile_score += 25;
    TOKENS
 ───────────────────────────────────────── */
 	:root {
-		--f-display: 'DM Serif Display', Georgia, serif;
+		--f-display: 'Roboto', sans-serif;
 		--f-body: 'Roboto', system-ui, sans-serif;
-		--f-mono: 'DM Mono', monospace;
+		--f-mono: 'Roboto', sans-serif;
 
 		--c-ink: #1a1a1a;
 		--c-ink-2: #3d3d3d;

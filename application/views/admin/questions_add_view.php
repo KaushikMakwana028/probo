@@ -755,7 +755,7 @@ foreach ($categories as $category_item) {
 		border: 2px solid #e5e7eb;
 		border-radius: 14px;
 		font-size: 14px;
-		font-family: inherit;
+		font-family: 'Roboto', sans-serif;
 		resize: vertical;
 		transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 		background: #f9fafb;

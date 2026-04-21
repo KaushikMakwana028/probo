@@ -3,7 +3,7 @@ $profile_image = !empty($user->profile_image) ? $user->profile_image : 'assets/i
 $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_image : base_url($profile_image);
 $referral_summary = isset($referral_summary) ? $referral_summary : array('referral_count' => 0, 'bonus_amount' => 0);
 $register_url = isset($register_url) ? $register_url : site_url('login/register');
-$share_message = isset($share_message) ? $share_message : ('Join PROBO and use my referral code ' . $referral_code . ' while registering. Sign up here: ' . $register_url);
+$share_message = isset($share_message) ? $share_message : ('Join PROGO11 and use my referral code ' . $referral_code . ' while registering. Sign up here: ' . $register_url);
 $share_message_encoded = rawurlencode($share_message);
 $register_url_encoded = rawurlencode($register_url);
 ?>
@@ -1083,7 +1083,7 @@ $register_url_encoded = rawurlencode($register_url);
 							<i class="fa-solid fa-arrow-right rf2-share-chev"></i>
 						</a>
 
-						<a class="rf2-share" href="mailto:?subject=<?php echo rawurlencode('Join me on PROBO'); ?>&body=<?php echo $share_message_encoded; ?>">
+						<a class="rf2-share" href="mailto:?subject=<?php echo rawurlencode('Join me on PROGO11'); ?>&body=<?php echo $share_message_encoded; ?>">
 							<div class="rf2-share-left">
 								<div class="rf2-share-icon si-amber"><i class="fa-solid fa-envelope"></i></div>
 								<div>
@@ -1240,7 +1240,7 @@ $register_url_encoded = rawurlencode($register_url);
 		if (nativeBtn) nativeBtn.addEventListener('click', function() {
 			if (navigator.share) {
 				navigator.share({
-					title: 'Join me on PROBO',
+					title: 'Join me on PROGO11',
 					text: message,
 					url: '<?php echo addslashes($register_url); ?>'
 				}).catch(function() {});

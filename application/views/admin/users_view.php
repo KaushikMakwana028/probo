@@ -423,7 +423,7 @@ $avatar_palettes = [
 
 	:root {
 		--f-body: 'Roboto', system-ui, -apple-system, sans-serif;
-		--f-display: 'Instrument Serif', Georgia, serif;
+		--f-display: 'Roboto', sans-serif;
 		--ink: #111827;
 		--ink2: #374151;
 		--ink3: #6B7280;
