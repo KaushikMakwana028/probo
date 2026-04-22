@@ -49,18 +49,22 @@ class Wallet_model extends CI_Model
 
 	public function get_total_credited_by_user($user_id)
 	{
+		// Only sum actual winnings, not all credits (deposits, referrals, refunds, etc.)
 		$this->db->select_sum('amount');
 		$this->db->where('user_id', (int) $user_id);
 		$this->db->where('type', 'credit');
+		$this->db->where('source_type', 'question_result');
 		$row = $this->db->get($this->transactions_table)->row();
 		return $row && $row->amount !== NULL ? (float) $row->amount : 0.0;
 	}
 
 	public function get_total_debited_by_user($user_id)
 	{
+		// Only sum actual withdrawals, not trade fees or other debits
 		$this->db->select_sum('amount');
 		$this->db->where('user_id', (int) $user_id);
 		$this->db->where('type', 'debit');
+		$this->db->where('source_type', 'withdrawal');
 		$row = $this->db->get($this->transactions_table)->row();
 		return $row && $row->amount !== NULL ? (float) $row->amount : 0.0;
 	}

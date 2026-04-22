@@ -1061,7 +1061,7 @@ foreach ($notifications as $notification) {
 					'<div class="np-icon-wrap"><i class="fa-solid ' + (u ? 'fa-bell' : 'fa-check') + '"></i></div>' +
 					'<div class="np-card-body">' +
 					'<div class="np-card-title">' + esc(n.title) + '</div>' +
-					'<div class="np-card-msg">' + esc(n.message) + '</div>' +
+					'<div class="np-card-msg">' + esc(n.message).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') + '</div>' +
 					'</div>' +
 					'<div class="np-card-meta">' +
 					'<span class="np-time">' + esc(n.time_label || 'Just now') + '</span>' +

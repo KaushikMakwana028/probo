@@ -102,7 +102,7 @@ $config['charset'] = 'UTF-8';
 | setting this variable to TRUE (boolean).  See the user guide for details.
 |
 */
-$config['enable_hooks'] = FALSE;
+$config['enable_hooks'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -389,7 +389,7 @@ $config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 31536000;
 $config['sess_save_path'] = APPPATH . 'cache/sessions/';
 $config['sess_match_ip'] = FALSE;
-$config['sess_time_to_update'] = 86400;
+$config['sess_time_to_update'] = 0;
 $config['sess_regenerate_destroy'] = FALSE;
 
 /*
@@ -497,7 +497,7 @@ $config['compress_output'] = FALSE;
 | helper' page of the user guide for information regarding date handling.
 |
 */
-$config['time_reference'] = 'local';
+$config['time_reference'] = 'Asia/Kolkata';
 
 /*
 |--------------------------------------------------------------------------

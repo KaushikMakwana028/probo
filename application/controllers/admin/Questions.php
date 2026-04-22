@@ -624,11 +624,15 @@ class Questions extends CI_Controller
 			return;
 		}
 
+		// Fetch the question to get the admin-set multiplier
+		$question = $this->Category_model->get_question((int) $question_id);
+		$multiplier = ($question && (float) $question->multiplier > 0) ? (float) $question->multiplier : 1.25;
+
 		$settled_at = date('Y-m-d H:i:s');
 
 		foreach ($unsettled_answers as $answer) {
 			$is_winner = strtolower((string) $answer->answer) === strtolower((string) $answer_key);
-			$payout_amount = $is_winner ? round(((float) $answer->price * (int) $answer->quantity) * 1.25, 2) : 0.00;
+			$payout_amount = $is_winner ? round(((float) $answer->price * (int) $answer->quantity) * $multiplier, 2) : 0.00;
 
 			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at);
 
@@ -645,14 +649,14 @@ class Questions extends CI_Controller
 				$this->User_model->add_notification(array(
 					'user_id' => (int) $answer->user_id,
 					'title' => 'Market won',
-					'message' => 'Question #' . (int) $question_id . ' resolved in your favor. Rs ' . number_format($payout_amount, 2) . ' was credited to your wallet.',
+					'message' => 'Question **' . $question->question . '** resolved in your favor. Rs ' . number_format($payout_amount, 2) . ' was credited to your wallet.',
 					'type' => 'result'
 				));
 			} else {
 				$this->User_model->add_notification(array(
 					'user_id' => (int) $answer->user_id,
 					'title' => 'Market resolved',
-					'message' => 'Question #' . (int) $question_id . ' has been resolved. This trade did not earn a payout.',
+					'message' => 'Question **' . $question->question . '** has been resolved. This trade did not earn a payout.',
 					'type' => 'result'
 				));
 			}

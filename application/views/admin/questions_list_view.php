@@ -10,12 +10,59 @@ $cat_q_count = $selected_category && !empty($selected_category->questions) ? cou
 $saved_count = 0;
 $now_ts = time();
 
+$questions_payload = array();
+
 if ($selected_category && !empty($selected_category->questions)) {
 	foreach ($selected_category->questions as $question_item) {
-		if (in_array(strtolower((string) $question_item->answer_key), array('yes', 'no'), TRUE)) {
+		$item_saved = in_array(strtolower((string) $question_item->answer_key), array('yes', 'no'), TRUE);
+		if ($item_saved) {
 			$saved_count++;
 		}
+
+		$real_users = isset($question_item->real_users) ? (int) $question_item->real_users : 0;
+		$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
+		$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
+		$timing_class = 'live';
+		$timing_label = 'Live';
+		$sort_weight = 1; // Live first
+
+		if ($start_ts && $now_ts < $start_ts) {
+			$timing_class = 'upcoming';
+			$timing_label = 'Upcoming';
+			$sort_weight = 2; // Upcoming second
+		} elseif ($end_ts && $now_ts > $end_ts) {
+			$timing_class = 'ended';
+			$timing_label = 'Ended';
+			$sort_weight = 3; // Ended last
+		} elseif (strtolower((string) $question_item->status) !== 'open') {
+			$timing_class = 'ended';
+			$timing_label = ucfirst((string) $question_item->status);
+			$sort_weight = 3; // Ended last
+		}
+
+		$questions_payload[] = array(
+			'id' => (int) $question_item->id,
+			'question' => (string) $question_item->question,
+			'category_name' => html_escape($selected_category->name),
+			'yes_price' => number_format((float) $question_item->yes_price, 2),
+			'no_price' => number_format((float) $question_item->no_price, 2),
+			'start_time' => !empty($question_item->start_time) ? html_escape($question_item->start_time) : 'Not set',
+			'end_time' => !empty($question_item->end_time) ? html_escape($question_item->end_time) : 'Not set',
+			'item_saved' => $item_saved,
+			'real_users' => $real_users,
+			'timing_class' => $timing_class,
+			'timing_label' => $timing_label,
+			'sort_weight' => $sort_weight,
+			'detail_url' => site_url('admin/questions/detail/' . (int) $question_item->id)
+		);
 	}
+
+	usort($questions_payload, function ($a, $b) {
+		if ($a['sort_weight'] === $b['sort_weight']) {
+			return $b['id'] <=> $a['id']; // Descending ID within same status
+		}
+		return $a['sort_weight'] <=> $b['sort_weight']; // Ascending status weight
+	});
 }
 ?>
 
@@ -410,6 +457,46 @@ if ($selected_category && !empty($selected_category->questions)) {
 	/* ===== MOBILE FIX START ===== */
 	@media (max-width: 600px) {
 
+		.aq-panel-controls {
+			display: flex;
+			flex-direction: row;
+			/* keep in one row */
+			gap: 10px;
+			align-items: center;
+		}
+
+		.aq-search-wrap {
+			flex: 1;
+			min-width: 0;
+			/* VERY IMPORTANT (prevents overflow) */
+		}
+
+		.aq-search-input {
+			width: 100%;
+			padding: 10px 12px 10px 34px;
+			font-size: 12px;
+		}
+
+		.aq-rows-select {
+			width: auto;
+			min-width: 90px;
+			font-size: 12px;
+			padding: 10px;
+		}
+
+		.aq-search-wrap i {
+			left: 10px;
+			font-size: 12px;
+		}
+
+		.aq-search-wrap {
+			width: 100%;
+		}
+
+		.aq-rows-select {
+			width: 100%;
+		}
+
 		.aq-topbar {
 			padding: 14px;
 			flex-direction: column;
@@ -466,10 +553,138 @@ if ($selected_category && !empty($selected_category->questions)) {
 		}
 	}
 
+	/* Added UI styles */
+	.aq-panel-controls {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		flex-wrap: nowrap;
+		margin-bottom: 20px;
+		padding-bottom: 16px;
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.aq-search-wrap {
+		position: relative;
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.aq-search-wrap i {
+		position: absolute;
+		left: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #94a3b8;
+		font-size: 14px;
+	}
+
+	.aq-search-input {
+		width: 100%;
+		padding: 10px 14px 10px 36px;
+		border-radius: 12px;
+		border: 1px solid #d1d5db;
+		background: #fff;
+		font-size: 13px;
+		outline: none;
+		transition: border-color .15s;
+	}
+
+	.aq-search-input:focus {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+	}
+
+	.aq-rows-select {
+		width: auto;
+		min-width: 120px;
+		flex-shrink: 0;
+		padding: 10px 14px;
+		border-radius: 12px;
+		border: 1px solid #d1d5db;
+		background: #fff;
+		font-size: 13px;
+		font-weight: 600;
+		outline: none;
+		cursor: pointer;
+		color: #111827;
+	}
+
+	.aq-pagination {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 20px;
+		border-top: 1px solid #e2e8f0;
+		margin-top: 10px;
+	}
+
+	.aq-page-info {
+		font-size: 12px;
+		font-weight: 500;
+		color: #64748b;
+	}
+
+	.aq-page-btns {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.aq-page-btn {
+		min-width: 34px;
+		height: 34px;
+		padding: 0 10px;
+		border-radius: 8px;
+		border: 1px solid #d1d5db;
+		background: #fff;
+		color: #111827;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all .15s;
+	}
+
+	.aq-page-btn:hover:not(:disabled) {
+		background: #f1f5f9;
+		border-color: #cbd5e1;
+	}
+
+	.aq-page-btn.is-active {
+		background: #2563eb;
+		color: #fff;
+		border-color: #2563eb;
+	}
+
+	.aq-page-btn:disabled {
+		opacity: .5;
+		cursor: not-allowed;
+	}
+
+	.aq-page-ellipsis {
+		color: #94a3b8;
+		font-size: 14px;
+		padding: 0 4px;
+	}
+
+	@media (max-width: 400px) {
+		.aq-panel-controls {
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.aq-rows-select {
+			width: 100%;
+		}
+	}
+
 	/* ===== MOBILE FIX END ===== */
 </style>
 
-<div class="aq-page">
+<div class="aq-page" id="aqApp" data-questions="<?php echo htmlspecialchars(json_encode($questions_payload), ENT_QUOTES, 'UTF-8'); ?>">
 	<section class="aq-topbar">
 		<div>
 			<h2>View questions</h2>
@@ -516,79 +731,25 @@ if ($selected_category && !empty($selected_category->questions)) {
 				<span class="aq-count"><?php echo $cat_q_count; ?> question<?php echo $cat_q_count !== 1 ? 's' : ''; ?></span>
 			</div>
 
-			<div class="aq-list">
-				<?php foreach ($selected_category->questions as $index => $question_item):
-					$item_saved = in_array(strtolower((string) $question_item->answer_key), array('yes', 'no'), TRUE);
-					$real_users = isset($question_item->real_users) ? (int) $question_item->real_users : 0;
-					$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
-					$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
-					$timing_class = 'live';
-					$timing_label = 'Live';
+			<div class="aq-panel-controls">
+				<div class="aq-search-wrap">
+					<i class="fa-solid fa-magnifying-glass"></i>
+					<input type="text" id="aqSearch" class="aq-search-input" placeholder="Search questions by Text">
+				</div>
+				<select id="aqRows" class="aq-rows-select">
+					<option value="10" selected>10 rows</option>
+					<option value="25">25 rows</option>
+					<option value="50">50 rows</option>
+					<option value="100">100 rows</option>
+					<option value="all">All rows</option>
+				</select>
+			</div>
 
-					if ($start_ts && $now_ts < $start_ts) {
-						$timing_class = 'upcoming';
-						$timing_label = 'Upcoming';
-					} elseif ($end_ts && $now_ts > $end_ts) {
-						$timing_class = 'ended';
-						$timing_label = 'Ended';
-					} elseif (strtolower((string) $question_item->status) !== 'open') {
-						$timing_class = 'ended';
-						$timing_label = ucfirst((string) $question_item->status);
-					}
-				?>
-					<a class="aq-row" href="<?php echo site_url('admin/questions/detail/' . (int) $question_item->id); ?>">
-						<div class="aq-row-top">
-							<div class="aq-row-left">
-								<span class="aq-index"><?php echo $index + 1; ?></span>
-								<div>
-									<div class="aq-title"><?php echo html_escape($question_item->question); ?></div>
-									<div class="aq-sub">Question ID: <?php echo (int) $question_item->id; ?> • Category: <?php echo html_escape($selected_category->name); ?></div>
-								</div>
-							</div>
-							<div class="aq-badges">
-								<span class="aq-badge <?php echo $item_saved ? 'saved' : 'pending'; ?>">
-									<?php echo $item_saved ? 'Key saved' : 'Key pending'; ?>
-								</span>
-								<span class="aq-badge <?php echo $timing_class; ?>">
-									<?php echo $timing_label; ?>
-								</span>
-							</div>
-						</div>
+			<div class="aq-list" id="aqList"></div>
 
-						<div class="aq-row-meta">
-							<div class="aq-meta-item">
-								<label>joined users</label>
-								<strong><?php echo $real_users; ?></strong>
-								<small>Only Real Users</small>
-							</div>
-							<div class="aq-meta-item">
-								<label>Yes price</label>
-								<strong class="yes">Rs <?php echo number_format((float) $question_item->yes_price, 2); ?></strong>
-								<small>Current YES market price</small>
-							</div>
-							<div class="aq-meta-item">
-								<label>No price</label>
-								<strong class="no">Rs <?php echo number_format((float) $question_item->no_price, 2); ?></strong>
-								<small>Current NO market price</small>
-							</div>
-							<div class="aq-meta-item">
-								<label>Start time</label>
-								<strong style="font-size:15px;"><?php echo !empty($question_item->start_time) ? html_escape($question_item->start_time) : 'Not set'; ?></strong>
-								<small>Market opening time</small>
-							</div>
-							<div class="aq-meta-item">
-								<label>Close time</label>
-								<strong style="font-size:15px;"><?php echo !empty($question_item->end_time) ? html_escape($question_item->end_time) : 'Not set'; ?></strong>
-								<small>Market closing time</small>
-							</div>
-						</div>
-
-						<div class="aq-open">
-							<span>Open question details</span>
-							<i class="fa-solid fa-arrow-right"></i>
-						</div>
-					</a>
-				<?php endforeach; ?>
+			<div class="aq-pagination" id="aqPagination" style="display: none;">
+				<div class="aq-page-info" id="aqPageInfo"></div>
+				<div class="aq-page-btns" id="aqPageBtns"></div>
 			</div>
 		</section>
 	<?php elseif ($selected_category): ?>
@@ -603,3 +764,214 @@ if ($selected_category && !empty($selected_category->questions)) {
 		</div>
 	<?php endif; ?>
 </div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		var app = document.getElementById('aqApp');
+		if (!app) return;
+
+		var questions = [];
+		try {
+			questions = JSON.parse(app.getAttribute('data-questions') || '[]');
+		} catch (e) {
+			console.error("Failed to parse questions", e);
+		}
+
+		var state = {
+			searchTerm: '',
+			rowsPerPage: 10,
+			page: 1
+		};
+
+		var els = {
+			search: document.getElementById('aqSearch'),
+			rows: document.getElementById('aqRows'),
+			list: document.getElementById('aqList'),
+			pagination: document.getElementById('aqPagination'),
+			pageInfo: document.getElementById('aqPageInfo'),
+			pageBtns: document.getElementById('aqPageBtns')
+		};
+
+		if (!els.list) return;
+
+		function getFiltered() {
+			return questions.filter(function(q) {
+				if (!state.searchTerm) return true;
+				var term = state.searchTerm.toLowerCase();
+				return q.question.toLowerCase().includes(term) || q.id.toString().includes(term);
+			});
+		}
+
+		function esc(str) {
+			return String(str)
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;');
+		}
+
+		function renderList(items, startIndex) {
+			if (items.length === 0) {
+				els.list.innerHTML = '<div class="aq-empty" style="padding: 40px; text-align: center;"><h4>No matches found</h4><p>Try a different search term.</p></div>';
+				return;
+			}
+
+			els.list.innerHTML = items.map(function(q, i) {
+				var index = startIndex + i + 1;
+				var itemSavedClass = q.item_saved ? 'saved' : 'pending';
+				var itemSavedLabel = q.item_saved ? 'Key saved' : 'Key pending';
+
+				return `
+				<a class="aq-row" href="${esc(q.detail_url)}">
+					<div class="aq-row-top">
+						<div class="aq-row-left">
+							<span class="aq-index">${index}</span>
+							<div>
+								<div class="aq-title">${esc(q.question)}</div>
+								<div class="aq-sub">Category: ${esc(q.category_name)}</div>
+							</div>
+						</div>
+						<div class="aq-badges">
+							<span class="aq-badge ${itemSavedClass}">
+								${itemSavedLabel}
+							</span>
+							<span class="aq-badge ${esc(q.timing_class)}">
+								${esc(q.timing_label)}
+							</span>
+						</div>
+					</div>
+
+					<div class="aq-row-meta">
+						<div class="aq-meta-item">
+							<label>joined users</label>
+							<strong>${q.real_users}</strong>
+							<small>Only Real Users</small>
+						</div>
+						<div class="aq-meta-item">
+							<label>Yes price</label>
+							<strong class="yes">Rs ${esc(q.yes_price)}</strong>
+							<small>Current YES market price</small>
+						</div>
+						<div class="aq-meta-item">
+							<label>No price</label>
+							<strong class="no">Rs ${esc(q.no_price)}</strong>
+							<small>Current NO market price</small>
+						</div>
+						<div class="aq-meta-item">
+							<label>Start time</label>
+							<strong style="font-size:15px;">${esc(q.start_time)}</strong>
+							<small>Market opening time</small>
+						</div>
+						<div class="aq-meta-item">
+							<label>Close time</label>
+							<strong style="font-size:15px;">${esc(q.end_time)}</strong>
+							<small>Market closing time</small>
+						</div>
+					</div>
+
+					<div class="aq-open">
+						<span>Open question details</span>
+						<i class="fa-solid fa-arrow-right"></i>
+					</div>
+				</a>
+			`;
+			}).join('');
+		}
+
+		function renderPagination(totalItems) {
+			if (state.rowsPerPage === 'all' || totalItems <= state.rowsPerPage) {
+				els.pagination.style.display = 'none';
+				return;
+			}
+
+			var totalPages = Math.ceil(totalItems / state.rowsPerPage);
+			if (state.page > totalPages) state.page = totalPages;
+
+			var startItem = (state.page - 1) * state.rowsPerPage + 1;
+			var endItem = Math.min(state.page * state.rowsPerPage, totalItems);
+
+			els.pagination.style.display = 'flex';
+			els.pageInfo.textContent = 'Showing ' + startItem + ' to ' + endItem + ' of ' + totalItems;
+
+			// Build buttons
+			var p = state.page;
+			var pages = [];
+			if (totalPages <= 7) {
+				for (var i = 1; i <= totalPages; i++) pages.push(i);
+			} else {
+				pages.push(1);
+				if (p > 3) pages.push('...');
+				var lo = Math.max(2, p - 1);
+				var hi = Math.min(totalPages - 1, p + 1);
+				for (var j = lo; j <= hi; j++) pages.push(j);
+				if (p < totalPages - 2) pages.push('...');
+				pages.push(totalPages);
+			}
+
+			var html = '<button class="aq-page-btn" data-page="' + (p - 1) + '" ' + (p === 1 ? 'disabled' : '') + '><i class="fa-solid fa-chevron-left"></i></button>';
+
+			pages.forEach(function(pg) {
+				if (pg === '...') {
+					html += '<span class="aq-page-ellipsis">...</span>';
+				} else {
+					html += '<button class="aq-page-btn ' + (pg === p ? 'is-active' : '') + '" data-page="' + pg + '">' + pg + '</button>';
+				}
+			});
+
+			html += '<button class="aq-page-btn" data-page="' + (p + 1) + '" ' + (p === totalPages ? 'disabled' : '') + '><i class="fa-solid fa-chevron-right"></i></button>';
+
+			els.pageBtns.innerHTML = html;
+		}
+
+		function render() {
+			var filtered = getFiltered();
+
+			var itemsToRender = filtered;
+			var startIndex = 0;
+
+			if (state.rowsPerPage !== 'all') {
+				var limit = parseInt(state.rowsPerPage, 10);
+				var totalPages = Math.ceil(filtered.length / limit);
+				if (state.page > totalPages) state.page = Math.max(1, totalPages);
+
+				startIndex = (state.page - 1) * limit;
+				itemsToRender = filtered.slice(startIndex, startIndex + limit);
+			}
+
+			renderList(itemsToRender, startIndex);
+			renderPagination(filtered.length);
+		}
+
+		// Listeners
+		els.search.addEventListener('input', function(e) {
+			state.searchTerm = e.target.value;
+			state.page = 1;
+			render();
+		});
+
+		els.rows.addEventListener('change', function(e) {
+			state.rowsPerPage = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+			state.page = 1;
+			render();
+		});
+
+		els.pageBtns.addEventListener('click', function(e) {
+			var btn = e.target.closest('.aq-page-btn');
+			if (!btn || btn.disabled) return;
+			var nextPage = parseInt(btn.getAttribute('data-page'), 10);
+			if (!isNaN(nextPage)) {
+				state.page = nextPage;
+				render();
+				// Scroll top list
+				els.list.scrollIntoView({
+					behavior: 'smooth',
+					block: 'start'
+				});
+			}
+		});
+
+		// Init
+		render();
+	});
+</script>
