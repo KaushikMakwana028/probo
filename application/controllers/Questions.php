@@ -311,18 +311,21 @@ class Questions extends CI_Controller
 		}
 
 		$this->User_model->adjust_wallet_balance($user->id, -1 * $stake_amount);
+		$question_label = trim(isset($selected_question->question) ? (string) $selected_question->question : '');
+		$question_label = $question_label !== '' ? $question_label : ('Question #' . $question_id);
+
 		$this->Wallet_model->add_transaction(array(
 			'user_id' => (int) $user->id,
 			'source_type' => 'trade_entry',
 			'source_id' => $question_id,
 			'type' => 'debit',
 			'amount' => $stake_amount,
-			'description' => 'Trade placed on question #' . $question_id . ' (' . strtoupper($selected_answer) . ')'
+			'description' => 'Trade placed on ' . $question_label . ' (' . strtoupper($selected_answer) . ')'
 		));
 		$this->User_model->add_notification(array(
 			'user_id' => (int) $user->id,
 			'title' => 'Trade placed successfully',
-			'message' => 'Your ' . strtoupper($selected_answer) . ' trade on question #' . $question_id . ' was submitted for Rs ' . number_format($stake_amount, 2) . '.',
+			'message' => 'Your ' . strtoupper($selected_answer) . ' trade on **' . $question_label . '** was submitted for Rs ' . number_format($stake_amount, 2) . '.',
 			'type' => 'trade'
 		));
 

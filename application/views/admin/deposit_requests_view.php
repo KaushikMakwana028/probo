@@ -1,12 +1,22 @@
 <?php
-$pending_requests  = array_filter($requests ?? [], fn($r) => $r->status === 'pending');
-$approved_requests = array_filter($requests ?? [], fn($r) => $r->status === 'approved');
-$rejected_requests = array_filter($requests ?? [], fn($r) => $r->status === 'rejected');
-$all_sorted = array_merge(
-    array_values($pending_requests),
-    array_values($approved_requests),
-    array_values($rejected_requests)
-);
+$requests = isset($requests) && is_array($requests) ? $requests : array();
+$pending_requests = array();
+$approved_requests = array();
+$rejected_requests = array();
+
+foreach ($requests as $request_item) {
+    $request_status = isset($request_item->status) ? $request_item->status : '';
+
+    if ($request_status === 'pending') {
+        $pending_requests[] = $request_item;
+    } elseif ($request_status === 'approved') {
+        $approved_requests[] = $request_item;
+    } elseif ($request_status === 'rejected') {
+        $rejected_requests[] = $request_item;
+    }
+}
+
+$all_sorted = array_merge($pending_requests, $approved_requests, $rejected_requests);
 ?>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">

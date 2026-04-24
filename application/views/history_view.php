@@ -965,17 +965,38 @@
 
 <?php
 /* ─── PHP CALCULATIONS ──────────────────────────── */
-$total_count   = count($history);
-$wins          = array_values(array_filter($history, fn($r) => $r->result === 'win'));
-$losses        = array_values(array_filter($history, fn($r) => $r->result === 'lose'));
-$pending       = array_values(array_filter($history, fn($r) => $r->result === 'pending'));
-$win_count     = count($wins);
-$loss_count    = count($losses);
+$history = isset($history) && is_array($history) ? $history : array();
+$total_count = count($history);
+$wins = array();
+$losses = array();
+$pending = array();
+$total_won = 0;
+$total_staked = 0;
+$pending_stake = 0;
+$win_stake = 0;
+
+foreach ($history as $history_row) {
+    $result = isset($history_row->result) ? $history_row->result : 'pending';
+    $stake_amount = isset($history_row->stake_amount) ? (float) $history_row->stake_amount : 0;
+    $winning_amount = isset($history_row->winning_amount) ? (float) $history_row->winning_amount : 0;
+
+    $total_staked += $stake_amount;
+
+    if ($result === 'win') {
+        $wins[] = $history_row;
+        $total_won += $winning_amount;
+        $win_stake += $stake_amount;
+    } elseif ($result === 'lose') {
+        $losses[] = $history_row;
+    } else {
+        $pending[] = $history_row;
+        $pending_stake += $stake_amount;
+    }
+}
+
+$win_count = count($wins);
+$loss_count = count($losses);
 $pending_count = count($pending);
-$total_won     = array_sum(array_map(fn($r) => $r->winning_amount ?? 0, $wins));
-$total_staked  = array_sum(array_map(fn($r) => $r->stake_amount, $history));
-$pending_stake = array_sum(array_map(fn($r) => $r->stake_amount, $pending));
-$win_stake     = array_sum(array_map(fn($r) => $r->stake_amount, $wins));
 $avg_win       = $win_count  ? $total_won / $win_count : 0;
 $win_rate      = $total_count ? $win_count  / $total_count * 100 : 0;
 $loss_rate     = $total_count ? $loss_count / $total_count * 100 : 0;
@@ -1008,23 +1029,50 @@ $current_page  = max(1, (int)($this->input->get('pg') ?: 1));
 $per_page      = 10;
 
 $filtered = $history;
-if ($active_filter !== 'all') $filtered = array_filter($filtered, fn($r) => $r->result === $active_filter);
+if ($active_filter !== 'all') {
+    $filtered_rows = array();
+    foreach ($filtered as $filtered_row) {
+        if (isset($filtered_row->result) && $filtered_row->result === $active_filter) {
+            $filtered_rows[] = $filtered_row;
+        }
+    }
+    $filtered = $filtered_rows;
+}
 if ($search_q !== '') {
     $sq = strtolower($search_q);
-    $filtered = array_filter(
-        $filtered,
-        fn($r) =>
-        str_contains(strtolower($r->question), $sq) ||
-            str_contains(strtolower($r->category_name), $sq)
-    );
+    $searched_rows = array();
+    foreach ($filtered as $filtered_row) {
+        $question_value = strtolower(isset($filtered_row->question) ? $filtered_row->question : '');
+        $category_value = strtolower(isset($filtered_row->category_name) ? $filtered_row->category_name : '');
+
+        if (strpos($question_value, $sq) !== FALSE || strpos($category_value, $sq) !== FALSE) {
+            $searched_rows[] = $filtered_row;
+        }
+    }
+    $filtered = $searched_rows;
 }
 $filtered = array_values($filtered);
-usort($filtered, fn($a, $b) => match ($sort_by) {
-    'oldest'     => $a->id <=> $b->id,
-    'stake_high' => $b->stake_amount <=> $a->stake_amount,
-    'stake_low'  => $a->stake_amount <=> $b->stake_amount,
-    'win_high'   => ($b->winning_amount ?? 0) <=> ($a->winning_amount ?? 0),
-    default      => $b->id <=> $a->id,
+usort($filtered, function ($a, $b) use ($sort_by) {
+    $a_id = isset($a->id) ? (int) $a->id : 0;
+    $b_id = isset($b->id) ? (int) $b->id : 0;
+    $a_stake = isset($a->stake_amount) ? (float) $a->stake_amount : 0;
+    $b_stake = isset($b->stake_amount) ? (float) $b->stake_amount : 0;
+    $a_win = isset($a->winning_amount) ? (float) $a->winning_amount : 0;
+    $b_win = isset($b->winning_amount) ? (float) $b->winning_amount : 0;
+
+    switch ($sort_by) {
+        case 'oldest':
+            return $a_id <=> $b_id;
+        case 'stake_high':
+            return $b_stake <=> $a_stake;
+        case 'stake_low':
+            return $a_stake <=> $b_stake;
+        case 'win_high':
+            return $b_win <=> $a_win;
+        case 'newest':
+        default:
+            return $b_id <=> $a_id;
+    }
 });
 $total_filtered = count($filtered);
 $total_pages    = max(1, (int)ceil($total_filtered / $per_page));
@@ -1035,10 +1083,14 @@ $start_num      = $total_filtered ? $offset + 1 : 0;
 $end_num        = min($offset + $per_page, $total_filtered);
 $bq             = "filter={$active_filter}&search=" . urlencode($search_q) . "&sort={$sort_by}";
 
-function th_cat(string $n): string
+function th_cat($n)
 {
-    foreach (['Cricket', 'Football', 'Politics', 'Movies', 'Finance', 'Sports', 'Tech', 'Entertainment'] as $k)
-        if (stripos($n, $k) !== false) return $k;
+    foreach (array('Cricket', 'Football', 'Politics', 'Movies', 'Finance', 'Sports', 'Tech', 'Entertainment') as $k) {
+        if (stripos((string) $n, $k) !== false) {
+            return $k;
+        }
+    }
+
     return 'Finance';
 }
 ?>
@@ -1222,17 +1274,17 @@ function th_cat(string $n): string
         </div>
 
         <?php if ($page_rows): foreach ($page_rows as $row):
-                $wa  = $row->winning_amount ?? 0;
-                $sc  = match ($row->result) {
-                    'win' => 's-win',
-                    'lose' => 's-lose',
-                    default => 's-pending'
-                };
-                $sl  = match ($row->result) {
-                    'win' => 'Win',
-                    'lose' => 'Lose',
-                    default => 'Pending'
-                };
+                $wa  = isset($row->winning_amount) ? $row->winning_amount : 0;
+                if ($row->result === 'win') {
+                    $sc = 's-win';
+                    $sl = 'Win';
+                } elseif ($row->result === 'lose') {
+                    $sc = 's-lose';
+                    $sl = 'Lose';
+                } else {
+                    $sc = 's-pending';
+                    $sl = 'Pending';
+                }
                 $cat = th_cat($row->category_name);
                 $ts  = strtotime($row->created_at);
                 $q   = htmlspecialchars($row->question);

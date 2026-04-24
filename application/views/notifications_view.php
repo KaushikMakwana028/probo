@@ -586,6 +586,12 @@ foreach ($notifications as $notification) {
 		white-space: pre-line;
 	}
 
+	.np-card-msg b,
+	.np-card-msg strong {
+		color: var(--text-primary);
+		font-weight: 700;
+	}
+
 	/* Meta */
 	.np-card-meta {
 		display: flex;

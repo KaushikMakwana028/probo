@@ -165,6 +165,23 @@ $avatar_palettes = [
 						<option value="name">Name A → Z</option>
 					</select>
 				</div>
+				<div class="ud-select-wrap">
+					<svg class="ud-select-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M8 6h13" />
+						<path d="M8 12h13" />
+						<path d="M8 18h13" />
+						<path d="M3 6h.01" />
+						<path d="M3 12h.01" />
+						<path d="M3 18h.01" />
+					</svg>
+					<select id="rowsPerPage" class="ud-input ud-input--select">
+						<option value="10" selected>10 / page</option>
+						<option value="25">25 / page</option>
+						<option value="50">50 / page</option>
+						<option value="100">100 / page</option>
+						<option value="all">All rows</option>
+					</select>
+				</div>
 			</div>
 		</div>
 
@@ -388,6 +405,11 @@ $avatar_palettes = [
 					</div>
 				<?php endforeach; ?>
 			<?php endif; ?>
+		</div>
+
+		<div class="ud-pagination" id="udPagination" hidden>
+			<div class="ud-page-info" id="udPageInfo"></div>
+			<div class="ud-page-btns" id="udPageBtns"></div>
 		</div>
 
 		<!-- No results -->
@@ -803,6 +825,76 @@ $avatar_palettes = [
 		border-right: 4px solid transparent;
 		border-top: 5px solid var(--ink4);
 		pointer-events: none;
+	}
+
+	.ud-pagination {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		flex-wrap: wrap;
+		padding: 14px 26px;
+		border-top: 1px solid var(--line);
+		background: var(--bg);
+	}
+
+	.ud-page-info {
+		font-size: 12.5px;
+		color: var(--ink4);
+	}
+
+	.ud-page-info strong {
+		color: var(--ink3);
+		font-weight: 600;
+	}
+
+	.ud-page-btns {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.ud-page-btn {
+		min-width: 34px;
+		height: 34px;
+		padding: 0 10px;
+		border-radius: var(--r-sm);
+		border: 1px solid var(--line);
+		background: var(--bg);
+		color: var(--ink2);
+		font-family: var(--f-body);
+		font-size: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all .12s;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.ud-page-btn:hover:not(:disabled) {
+		background: var(--bg2);
+		border-color: var(--ink4);
+		transform: translateY(-1px);
+	}
+
+	.ud-page-btn.is-active {
+		background: var(--ink);
+		border-color: var(--ink);
+		color: #fff;
+	}
+
+	.ud-page-btn:disabled {
+		opacity: .4;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	.ud-page-ellipsis {
+		font-size: 13px;
+		color: var(--ink4);
+		padding: 0 4px;
 	}
 
 	/* Desktop Table */
@@ -1242,6 +1334,10 @@ $avatar_palettes = [
 		.ud-mobile-cards {
 			display: block;
 		}
+
+		.ud-pagination {
+			padding: 14px 18px;
+		}
 	}
 
 	@media (max-width: 640px) {
@@ -1282,6 +1378,7 @@ $avatar_palettes = [
 		'use strict';
 		var si = document.getElementById('searchUsers');
 		var ss = document.getElementById('sortUsers');
+		var rp = document.getElementById('rowsPerPage');
 		var sx = document.getElementById('searchClear');
 		var cb = document.getElementById('clearSearchBtn');
 		var tb = document.getElementById('usersTableBody');
@@ -1289,6 +1386,14 @@ $avatar_palettes = [
 		var vc = document.getElementById('visibleCount');
 		var fi = document.getElementById('admFooterInfo');
 		var fe = document.getElementById('filteredEmpty');
+		var pg = document.getElementById('udPagination');
+		var pi = document.getElementById('udPageInfo');
+		var pb = document.getElementById('udPageBtns');
+		var er = document.getElementById('admEmptyRow');
+		var state = {
+			page: 1,
+			rowsPerPage: 10
+		};
 
 		function tableRows() {
 			return tb ? Array.prototype.slice.call(tb.querySelectorAll('.ud-row')) : [];
@@ -1308,11 +1413,72 @@ $avatar_palettes = [
 			return n;
 		}
 
-		function filter() {
+		function buildPageButtons(totalPages) {
+			var p = state.page;
+			var items = [];
+			var html = '';
+			var i;
+
+			if (totalPages <= 7) {
+				for (i = 1; i <= totalPages; i++) {
+					items.push(i);
+				}
+			} else {
+				items.push(1);
+				if (p > 3) items.push('left');
+				for (i = Math.max(2, p - 1); i <= Math.min(totalPages - 1, p + 1); i++) {
+					items.push(i);
+				}
+				if (p < totalPages - 2) items.push('right');
+				items.push(totalPages);
+			}
+
+			html += '<button type="button" class="ud-page-btn" data-page="' + (p - 1) + '"' + (p === 1 ? ' disabled' : '') + '>&lsaquo;</button>';
+			items.forEach(function(item) {
+				if (typeof item === 'string') {
+					html += '<span class="ud-page-ellipsis">...</span>';
+				} else {
+					html += '<button type="button" class="ud-page-btn' + (item === p ? ' is-active' : '') + '" data-page="' + item + '">' + item + '</button>';
+				}
+			});
+			html += '<button type="button" class="ud-page-btn" data-page="' + (p + 1) + '"' + (p === totalPages ? ' disabled' : '') + '>&rsaquo;</button>';
+			return html;
+		}
+
+		function renderPagination(totalCount, visibleCount) {
+			var perPage = state.rowsPerPage;
+			var totalPages;
+			var start;
+			var end;
+
+			if (!pg || !pi || !pb) return;
+
+			if (!totalCount || perPage === 'all' || totalCount <= perPage) {
+				pg.hidden = true;
+				return;
+			}
+
+			totalPages = Math.max(1, Math.ceil(totalCount / perPage));
+			if (state.page > totalPages) state.page = totalPages;
+			start = (state.page - 1) * perPage + 1;
+			end = start + visibleCount - 1;
+
+			pg.hidden = false;
+			pi.innerHTML = 'Showing <strong>' + start + '-' + end + '</strong> of <strong>' + totalCount + '</strong> users';
+			pb.innerHTML = buildPageButtons(totalPages);
+		}
+
+		function render() {
 			var term = si ? si.value.toLowerCase().trim() : '';
 			var tRows = tableRows();
 			var mCards = mobileCards();
-			var vis = [];
+			var matchedIds = [];
+			var pageIds = [];
+			var visibleRows;
+			var start = 0;
+			var end = 0;
+			var totalMatches = 0;
+			var perPage = state.rowsPerPage;
 
 			tRows.forEach(function(r) {
 				var match = !term ||
@@ -1320,25 +1486,62 @@ $avatar_palettes = [
 					(r.dataset.mobile || '').indexOf(term) > -1 ||
 					(r.dataset.email || '').indexOf(term) > -1 ||
 					(r.dataset.address || '').indexOf(term) > -1;
-				r.style.display = match ? '' : 'none';
-				if (match) vis.push(r);
+				if (match) matchedIds.push(r.dataset.id || '');
 			});
+
+			totalMatches = matchedIds.length;
+
+			if (perPage === 'all') {
+				pageIds = matchedIds.slice();
+			} else {
+				start = (state.page - 1) * perPage;
+				if (start >= totalMatches && totalMatches > 0) {
+					state.page = 1;
+					start = 0;
+				}
+				end = start + perPage;
+				pageIds = matchedIds.slice(start, end);
+			}
+
+			tRows.forEach(function(r) {
+				var show = pageIds.indexOf(r.dataset.id || '') > -1;
+				r.style.display = show ? '' : 'none';
+			});
+
 			mCards.forEach(function(c) {
 				var match = !term ||
 					(c.dataset.name || '').indexOf(term) > -1 ||
 					(c.dataset.mobile || '').indexOf(term) > -1 ||
 					(c.dataset.email || '').indexOf(term) > -1 ||
 					(c.dataset.address || '').indexOf(term) > -1;
-				c.style.display = match ? '' : 'none';
+				var show = match && pageIds.indexOf(c.dataset.id || '') > -1;
+				c.style.display = show ? '' : 'none';
 			});
 
-			var n = reindex(vis);
-			if (vc) vc.textContent = n;
-			if (fe) fe.hidden = (n > 0);
+			visibleRows = tRows.filter(function(r) {
+				return r.style.display !== 'none';
+			});
+
+			var n = reindex(visibleRows);
+			if (vc) vc.textContent = totalMatches;
+			if (fe) fe.hidden = (totalMatches > 0);
 			if (sx) sx.hidden = !term;
-			if (fi) fi.innerHTML = term ?
-				'Showing <strong>' + n + '</strong> of <strong>' + tRows.length + '</strong> users' :
-				'Showing all <strong>' + tRows.length + '</strong> users';
+			if (er) er.style.display = tRows.length === 0 ? '' : 'none';
+			if (fi) {
+				if (!totalMatches) {
+					fi.innerHTML = term ? 'Showing <strong>0</strong> of <strong>' + tRows.length + '</strong> users' : 'Showing <strong>0</strong> users';
+				} else if (perPage === 'all') {
+					fi.innerHTML = term ?
+						'Showing <strong>' + totalMatches + '</strong> of <strong>' + tRows.length + '</strong> users' :
+						'Showing all <strong>' + totalMatches + '</strong> users';
+				} else {
+					var pageStart = ((state.page - 1) * perPage) + 1;
+					var pageEnd = pageStart + n - 1;
+					fi.innerHTML = 'Showing <strong>' + pageStart + '-' + pageEnd + '</strong> of <strong>' + totalMatches + '</strong> users';
+				}
+			}
+
+			renderPagination(totalMatches, n);
 		}
 
 		function sort() {
@@ -1357,7 +1560,7 @@ $avatar_palettes = [
 			mCards.sort(sortFn).forEach(function(c) {
 				if (mc) mc.appendChild(c);
 			});
-			filter();
+			render();
 		}
 
 		function clearSearch() {
@@ -1365,13 +1568,32 @@ $avatar_palettes = [
 				si.value = '';
 				si.focus();
 			}
-			filter();
+			state.page = 1;
+			render();
 		}
 
-		if (si) si.addEventListener('input', filter);
+		if (si) si.addEventListener('input', function() {
+			state.page = 1;
+			render();
+		});
 		if (ss) ss.addEventListener('change', sort);
+		if (rp) rp.addEventListener('change', function() {
+			var value = rp.value;
+			state.rowsPerPage = value === 'all' ? 'all' : parseInt(value, 10);
+			state.page = 1;
+			render();
+		});
 		if (sx) sx.addEventListener('click', clearSearch);
 		if (cb) cb.addEventListener('click', clearSearch);
+		if (pb) pb.addEventListener('click', function(e) {
+			var btn = e.target.closest('.ud-page-btn');
+			var nextPage;
+			if (!btn || btn.disabled) return;
+			nextPage = parseInt(btn.getAttribute('data-page'), 10);
+			if (isNaN(nextPage) || nextPage < 1) return;
+			state.page = nextPage;
+			render();
+		});
 
 		sort();
 

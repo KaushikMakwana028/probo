@@ -30,7 +30,7 @@ class Dashboard extends CI_Controller
 		$notifications = $this->User_model->get_notifications_by_user($user->id, 5);
 		$unread_notifications = $this->User_model->count_unread_notifications($user->id);
 		$user_trade_count = $this->Category_model->count_user_attempted_answers($user->id);
-		$categories = $this->Category_model->get_all_categories();
+		$categories = $this->Category_model->get_all_categories_with_visible_question_counts_for_user($user->id);
 		$referral_settings = $this->User_model->get_referral_settings();
 
 		$data = array(

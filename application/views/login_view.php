@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -203,7 +204,8 @@
         }
 
         /* Validation errors list (CI style) */
-        .message.error ul, .message.error li {
+        .message.error ul,
+        .message.error li {
             background: transparent;
             list-style: none;
             margin: 0;
@@ -225,12 +227,15 @@
                 padding: 1.6rem 1.3rem 1.8rem 1.3rem;
                 border-radius: 1.6rem;
             }
+
             h1 {
                 font-size: 1.8rem;
             }
+
             input {
                 padding: 0.8rem 0.9rem;
             }
+
             .brand-icon {
                 width: 54px;
                 height: 54px;
@@ -243,6 +248,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -257,59 +263,68 @@
         }
     </style>
 </head>
+
 <body>
-<div class="auth-shell">
-    <div class="auth-card">
-        <!-- Improved brand icon with SVG instead of empty div -->
-        <div class="brand-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="white" stroke-linecap="round"/>
-                <circle cx="12" cy="12" r="3" stroke="white" fill="rgba(255,255,255,0.2)"/>
-            </svg>
-        </div>
-        <h1>Welcome back</h1>
-        <p>Sign in with your mobile number or email and password.</p>
-
-        <!-- Flashdata messages (error / success) -->
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="message error">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <?php echo $this->session->flashdata('error'); ?>
+    <div class="auth-shell">
+        <div class="auth-card">
+            <!-- Improved brand icon with SVG instead of empty div -->
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="white" stroke-linecap="round" />
+                    <circle cx="12" cy="12" r="3" stroke="white" fill="rgba(255,255,255,0.2)" />
+                </svg>
             </div>
-        <?php endif; ?>
+            <h1>Welcome back</h1>
+            <p>Sign in with your mobile number or email and password.</p>
 
-        <?php if ($this->session->flashdata('success')): ?>
-            <div class="message success">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <?php echo $this->session->flashdata('success'); ?>
+            <!-- Flashdata messages (error / success) -->
+            <?php if ($this->session->flashdata('error')): ?>
+                <div class="message error">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <?php echo $this->session->flashdata('error'); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($this->session->flashdata('success')): ?>
+                <div class="message success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <?php echo $this->session->flashdata('success'); ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- CodeIgniter validation errors block -->
+            <?php echo validation_errors('<div class="message error"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', '</div>'); ?>
+
+            <form method="post" action="<?php echo site_url('login/authenticate'); ?>">
+                <div class="form-group">
+                    <label for="mobile">📱 Mobile Number or Email</label>
+                    <input type="text" id="identity" name="identity" value="<?php echo set_value('identity'); ?>" placeholder="e.g., 9876543210 or hello@example.com" autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">🔒 Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+                </div>
+
+                <button class="btn-primary" type="submit">→ Sign in</button>
+            </form>
+
+            <div class="link-text" style="border-top:0;padding-top:0;margin-top:-0.2rem;margin-bottom:1rem;">
+                <a href="<?php echo site_url('login/forgot-password'); ?>">Forgot Password?</a>
             </div>
-        <?php endif; ?>
 
-        <!-- CodeIgniter validation errors block -->
-        <?php echo validation_errors('<div class="message error"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', '</div>'); ?>
-
-        <form method="post" action="<?php echo site_url('login/authenticate'); ?>">
-            <div class="form-group">
-                <label for="mobile">📱 Mobile Number or Email</label>
-                <input type="text" id="identity" name="identity" value="<?php echo set_value('identity'); ?>" placeholder="e.g., 9876543210 or hello@example.com" autocomplete="username">
+            <div class="link-text">
+                Don't have an account? <a href="<?php echo site_url('login/register'); ?>">Create account</a>
             </div>
-
-            <div class="form-group">
-                <label for="password">🔒 Password</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
-            </div>
-
-            <button class="btn-primary" type="submit">→ Sign in</button>
-        </form>
-
-        <div class="link-text" style="border-top:0;padding-top:0;margin-top:-0.2rem;margin-bottom:1rem;">
-            <a href="<?php echo site_url('login/forgot-password'); ?>">Forgot Password?</a>
-        </div>
-
-        <div class="link-text">
-            Don't have an account? <a href="<?php echo site_url('login/register'); ?>">Create account</a>
         </div>
     </div>
-</div>
 </body>
+
 </html>
