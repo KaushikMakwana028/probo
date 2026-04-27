@@ -1,6 +1,15 @@
 <?php if ($this->session->flashdata('error')): ?>
 	<div class="question-edit-flash question-edit-flash-error"><?php echo $this->session->flashdata('error'); ?></div>
 <?php endif; ?>
+<?php
+$trade_totals = isset($question->trade_totals) && is_array($question->trade_totals) ? $question->trade_totals : array();
+$display_yes_quantity = isset($trade_totals['yes_quantity']) ? (int) $trade_totals['yes_quantity'] : (int) ($question->admin_yes_quantity ?? 0);
+$display_no_quantity = isset($trade_totals['no_quantity']) ? (int) $trade_totals['no_quantity'] : (int) ($question->admin_no_quantity ?? 0);
+$actual_yes_quantity = isset($trade_totals['actual_yes_quantity']) ? (int) $trade_totals['actual_yes_quantity'] : 0;
+$actual_no_quantity = isset($trade_totals['actual_no_quantity']) ? (int) $trade_totals['actual_no_quantity'] : 0;
+$extra_yes_quantity = isset($trade_totals['admin_yes_quantity']) ? (int) $trade_totals['admin_yes_quantity'] : (int) ($question->admin_yes_quantity ?? 0);
+$extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_totals['admin_no_quantity'] : (int) ($question->admin_no_quantity ?? 0);
+?>
 
 <section class="question-edit-layout">
 	<aside class="question-edit-summary">
@@ -22,6 +31,14 @@
 				<div>
 					<label>No Price</label>
 					<strong>Rs <?php echo number_format((float) $question->no_price, 2); ?></strong>
+				</div>
+				<div>
+					<label>Yes Quantity</label>
+					<strong><?php echo number_format($display_yes_quantity); ?></strong>
+				</div>
+				<div>
+					<label>No Quantity</label>
+					<strong><?php echo number_format($display_no_quantity); ?></strong>
 				</div>
 			</div>
 
@@ -81,6 +98,18 @@
 				<div class="form-group">
 					<label for="multiplier">Multiplier</label>
 					<input type="number" id="multiplier" name="multiplier" min="0.01" step="0.01" value="<?php echo set_value('multiplier', number_format((float) ($question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
+				</div>
+
+				<div class="form-group">
+					<label for="admin_yes_quantity">Yes Quantity</label>
+					<input type="number" id="admin_yes_quantity" name="admin_yes_quantity" min="0" step="1" value="<?php echo set_value('admin_yes_quantity', $display_yes_quantity); ?>" required>
+					<small class="question-field-hint">Live: <?php echo number_format($actual_yes_quantity); ?> | Extra: <?php echo number_format($extra_yes_quantity); ?></small>
+				</div>
+
+				<div class="form-group">
+					<label for="admin_no_quantity">No Quantity</label>
+					<input type="number" id="admin_no_quantity" name="admin_no_quantity" min="0" step="1" value="<?php echo set_value('admin_no_quantity', $display_no_quantity); ?>" required>
+					<small class="question-field-hint">Live: <?php echo number_format($actual_no_quantity); ?> | Extra: <?php echo number_format($extra_no_quantity); ?></small>
 				</div>
 
 				<div class="form-group">
@@ -284,6 +313,13 @@
 		outline: none;
 		border-color: #2563eb;
 		box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+	}
+
+	.question-field-hint {
+		display: block;
+		margin-top: 8px;
+		font-size: 12px;
+		color: #64748b;
 	}
 
 	.question-edit-actions {

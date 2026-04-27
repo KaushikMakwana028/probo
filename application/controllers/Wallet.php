@@ -18,8 +18,19 @@ class Wallet extends CI_Controller
 	public function index()
 	{
 		$user = $this->get_user();
+		$settings = $this->db->get('payment_settings')->row();
 		$history_filter = strtolower(trim((string) $this->input->get('history')));
 		$allowed_filters = array('all', 'winnings', 'withdrawals', 'deposits', 'trades', 'refunds');
+		$withdraw_min_amount = 5000;
+
+		if (
+			$settings &&
+			$this->db->field_exists('withdraw_min_amount', 'payment_settings') &&
+			isset($settings->withdraw_min_amount) &&
+			(float) $settings->withdraw_min_amount > 0
+		) {
+			$withdraw_min_amount = (float) $settings->withdraw_min_amount;
+		}
 
 		if (!in_array($history_filter, $allowed_filters, TRUE)) {
 			$history_filter = 'all';
@@ -40,6 +51,7 @@ class Wallet extends CI_Controller
 			'total_deposited' => $this->Wallet_model->get_total_deposited_by_user($user->id),
 			'history_filter' => $history_filter,
 			'bank_details_saved' => $bank_details_saved,
+			'withdraw_min_amount' => $withdraw_min_amount,
 			'edit_bank_details' => $this->input->get('edit_bank') == '1' || !$bank_details_saved,
 			'active_page' => 'wallet'
 		);
@@ -52,6 +64,17 @@ class Wallet extends CI_Controller
 	public function request_withdrawal()
 	{
 		$user = $this->get_user();
+		$settings = $this->db->get('payment_settings')->row();
+		$withdraw_min_amount = 5000;
+
+		if (
+			$settings &&
+			$this->db->field_exists('withdraw_min_amount', 'payment_settings') &&
+			isset($settings->withdraw_min_amount) &&
+			(float) $settings->withdraw_min_amount > 0
+		) {
+			$withdraw_min_amount = (float) $settings->withdraw_min_amount;
+		}
 
 		$this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
 
@@ -64,6 +87,11 @@ class Wallet extends CI_Controller
 
 		if ($amount <= 0) {
 			$this->session->set_flashdata('error', 'Withdrawal amount must be greater than zero.');
+			redirect('wallet');
+		}
+
+		if ($amount < $withdraw_min_amount) {
+			$this->session->set_flashdata('error', 'Minimum withdrawal amount is Rs ' . number_format($withdraw_min_amount, 2) . '.');
 			redirect('wallet');
 		}
 

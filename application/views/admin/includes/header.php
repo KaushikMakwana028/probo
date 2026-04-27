@@ -917,10 +917,24 @@
 							</a>
 						</div>
 					</div>
-					<a class="<?php echo (isset($active_page) && $active_page === 'withdrawals') ? 'active' : ''; ?>"
-						href="<?php echo site_url('admin/withdrawals'); ?>">
-						<i class="fa-solid fa-wallet"></i><span>Withdrawals</span>
-					</a>
+					<div class="sidebar-group <?php echo (isset($active_page) && strpos($active_page, 'withdrawals') === 0) ? 'open' : ''; ?>">
+						<button class="sidebar-group-toggle" type="button">
+							<span class="sidebar-group-label">
+								<i class="fa-solid fa-wallet"></i><span>Withdrawals</span>
+							</span>
+							<span class="sidebar-caret"><i class="fa-solid fa-chevron-down"></i></span>
+						</button>
+						<div class="sidebar-subnav">
+							<a class="<?php echo (isset($active_page) && $active_page === 'withdrawals_requests') ? 'active' : ''; ?>"
+								href="<?php echo site_url('admin/withdrawals'); ?>">
+								<i class="fa-solid fa-list"></i><span> Requests</span>
+							</a>
+							<a class="<?php echo (isset($active_page) && $active_page === 'withdrawals_settings') ? 'active' : ''; ?>"
+								href="<?php echo site_url('admin/withdrawals/settings'); ?>">
+								<i class="fa-solid fa-gear"></i><span> Set Withdraw Amount</span>
+							</a>
+						</div>
+					</div>
 				</nav>
 			</aside>
 

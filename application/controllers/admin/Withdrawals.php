@@ -41,12 +41,76 @@ class Withdrawals extends CI_Controller
 			'pending_count' => $pending_count,
 			'approved_count' => $approved_count,
 			'total_requested' => $total_requested,
-			'active_page' => 'withdrawals'
+			'active_page' => 'withdrawals_requests'
 		);
 
 		$this->load->view('admin/includes/header', $data);
 		$this->load->view('admin/withdrawals_view', $data);
 		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function settings()
+	{
+		$admin = $this->get_admin();
+		$settings = $this->db->get('payment_settings')->row();
+		$withdraw_min_amount = 5000;
+
+		if (
+			$settings &&
+			$this->db->field_exists('withdraw_min_amount', 'payment_settings') &&
+			isset($settings->withdraw_min_amount) &&
+			(float) $settings->withdraw_min_amount > 0
+		) {
+			$withdraw_min_amount = (float) $settings->withdraw_min_amount;
+		}
+
+		$data = array(
+			'title' => 'Set Withdraw Amount',
+			'page_type' => 'dashboard',
+			'admin' => $admin,
+			'withdraw_min_amount' => $withdraw_min_amount,
+			'active_page' => 'withdrawals_settings'
+		);
+
+		$this->load->view('admin/includes/header', $data);
+		$this->load->view('admin/withdrawal_settings_view', $data);
+		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function save_settings()
+	{
+		$this->get_admin();
+		$this->form_validation->set_rules('withdraw_min_amount', 'Withdraw amount', 'required|numeric|greater_than[0]');
+
+		if ($this->form_validation->run() === FALSE) {
+			$this->session->set_flashdata('error', trim(strip_tags(validation_errors(' ', ' '))));
+			redirect('admin/withdrawals/settings');
+		}
+
+		if (!$this->db->field_exists('withdraw_min_amount', 'payment_settings')) {
+			$this->session->set_flashdata('error', 'Please run the withdrawal settings SQL update first.');
+			redirect('admin/withdrawals/settings');
+		}
+
+		$amount = round((float) $this->input->post('withdraw_min_amount', TRUE), 2);
+		$data = array(
+			'withdraw_min_amount' => $amount,
+			'updated_at' => date('Y-m-d H:i:s')
+		);
+
+		if ($this->db->count_all('payment_settings') > 0) {
+			$this->db->update('payment_settings', $data);
+		} else {
+			$data['upi_id'] = '';
+			$data['bank_name'] = '';
+			$data['account_number'] = '';
+			$data['ifsc'] = '';
+			$data['created_at'] = date('Y-m-d H:i:s');
+			$this->db->insert('payment_settings', $data);
+		}
+
+		$this->session->set_flashdata('success', 'Withdraw amount updated successfully.');
+		redirect('admin/withdrawals/settings');
 	}
 
 	public function approve($id)

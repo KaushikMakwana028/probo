@@ -20,6 +20,10 @@ foreach ($questions_in_category as $question_item) {
 
 $yes_qty    = isset($detail_question->trade_totals['yes_quantity']) ? (int) $detail_question->trade_totals['yes_quantity'] : 0;
 $no_qty     = isset($detail_question->trade_totals['no_quantity'])  ? (int) $detail_question->trade_totals['no_quantity']  : 0;
+$actual_yes_qty = isset($detail_question->trade_totals['actual_yes_quantity']) ? (int) $detail_question->trade_totals['actual_yes_quantity'] : $yes_qty;
+$actual_no_qty  = isset($detail_question->trade_totals['actual_no_quantity']) ? (int) $detail_question->trade_totals['actual_no_quantity'] : $no_qty;
+$admin_yes_qty  = isset($detail_question->trade_totals['admin_yes_quantity']) ? (int) $detail_question->trade_totals['admin_yes_quantity'] : 0;
+$admin_no_qty   = isset($detail_question->trade_totals['admin_no_quantity']) ? (int) $detail_question->trade_totals['admin_no_quantity'] : 0;
 $yes_users  = isset($detail_question->user_counts['yes_users'])     ? (int) $detail_question->user_counts['yes_users']     : 0;
 $no_users   = isset($detail_question->user_counts['no_users'])      ? (int) $detail_question->user_counts['no_users']      : 0;
 $real_users = isset($detail_question->real_users)                   ? (int) $detail_question->real_users                   : 0;
@@ -556,7 +560,7 @@ if ($start_ts && $now_ts < $start_ts) {
 			<div class="qd-fact">
 				<label>Trade quantity</label>
 				<strong class="js-trade-qty">Y <?php echo $yes_qty; ?> | N <?php echo $no_qty; ?></strong>
-				<small>Total flow: <span class="js-flow-total"><?php echo $flow_total; ?></span></small>
+				<small>Total flow: <span class="js-flow-total"><?php echo $flow_total; ?></span> | Actual Y <?php echo $actual_yes_qty; ?> + <?php echo $admin_yes_qty; ?> | Actual N <?php echo $actual_no_qty; ?> + <?php echo $admin_no_qty; ?></small>
 			</div>
 			<div class="qd-fact">
 				<label>Yes price</label>
@@ -602,7 +606,6 @@ if ($start_ts && $now_ts < $start_ts) {
 			</div>
 			<div class="qd-chart-foot">
 				<span>Auto-refreshes every 12 s</span>
-				<span>Question ID: <?php echo (int) $detail_question->id; ?></span>
 			</div>
 		</div>
 
@@ -728,6 +731,10 @@ if ($start_ts && $now_ts < $start_ts) {
 			var mt = Number(q.market_total || 0).toFixed(2);
 			var yq = q.trade_totals ? Number(q.trade_totals.yes_quantity || 0) : 0;
 			var nq = q.trade_totals ? Number(q.trade_totals.no_quantity || 0) : 0;
+			var ayq = q.trade_totals ? Number(q.trade_totals.actual_yes_quantity || 0) : yq;
+			var anq = q.trade_totals ? Number(q.trade_totals.actual_no_quantity || 0) : nq;
+			var exy = q.trade_totals ? Number(q.trade_totals.admin_yes_quantity || 0) : 0;
+			var exn = q.trade_totals ? Number(q.trade_totals.admin_no_quantity || 0) : 0;
 			var yu = q.trade_totals ? Number(q.trade_totals.yes_users || 0) : 0;
 			var nu = q.trade_totals ? Number(q.trade_totals.no_users || 0) : 0;
 			var ru = Number(q.real_users || 0);
@@ -748,6 +755,10 @@ if ($start_ts && $now_ts < $start_ts) {
 			card.querySelectorAll('.js-flow-total').forEach(function(n) {
 				n.textContent = String(yq + nq);
 			});
+			var tradeFactSmall = card.querySelector('.js-flow-total');
+			if (tradeFactSmall && tradeFactSmall.parentElement) {
+				tradeFactSmall.parentElement.textContent = 'Total flow: ' + (yq + nq) + ' | Actual Y ' + ayq + ' + ' + exy + ' | Actual N ' + anq + ' + ' + exn;
+			}
 			card.querySelectorAll('.js-yes-users').forEach(function(n) {
 				n.textContent = 'YES users: ' + yu;
 			});

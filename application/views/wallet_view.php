@@ -1,6 +1,7 @@
 <?php
 // wallet_view.php — Enhanced UI v5 (Full Mobile Fix + Premium Design)
 $history_filter = isset($history_filter) ? $history_filter : 'all';
+$withdraw_min_amount = isset($withdraw_min_amount) && (float) $withdraw_min_amount > 0 ? (float) $withdraw_min_amount : 5000;
 $pending_withdrawals = array();
 $merged_transactions = array();
 $withdrawal_tx_ids = array();
@@ -1923,14 +1924,14 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 					: 'You must add your bank account details before requesting a withdrawal.'; ?>
 			</p>
 			<div class="wv-card__body">
-				<form method="post" action="<?php echo site_url('wallet/request-withdrawal'); ?>" class="wv-form">
+				<form method="post" action="<?php echo site_url('wallet/request-withdrawal'); ?>" class="wv-form" id="wvWithdrawForm">
 					<div class="wv-field">
 						<label class="wv-label" for="wd_amount">Amount (₹)</label>
 						<div class="wv-input-wrap">
 							<span class="wv-pfx" aria-hidden="true">₹</span>
 							<input
 								type="number" id="wd_amount" name="amount"
-								min="1" step="0.01"
+								min="0.01" step="0.01"
 								max="<?php echo number_format((float)$user->wallet_balance, 2, '.', ''); ?>"
 								placeholder="0.00"
 								<?php echo $bank_details_saved ? '' : 'disabled'; ?> required
@@ -1939,6 +1940,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 						</div>
 						<?php if ($bank_details_saved): ?>
 							<p class="wv-hint">Max available: <strong>₹<?php echo number_format((float)$user->wallet_balance, 2); ?></strong></p>
+							<p class="wv-hint">Minimum withdrawal: <strong>Rs <?php echo number_format((float) $withdraw_min_amount, ((float) $withdraw_min_amount == floor((float) $withdraw_min_amount)) ? 0 : 2); ?></strong></p>
 						<?php endif; ?>
 					</div>
 					<button
@@ -2589,5 +2591,29 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(render, 100);
 		});
+
+		var withdrawForm = document.getElementById('wvWithdrawForm');
+		var withdrawAmountInput = document.getElementById('wd_amount');
+		if (withdrawForm && withdrawAmountInput) {
+			withdrawForm.addEventListener('submit', function(e) {
+				var amount = parseFloat(withdrawAmountInput.value) || 0;
+				var minAmount = <?php echo number_format((float) $withdraw_min_amount, 2, '.', ''); ?>;
+				if (amount < minAmount) {
+					e.preventDefault();
+					var minText = 'Minimum withdrawal amount is Rs ' + (Number.isInteger(minAmount) ? String(minAmount) : minAmount.toFixed(2)) + '.';
+					if (typeof userSwalAlert === 'function') {
+						userSwalAlert(minText, 'error');
+					} else if (typeof Swal !== 'undefined') {
+						Swal.fire({
+							icon: 'error',
+							text: minText,
+							confirmButtonColor: '#2563eb'
+						});
+					} else {
+						alert(minText);
+					}
+				}
+			});
+		}
 	}());
 </script>

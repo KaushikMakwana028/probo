@@ -19,13 +19,54 @@ if (!function_exists('notification_time_label')) {
 	}
 }
 
+if (!function_exists('notification_normalize_message')) {
+	function notification_normalize_message($title, $message)
+	{
+		static $question_cache = array();
+		$CI = &get_instance();
+
+		if (
+			stripos((string) $message, 'Question #') === FALSE ||
+			!isset($CI->Category_model) ||
+			!is_object($CI->Category_model)
+		) {
+			return (string) $message;
+		}
+
+		return preg_replace_callback('/Question\s+#(\d+)/i', function($matches) use ($CI, &$question_cache) {
+			$question_id = isset($matches[1]) ? (int) $matches[1] : 0;
+			if ($question_id <= 0) {
+				return $matches[0];
+			}
+
+			if (!array_key_exists($question_id, $question_cache)) {
+				$question = $CI->Category_model->get_question($question_id);
+				$question_cache[$question_id] = ($question && !empty($question->question))
+					? trim((string) $question->question)
+					: '';
+			}
+
+			if ($question_cache[$question_id] === '') {
+				return $matches[0];
+			}
+
+			return 'Question **' . $question_cache[$question_id] . '**';
+		}, (string) $message);
+	}
+}
+
 $notification_payload = array();
 foreach ($notifications as $notification) {
 	$is_unread = empty($notification->is_read);
+	$message = isset($notification->message) ? (string) $notification->message : '';
+	$message = notification_normalize_message(
+		isset($notification->title) ? (string) $notification->title : '',
+		$message
+	);
 	$notification_payload[] = array(
 		'id'         => isset($notification->id) ? (int) $notification->id : 0,
 		'title'      => isset($notification->title) ? (string) $notification->title : 'Notification',
-		'message'    => isset($notification->message) ? (string) $notification->message : '',
+		'message'    => $message,
 		'created_at' => isset($notification->created_at) ? (string) $notification->created_at : '',
 		'time_label' => notification_time_label(isset($notification->created_at) ? $notification->created_at : ''),
 		'is_read'    => $is_unread ? 0 : 1,

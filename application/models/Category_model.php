@@ -417,13 +417,43 @@ class Category_model extends CI_Model
 	{
 		$question_id = (int) $question_id;
 		$totals = $this->get_question_trade_totals($question_id);
+		$display_yes_quantity = (int) $totals['yes_quantity'];
+		$display_no_quantity = (int) $totals['no_quantity'];
+		$admin_yes_quantity = 0;
+		$admin_no_quantity = 0;
+
+		if ($this->db->table_exists($this->question_table)) {
+			$question = $this->db
+				->select('admin_yes_quantity, admin_no_quantity')
+				->where('id', $question_id)
+				->get($this->question_table)
+				->row();
+
+			if ($question) {
+				if (isset($question->admin_yes_quantity) && (int) $question->admin_yes_quantity >= 0) {
+					$admin_yes_quantity = (int) $question->admin_yes_quantity;
+				}
+				if (isset($question->admin_no_quantity) && (int) $question->admin_no_quantity >= 0) {
+					$admin_no_quantity = (int) $question->admin_no_quantity;
+				}
+			}
+		}
+
+		$display_yes_quantity += $admin_yes_quantity;
+		$display_no_quantity += $admin_no_quantity;
 
 		if (!$this->db->table_exists($this->answer_table)) {
-			return array_merge($totals, array(
+			return array(
+				'yes_quantity' => $display_yes_quantity,
+				'no_quantity' => $display_no_quantity,
+				'actual_yes_quantity' => (int) $totals['yes_quantity'],
+				'actual_no_quantity' => (int) $totals['no_quantity'],
+				'admin_yes_quantity' => $admin_yes_quantity,
+				'admin_no_quantity' => $admin_no_quantity,
 				'yes_users' => 0,
 				'no_users' => 0,
 				'total_users' => 0
-			));
+			);
 		}
 
 		$this->db->select('answer, COUNT(*) AS total_users');
@@ -439,8 +469,12 @@ class Category_model extends CI_Model
 		}
 
 		return array(
-			'yes_quantity' => (int) $totals['yes_quantity'],
-			'no_quantity' => (int) $totals['no_quantity'],
+			'yes_quantity' => $display_yes_quantity,
+			'no_quantity' => $display_no_quantity,
+			'actual_yes_quantity' => (int) $totals['yes_quantity'],
+			'actual_no_quantity' => (int) $totals['no_quantity'],
+			'admin_yes_quantity' => $admin_yes_quantity,
+			'admin_no_quantity' => $admin_no_quantity,
 			'yes_users' => (int) $users['yes_users'],
 			'no_users' => (int) $users['no_users'],
 			'total_users' => (int) $users['yes_users'] + (int) $users['no_users']

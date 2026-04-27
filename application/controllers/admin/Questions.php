@@ -308,6 +308,8 @@ class Questions extends CI_Controller
 			redirect('admin/questions/view');
 		}
 
+		$question->trade_totals = $this->Category_model->get_question_trade_breakdown((int) $id);
+
 		$data = array(
 			'title' => 'Edit Question',
 			'page_type' => 'dashboard',
@@ -339,6 +341,8 @@ class Questions extends CI_Controller
 		$this->form_validation->set_rules('no_price', 'No price', 'required|numeric');
 		$this->form_validation->set_rules('multiplier', 'Multiplier', 'required|numeric|greater_than[0]');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[draft,open,closed]');
+		$this->form_validation->set_rules('admin_yes_quantity', 'Yes quantity', 'required|integer|greater_than_equal_to[0]');
+		$this->form_validation->set_rules('admin_no_quantity', 'No quantity', 'required|integer|greater_than_equal_to[0]');
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
@@ -350,11 +354,16 @@ class Questions extends CI_Controller
 		$yes_price = (float) $this->input->post('yes_price', TRUE);
 		$no_price = (float) $this->input->post('no_price', TRUE);
 		$multiplier = (float) $this->input->post('multiplier', TRUE);
+		$entered_yes_quantity = (int) $this->input->post('admin_yes_quantity', TRUE);
+		$entered_no_quantity = (int) $this->input->post('admin_no_quantity', TRUE);
 		$status = strtolower(trim((string) $this->input->post('status', TRUE)));
 		$start_time = trim((string) $this->input->post('start_time', TRUE));
 		$end_time = trim((string) $this->input->post('end_time', TRUE));
 		$start_time_sql = $this->normalize_datetime_input($start_time);
 		$end_time_sql = $this->normalize_datetime_input($end_time);
+		$trade_breakdown = $this->Category_model->get_question_trade_breakdown($id);
+		$actual_yes_quantity = isset($trade_breakdown['actual_yes_quantity']) ? (int) $trade_breakdown['actual_yes_quantity'] : 0;
+		$actual_no_quantity = isset($trade_breakdown['actual_no_quantity']) ? (int) $trade_breakdown['actual_no_quantity'] : 0;
 
 		if (!$category) {
 			$this->session->set_flashdata('error', 'Selected category not found.');
@@ -381,7 +390,12 @@ class Questions extends CI_Controller
 			redirect('admin/questions/edit/' . $id);
 		}
 
-		$updated = $this->Category_model->update_question($id, array(
+		if ($entered_yes_quantity < $actual_yes_quantity || $entered_no_quantity < $actual_no_quantity) {
+			$this->session->set_flashdata('error', 'Yes/No quantity cannot be less than the current live trade quantity.');
+			redirect('admin/questions/edit/' . $id);
+		}
+
+		$update_data = array(
 			'category_id' => $category_id,
 			'question' => $this->input->post('question', TRUE),
 			'yes_price' => $yes_price,
@@ -392,7 +406,17 @@ class Questions extends CI_Controller
 			'end_time' => $end_time_sql,
 			'status' => $status,
 			'result_declared_at' => NULL
-		));
+		);
+
+		if ($this->db->field_exists('admin_yes_quantity', 'category_questions')) {
+			$update_data['admin_yes_quantity'] = max(0, $entered_yes_quantity - $actual_yes_quantity);
+		}
+
+		if ($this->db->field_exists('admin_no_quantity', 'category_questions')) {
+			$update_data['admin_no_quantity'] = max(0, $entered_no_quantity - $actual_no_quantity);
+		}
+
+		$updated = $this->Category_model->update_question($id, $update_data);
 
 		if (!$updated) {
 			$this->session->set_flashdata('error', 'Question could not be updated.');
