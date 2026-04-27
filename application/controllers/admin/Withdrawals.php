@@ -117,6 +117,7 @@ class Withdrawals extends CI_Controller
 	{
 		$this->get_admin();
 		$withdrawal = $this->Wallet_model->get_withdrawal((int) $id);
+		$admin_note = trim((string) $this->input->post('admin_note', TRUE));
 
 		if (!$withdrawal || $withdrawal->status !== 'pending') {
 			$this->session->set_flashdata('error', 'Withdrawal request not found or already processed.');
@@ -128,7 +129,7 @@ class Withdrawals extends CI_Controller
 		if (!$user || (float) $user->wallet_balance < (float) $withdrawal->amount) {
 			$this->Wallet_model->update_withdrawal((int) $withdrawal->id, array(
 				'status' => 'rejected',
-				'admin_note' => 'Insufficient wallet balance at approval time.'
+				'admin_note' => $admin_note !== '' ? $admin_note : 'Insufficient wallet balance at approval time.'
 			));
 			$this->session->set_flashdata('error', 'Wallet balance was insufficient, so the request was rejected.');
 			redirect('admin/withdrawals');
@@ -145,12 +146,12 @@ class Withdrawals extends CI_Controller
 		));
 		$this->Wallet_model->update_withdrawal((int) $withdrawal->id, array(
 			'status' => 'approved',
-			'admin_note' => 'Approved and marked for bank transfer.'
+			'admin_note' => $admin_note !== '' ? $admin_note : 'Approved and marked for bank transfer.'
 		));
 		$this->User_model->add_notification(array(
 			'user_id' => (int) $withdrawal->user_id,
 			'title' => 'Withdrawal approved',
-			'message' => 'Your withdrawal request for Rs ' . number_format((float) $withdrawal->amount, 2) . ' was approved.',
+			'message' => 'Your withdrawal request for Rs ' . number_format((float) $withdrawal->amount, 2) . ' was approved.' . ($admin_note !== '' ? ' Remark: ' . $admin_note : ''),
 			'type' => 'withdrawal'
 		));
 
@@ -162,6 +163,7 @@ class Withdrawals extends CI_Controller
 	{
 		$this->get_admin();
 		$withdrawal = $this->Wallet_model->get_withdrawal((int) $id);
+		$admin_note = trim((string) $this->input->post('admin_note', TRUE));
 
 		if (!$withdrawal || $withdrawal->status !== 'pending') {
 			$this->session->set_flashdata('error', 'Withdrawal request not found or already processed.');
@@ -170,12 +172,12 @@ class Withdrawals extends CI_Controller
 
 		$this->Wallet_model->update_withdrawal((int) $withdrawal->id, array(
 			'status' => 'rejected',
-			'admin_note' => 'Rejected by admin.'
+			'admin_note' => $admin_note !== '' ? $admin_note : 'Rejected by admin.'
 		));
 		$this->User_model->add_notification(array(
 			'user_id' => (int) $withdrawal->user_id,
 			'title' => 'Withdrawal rejected',
-			'message' => 'Your withdrawal request for Rs ' . number_format((float) $withdrawal->amount, 2) . ' was rejected.',
+			'message' => 'Your withdrawal request for Rs ' . number_format((float) $withdrawal->amount, 2) . ' was rejected.' . ($admin_note !== '' ? ' Remark: ' . $admin_note : ''),
 			'type' => 'withdrawal'
 		));
 

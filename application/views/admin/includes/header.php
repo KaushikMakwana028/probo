@@ -871,6 +871,11 @@
 								href="<?php echo site_url('admin/questions/view'); ?>">
 								<i class="fa-solid fa-eye"></i><span> View Questions</span>
 							</a>
+
+							<a class="<?php echo (isset($active_page) && $active_page === 'questions_completed') ? 'active' : ''; ?>"
+								href="<?php echo site_url('admin/questions/completed'); ?>">
+								<i class="fa-solid fa-square-check"></i><span> Completed Questions</span>
+							</a>
 						</div>
 					</div>
 

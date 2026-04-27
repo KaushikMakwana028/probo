@@ -6,7 +6,7 @@
 <?php endif; ?>
 
 <?php
-$cat_q_count = $selected_category && !empty($selected_category->questions) ? count($selected_category->questions) : 0;
+$cat_q_count = 0;
 $saved_count = 0;
 $now_ts = time();
 
@@ -17,27 +17,30 @@ if ($selected_category && !empty($selected_category->questions)) {
 		$item_saved = in_array(strtolower((string) $question_item->answer_key), array('yes', 'no'), TRUE);
 		if ($item_saved) {
 			$saved_count++;
+			continue;
 		}
+
+		$cat_q_count++;
 
 		$real_users = isset($question_item->real_users) ? (int) $question_item->real_users : 0;
 		$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 		$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 		$timing_class = 'live';
 		$timing_label = 'Live';
-		$sort_weight = 1; // Live first
+		$sort_weight = 1;
 
 		if ($start_ts && $now_ts < $start_ts) {
 			$timing_class = 'upcoming';
 			$timing_label = 'Upcoming';
-			$sort_weight = 2; // Upcoming second
+			$sort_weight = 2;
 		} elseif ($end_ts && $now_ts > $end_ts) {
 			$timing_class = 'ended';
 			$timing_label = 'Ended';
-			$sort_weight = 3; // Ended last
+			$sort_weight = 3;
 		} elseif (strtolower((string) $question_item->status) !== 'open') {
 			$timing_class = 'ended';
 			$timing_label = ucfirst((string) $question_item->status);
-			$sort_weight = 3; // Ended last
+			$sort_weight = 3;
 		}
 
 		$questions_payload[] = array(
@@ -59,9 +62,9 @@ if ($selected_category && !empty($selected_category->questions)) {
 
 	usort($questions_payload, function ($a, $b) {
 		if ($a['sort_weight'] === $b['sort_weight']) {
-			return $b['id'] <=> $a['id']; // Descending ID within same status
+			return $b['id'] <=> $a['id'];
 		}
-		return $a['sort_weight'] <=> $b['sort_weight']; // Ascending status weight
+		return $a['sort_weight'] <=> $b['sort_weight'];
 	});
 }
 ?>
@@ -454,13 +457,11 @@ if ($selected_category && !empty($selected_category->questions)) {
 		}
 	}
 
-	/* ===== MOBILE FIX START ===== */
 	@media (max-width: 600px) {
 
 		.aq-panel-controls {
 			display: flex;
 			flex-direction: row;
-			/* keep in one row */
 			gap: 10px;
 			align-items: center;
 		}
@@ -468,7 +469,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 		.aq-search-wrap {
 			flex: 1;
 			min-width: 0;
-			/* VERY IMPORTANT (prevents overflow) */
 		}
 
 		.aq-search-input {
@@ -553,7 +553,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 		}
 	}
 
-	/* Added UI styles */
 	.aq-panel-controls {
 		display: flex;
 		gap: 16px;
@@ -680,8 +679,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 			width: 100%;
 		}
 	}
-
-	/* ===== MOBILE FIX END ===== */
 </style>
 
 <div class="aq-page" id="aqApp" data-questions="<?php echo htmlspecialchars(json_encode($questions_payload), ENT_QUOTES, 'UTF-8'); ?>">
@@ -754,8 +751,8 @@ if ($selected_category && !empty($selected_category->questions)) {
 		</section>
 	<?php elseif ($selected_category): ?>
 		<div class="aq-empty">
-			<h4>No questions yet</h4>
-			<p>This category has no questions right now. Add a question first, then it will appear here in the list.</p>
+			<h4>No pending questions</h4>
+			<p>All questions in this category already have saved keys. You can review them on the Completed Questions page.</p>
 		</div>
 	<?php else: ?>
 		<div class="aq-empty">
@@ -894,7 +891,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 			els.pagination.style.display = 'flex';
 			els.pageInfo.textContent = 'Showing ' + startItem + ' to ' + endItem + ' of ' + totalItems;
 
-			// Build buttons
 			var p = state.page;
 			var pages = [];
 			if (totalPages <= 7) {
@@ -926,7 +922,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 
 		function render() {
 			var filtered = getFiltered();
-
 			var itemsToRender = filtered;
 			var startIndex = 0;
 
@@ -943,7 +938,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 			renderPagination(filtered.length);
 		}
 
-		// Listeners
 		els.search.addEventListener('input', function(e) {
 			state.searchTerm = e.target.value;
 			state.page = 1;
@@ -963,7 +957,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 			if (!isNaN(nextPage)) {
 				state.page = nextPage;
 				render();
-				// Scroll top list
 				els.list.scrollIntoView({
 					behavior: 'smooth',
 					block: 'start'
@@ -971,7 +964,6 @@ if ($selected_category && !empty($selected_category->questions)) {
 			}
 		});
 
-		// Init
 		render();
 	});
 </script>

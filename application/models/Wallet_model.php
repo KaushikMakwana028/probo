@@ -34,7 +34,11 @@ class Wallet_model extends CI_Model
 			);
 
 			if (isset($source_map[$source_type])) {
-				$this->db->where('source_type', $source_map[$source_type]);
+				if ($source_type === 'trades') {
+					$this->db->where_in('source_type', array('trade_entry', 'trade_sell'));
+				} else {
+					$this->db->where('source_type', $source_map[$source_type]);
+				}
 			}
 		}
 

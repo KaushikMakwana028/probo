@@ -148,6 +148,8 @@ class Category_model extends CI_Model
 
 	public function get_all_questions()
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table) || !$this->db->table_exists($this->category_table)) {
 			return array();
 		}
@@ -161,6 +163,8 @@ class Category_model extends CI_Model
 
 	public function get_questions_by_category($category_id)
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table) || !$this->db->table_exists($this->category_table)) {
 			return array();
 		}
@@ -210,6 +214,8 @@ class Category_model extends CI_Model
 
 	public function get_question($id)
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table) || !$this->db->table_exists($this->category_table)) {
 			return NULL;
 		}
@@ -223,6 +229,8 @@ class Category_model extends CI_Model
 
 	public function create_question($data)
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table)) {
 			return FALSE;
 		}
@@ -233,6 +241,8 @@ class Category_model extends CI_Model
 
 	public function create_questions_batch($data)
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table)) {
 			return FALSE;
 		}
@@ -246,6 +256,8 @@ class Category_model extends CI_Model
 
 	public function update_question($id, $data)
 	{
+		$this->ensure_question_trade_edit_column();
+
 		if (!$this->db->table_exists($this->question_table)) {
 			return FALSE;
 		}
@@ -324,6 +336,8 @@ class Category_model extends CI_Model
 
 	public function get_user_answers_by_category($user_id, $category_id)
 	{
+		$this->ensure_answer_trade_exit_columns();
+
 		if (
 			!$this->db->table_exists($this->answer_table) ||
 			!$this->db->table_exists($this->question_table)
@@ -331,7 +345,7 @@ class Category_model extends CI_Model
 			return array();
 		}
 
-		$this->db->select('a.question_id, a.answer, a.price, a.quantity, a.payout_amount, a.stake_amount, a.settled_at');
+		$this->db->select('a.question_id, a.answer, a.price, a.quantity, a.payout_amount, a.stake_amount, a.entry_payout_amount, a.created_at, a.settled_at, a.settlement_type, a.sell_price, a.sell_multiplier, a.sell_profit');
 		$this->db->from($this->answer_table . ' a');
 		$this->db->join($this->question_table . ' q', 'q.id = a.question_id');
 		$this->db->where('a.user_id', (int) $user_id);
@@ -345,16 +359,37 @@ class Category_model extends CI_Model
 				'price' => isset($row->price) ? (float) $row->price : 0,
 				'quantity' => isset($row->quantity) ? (int) $row->quantity : 1,
 				'payout_amount' => isset($row->payout_amount) ? (float) $row->payout_amount : 0,
+				'entry_payout_amount' => isset($row->entry_payout_amount) ? (float) $row->entry_payout_amount : (isset($row->payout_amount) ? (float) $row->payout_amount : 0),
 				'stake_amount' => isset($row->stake_amount) ? (float) $row->stake_amount : 0,
-				'settled_at' => isset($row->settled_at) ? $row->settled_at : NULL
+				'created_at' => isset($row->created_at) ? $row->created_at : NULL,
+				'settled_at' => isset($row->settled_at) ? $row->settled_at : NULL,
+				'settlement_type' => isset($row->settlement_type) ? (string) $row->settlement_type : '',
+				'sell_price' => isset($row->sell_price) ? (float) $row->sell_price : 0,
+				'sell_multiplier' => isset($row->sell_multiplier) ? (float) $row->sell_multiplier : 0,
+				'sell_profit' => isset($row->sell_profit) ? (float) $row->sell_profit : 0
 			);
 		}
 
 		return $answers;
 	}
 
-	public function save_user_answer($user_id, $question_id, $answer, $price = 0, $quantity = 1, $payout_amount = 0, $stake_amount = 0, $settled_at = NULL)
+	public function get_user_answer($user_id, $question_id)
 	{
+		$this->ensure_answer_trade_exit_columns();
+
+		if (!$this->db->table_exists($this->answer_table)) {
+			return NULL;
+		}
+
+		$this->db->where('user_id', (int) $user_id);
+		$this->db->where('question_id', (int) $question_id);
+		return $this->db->get($this->answer_table)->row();
+	}
+
+	public function save_user_answer($user_id, $question_id, $answer, $price = 0, $quantity = 1, $payout_amount = 0, $stake_amount = 0, $settled_at = NULL, $extra_data = array())
+	{
+		$this->ensure_answer_trade_exit_columns();
+
 		if (!$this->db->table_exists($this->answer_table)) {
 			return FALSE;
 		}
@@ -370,8 +405,13 @@ class Category_model extends CI_Model
 			'price' => (float) $price,
 			'quantity' => max(1, (int) $quantity),
 			'payout_amount' => max(0, (float) $payout_amount),
+			'entry_payout_amount' => max(0, (float) (($extra_data['entry_payout_amount'] ?? $payout_amount))),
 			'stake_amount' => max(0, (float) $stake_amount),
-			'settled_at' => $settled_at
+			'settled_at' => $settled_at,
+			'settlement_type' => isset($extra_data['settlement_type']) ? $extra_data['settlement_type'] : NULL,
+			'sell_price' => isset($extra_data['sell_price']) ? (float) $extra_data['sell_price'] : NULL,
+			'sell_multiplier' => isset($extra_data['sell_multiplier']) ? (float) $extra_data['sell_multiplier'] : NULL,
+			'sell_profit' => isset($extra_data['sell_profit']) ? (float) $extra_data['sell_profit'] : NULL
 		);
 
 		if ($existing) {
@@ -599,6 +639,8 @@ class Category_model extends CI_Model
 
 	public function get_unsettled_answers_by_question($question_id)
 	{
+		$this->ensure_answer_trade_exit_columns();
+
 		if (!$this->db->table_exists($this->answer_table)) {
 			return array();
 		}
@@ -608,13 +650,23 @@ class Category_model extends CI_Model
 		return $this->db->get($this->answer_table)->result();
 	}
 
-	public function mark_answer_settlement($answer_id, $payout_amount, $settled_at)
+	public function mark_answer_settlement($answer_id, $payout_amount, $settled_at, $extra_data = array())
 	{
-		$this->db->where('id', (int) $answer_id);
-		return $this->db->update($this->answer_table, array(
+		$this->ensure_answer_trade_exit_columns();
+
+		$data = array(
 			'payout_amount' => max(0, (float) $payout_amount),
 			'settled_at' => $settled_at
-		));
+		);
+
+		foreach (array('settlement_type', 'sell_price', 'sell_multiplier', 'sell_profit') as $key) {
+			if (array_key_exists($key, $extra_data)) {
+				$data[$key] = $extra_data[$key];
+			}
+		}
+
+		$this->db->where('id', (int) $answer_id);
+		return $this->db->update($this->answer_table, $data);
 	}
 
 	private function to_timestamp($value)
@@ -654,6 +706,8 @@ class Category_model extends CI_Model
 
 	public function get_question_user_trade_report($question_id, $filters = array())
 	{
+		$this->ensure_answer_trade_exit_columns();
+
 		if (
 			!$this->db->table_exists($this->answer_table) ||
 			!$this->db->table_exists($this->question_table) ||
@@ -772,5 +826,37 @@ class Category_model extends CI_Model
 			'page' => $page,
 			'per_page' => $per_page
 		);
+	}
+
+	private function ensure_answer_trade_exit_columns()
+	{
+		if (!$this->db->table_exists($this->answer_table)) {
+			return;
+		}
+
+		$column_queries = array(
+			'entry_payout_amount' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `entry_payout_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER `payout_amount`",
+			'settlement_type' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `settlement_type` VARCHAR(20) NULL AFTER `settled_at`",
+			'sell_price' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_price` DECIMAL(10,2) NULL AFTER `settlement_type`",
+			'sell_multiplier' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_multiplier` DECIMAL(10,2) NULL AFTER `sell_price`",
+			'sell_profit' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_profit` DECIMAL(12,2) NULL AFTER `sell_multiplier`"
+		);
+
+		foreach ($column_queries as $column => $sql) {
+			if (!$this->db->field_exists($column, $this->answer_table)) {
+				$this->db->query($sql);
+			}
+		}
+	}
+
+	private function ensure_question_trade_edit_column()
+	{
+		if (!$this->db->table_exists($this->question_table)) {
+			return;
+		}
+
+		if (!$this->db->field_exists('last_trade_edit_at', $this->question_table)) {
+			$this->db->query("ALTER TABLE `{$this->question_table}` ADD COLUMN `last_trade_edit_at` DATETIME NULL AFTER `result_declared_at`");
+		}
 	}
 }

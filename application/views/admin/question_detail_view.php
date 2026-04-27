@@ -503,7 +503,7 @@ if ($start_ts && $now_ts < $start_ts) {
 			<h2>Question details</h2>
 			<p>Only the selected question is shown here.</p>
 		</div>
-		<a class="qd-back" href="<?php echo site_url('admin/questions/view?category_id=' . (int) $selected_category->id); ?>">
+		<a class="qd-back" href="<?php echo site_url(isset($list_page_url) ? $list_page_url : 'admin/questions/view?category_id=' . (int) $selected_category->id); ?>">
 			<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 				<path d="M10 13L5 8l5-5" />
 			</svg>
@@ -611,7 +611,7 @@ if ($start_ts && $now_ts < $start_ts) {
 
 		<form method="post" action="<?php echo site_url('admin/questions/save-answer-keys'); ?>" class="qd-answer-box">
 			<h4>Save answer key</h4>
-			<p>Choose the correct result. You stay on the same details page after saving.</p>
+			<p>Choose the correct result. After saving, this question moves to the Completed Questions page.</p>
 
 			<input type="hidden" name="category_id" value="<?php echo (int) $selected_category->id; ?>">
 			<input type="hidden" name="question_id" value="<?php echo (int) $detail_question->id; ?>">

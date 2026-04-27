@@ -43,7 +43,7 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 			</div>
 
 			<div class="question-edit-links">
-				<a href="<?php echo site_url('admin/questions/view?category_id=' . (int) $question->category_id); ?>">Back to Questions</a>
+				<a href="<?php echo site_url(isset($list_page_url) ? $list_page_url : 'admin/questions/view?category_id=' . (int) $question->category_id); ?>">Back to Questions</a>
 			</div>
 		</div>
 	</aside>
@@ -124,7 +124,7 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 			</div>
 
 			<div class="question-edit-actions">
-				<a class="question-secondary-btn" href="<?php echo site_url('admin/questions/view?category_id=' . (int) $question->category_id); ?>">Cancel</a>
+				<a class="question-secondary-btn" href="<?php echo site_url(isset($list_page_url) ? $list_page_url : 'admin/questions/view?category_id=' . (int) $question->category_id); ?>">Cancel</a>
 				<button type="submit" class="question-primary-btn">Save Question</button>
 			</div>
 		</form>

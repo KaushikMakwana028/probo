@@ -39,6 +39,7 @@ class Wallet extends CI_Controller
 		$transactions = $this->Wallet_model->get_transactions_by_user($user->id);
 		$withdrawals = $this->Wallet_model->get_withdrawals_by_user($user->id);
 		$bank_details_saved = !empty($user->bank_account_holder_name) && !empty($user->bank_name) && !empty($user->bank_account_number) && !empty($user->bank_ifsc_code);
+		$withdrawal_status_alert = $this->User_model->get_latest_unread_withdrawal_status_notification($user->id);
 
 		$data = array(
 			'title' => 'Wallet',
@@ -52,6 +53,7 @@ class Wallet extends CI_Controller
 			'history_filter' => $history_filter,
 			'bank_details_saved' => $bank_details_saved,
 			'withdraw_min_amount' => $withdraw_min_amount,
+			'withdrawal_status_alert' => $withdrawal_status_alert,
 			'edit_bank_details' => $this->input->get('edit_bank') == '1' || !$bank_details_saved,
 			'active_page' => 'wallet'
 		);

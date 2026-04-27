@@ -159,6 +159,7 @@ class Questions extends CI_Controller
 		$selected_answer_state = isset($user_answers[(int) $question->id]) ? $user_answers[(int) $question->id] : NULL;
 		$price_history = $this->Category_model->get_question_price_history((int) $question->id, 20);
 		$trade_breakdown = $this->Category_model->get_question_trade_breakdown((int) $question->id);
+		$sell_trade_summary = $this->build_sell_trade_summary($question, $selected_answer_state);
 		$answered_count = 0;
 		$correct_count = 0;
 		$wrong_count = 0;
@@ -189,6 +190,7 @@ class Questions extends CI_Controller
 			'selected_category' => $selected_category,
 			'selected_question' => $question,
 			'selected_answer_state' => $selected_answer_state,
+			'sell_trade_summary' => $sell_trade_summary,
 			'price_history' => $price_history,
 			'trade_breakdown' => $trade_breakdown,
 			'market_is_open' => $this->is_question_open_for_trade($question),
@@ -337,12 +339,79 @@ class Questions extends CI_Controller
 			$selected_quantity,
 			$winning_amount,
 			$stake_amount,
-			NULL
+			NULL,
+			array(
+				'entry_payout_amount' => $winning_amount
+			)
 		);
 		$this->Category_model->rebalance_question_prices($question_id);
 		$this->session->set_userdata('last_trade_at', time());
 
 		$this->session->set_flashdata('success', 'Trade placed successfully. The trade amount was deducted from your wallet. Result payout will be added after admin declares the result.');
+		redirect('questions/answer/' . $question_id);
+	}
+
+	public function sell_trade()
+	{
+		$user = $this->User_model->get_by_id($this->session->userdata('user_id'));
+
+		if (!$user) {
+			$this->session->sess_destroy();
+			redirect('login');
+		}
+
+		$question_id = (int) $this->input->post('question_id');
+		$question = $this->Category_model->get_question($question_id);
+
+		if (!$question) {
+			$this->session->set_flashdata('error', 'Selected question was not found.');
+			redirect('questions');
+		}
+
+		$answer_state = $this->Category_model->get_user_answer((int) $user->id, $question_id);
+
+		if (!$answer_state) {
+			$this->session->set_flashdata('error', 'No trade was found for this question.');
+			redirect('questions/answer/' . $question_id);
+		}
+
+		$sell_summary = $this->build_sell_trade_summary($question, $answer_state);
+
+		if (empty($sell_summary['can_sell'])) {
+			$this->session->set_flashdata('error', isset($sell_summary['message']) ? $sell_summary['message'] : 'This trade cannot be sold right now.');
+			redirect('questions/answer/' . $question_id);
+		}
+
+		$settled_at = date('Y-m-d H:i:s');
+		$this->Category_model->mark_answer_settlement((int) $answer_state->id, (float) $sell_summary['exit_amount'], $settled_at, array(
+			'settlement_type' => 'sell',
+			'sell_price' => (float) $sell_summary['current_price'],
+			'sell_multiplier' => (float) $sell_summary['current_multiplier'],
+			'sell_profit' => (float) $sell_summary['net_profit']
+		));
+
+		$this->User_model->adjust_wallet_balance((int) $user->id, (float) $sell_summary['exit_amount']);
+
+		$question_label = trim(isset($question->question) ? (string) $question->question : '');
+		$question_label = $question_label !== '' ? $question_label : ('Question #' . $question_id);
+
+		$this->Wallet_model->add_transaction(array(
+			'user_id' => (int) $user->id,
+			'source_type' => 'trade_sell',
+			'source_id' => $question_id,
+			'type' => 'credit',
+			'amount' => (float) $sell_summary['exit_amount'],
+			'description' => 'Trade sold on ' . $question_label . ' (' . strtoupper((string) $answer_state->answer) . ')'
+		));
+
+		$this->User_model->add_notification(array(
+			'user_id' => (int) $user->id,
+			'title' => 'Trade sold successfully',
+			'message' => 'You sold your ' . strtoupper((string) $answer_state->answer) . ' trade on **' . $question_label . '** and Rs ' . number_format((float) $sell_summary['exit_amount'], 2) . ' was credited to your wallet.',
+			'type' => 'trade'
+		));
+
+		$this->session->set_flashdata('success', 'Trade sold successfully. Rs ' . number_format((float) $sell_summary['exit_amount'], 2) . ' was added to your wallet.');
 		redirect('questions/answer/' . $question_id);
 	}
 
@@ -453,5 +522,80 @@ class Questions extends CI_Controller
 		}
 
 		return TRUE;
+	}
+
+	private function build_sell_trade_summary($question, $answer_state)
+	{
+		$summary = array(
+			'can_sell' => FALSE,
+			'message' => 'This trade cannot be sold right now.',
+			'current_price' => 0.0,
+			'current_multiplier' => 0.0,
+			'exit_amount' => 0.0,
+			'entry_amount' => 0.0,
+			'net_profit' => 0.0
+		);
+
+		if (!$question || !$answer_state) {
+			$summary['message'] = 'No active trade found for this question.';
+			return $summary;
+		}
+
+		if (!empty($answer_state->settled_at)) {
+			$summary['message'] = 'This trade is already settled.';
+			return $summary;
+		}
+
+		if (!$this->is_question_open_for_trade($question)) {
+			$summary['message'] = 'Trade selling is available only while the market is open.';
+			return $summary;
+		}
+
+		$current_price = strtolower((string) $answer_state->answer) === 'no'
+			? (float) $question->no_price
+			: (float) $question->yes_price;
+		$current_quantity = max(1, (int) $answer_state->quantity);
+		$entry_amount = isset($answer_state->entry_payout_amount) && (float) $answer_state->entry_payout_amount > 0
+			? (float) $answer_state->entry_payout_amount
+			: (float) $answer_state->payout_amount;
+		$current_multiplier = isset($question->multiplier) ? (float) $question->multiplier : 1.25;
+		$entry_price = isset($answer_state->price) ? (float) $answer_state->price : 0.0;
+		$entry_multiplier = ($entry_price > 0 && $current_quantity > 0 && $entry_amount > 0)
+			? round($entry_amount / ($entry_price * $current_quantity), 4)
+			: $current_multiplier;
+		$exit_amount = round($current_price * $current_quantity * $current_multiplier, 2);
+		$net_profit = round($exit_amount - (float) $answer_state->stake_amount, 2);
+		$price_changed = abs($current_price - $entry_price) > 0.0001;
+		$multiplier_changed = abs($current_multiplier - $entry_multiplier) > 0.0001;
+		$market_changed_after_entry = $price_changed || $multiplier_changed;
+		$trade_created_at = isset($answer_state->created_at) ? strtotime((string) $answer_state->created_at) : FALSE;
+		$question_edited_at = isset($question->last_trade_edit_at) ? strtotime((string) $question->last_trade_edit_at) : FALSE;
+		$edited_after_trade = ($trade_created_at && $question_edited_at) ? ($question_edited_at > $trade_created_at) : FALSE;
+		$allow_sell_from_live_change = $market_changed_after_entry && !$question_edited_at;
+
+		$summary['current_price'] = $current_price;
+		$summary['current_multiplier'] = $current_multiplier;
+		$summary['exit_amount'] = $exit_amount;
+		$summary['entry_amount'] = $entry_amount;
+		$summary['net_profit'] = $net_profit;
+
+		if (!$edited_after_trade && !$allow_sell_from_live_change) {
+			$summary['message'] = 'Sell option will unlock only after admin changes this question after your trade is placed.';
+			return $summary;
+		}
+
+		if (!$market_changed_after_entry) {
+			$summary['message'] = 'Sell option will unlock when the updated market gives a better live return than your booked trade.';
+			return $summary;
+		}
+
+		if ($exit_amount <= $entry_amount) {
+			$summary['message'] = 'Sell option will unlock when the current return moves above your booked return.';
+			return $summary;
+		}
+
+		$summary['can_sell'] = TRUE;
+		$summary['message'] = 'You can sell this trade now and book the current profit.';
+		return $summary;
 	}
 }

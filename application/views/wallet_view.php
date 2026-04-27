@@ -50,6 +50,32 @@ usort($merged_transactions, function ($a, $b) {
 $transactions = $merged_transactions;
 $withdrawals = $pending_withdrawals;
 $wallet_history_count = count($withdrawals) + count($transactions);
+$withdrawal_status_alert_payload = array();
+
+if (!empty($withdrawal_status_alert)) {
+	$alert_title = isset($withdrawal_status_alert->title) ? trim((string) $withdrawal_status_alert->title) : 'Withdrawal update';
+	$alert_message = isset($withdrawal_status_alert->message) ? trim((string) $withdrawal_status_alert->message) : '';
+	$alert_icon = stripos($alert_title, 'rejected') !== FALSE ? 'error' : 'success';
+	$alert_html = nl2br(html_escape($alert_message));
+
+	if (stripos($alert_message, 'Remark:') !== FALSE) {
+		$remark_parts = preg_split('/Remark:/i', $alert_message, 2);
+		$main_message = isset($remark_parts[0]) ? trim((string) $remark_parts[0]) : '';
+		$remark_message = isset($remark_parts[1]) ? trim((string) $remark_parts[1]) : '';
+		$alert_html = nl2br(html_escape($main_message));
+		if ($remark_message !== '') {
+			$alert_html .= '<br><strong>Remark:</strong> <strong>' . html_escape($remark_message) . '</strong>';
+		}
+	}
+
+	$withdrawal_status_alert_payload = array(
+		'id' => isset($withdrawal_status_alert->id) ? (int) $withdrawal_status_alert->id : 0,
+		'title' => $alert_title,
+		'message' => $alert_message,
+		'html' => $alert_html,
+		'icon' => $alert_icon
+	);
+}
 ?>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2158,7 +2184,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 							<tr data-ft="withdrawals" data-history-item="1">
 								<td class="td-num">—</td>
 								<td><span class="badge badge--withdrawal"><span class="badge-dot" aria-hidden="true"></span>Withdrawal</span></td>
-								<td class="td-desc">Withdrawal request</td>
+								<td class="td-desc">Withdrawal request<?php echo !empty($wr->admin_note) ? ' - ' . html_escape($wr->admin_note) : ''; ?></td>
 								<td class="td-dr">− ₹<?php echo number_format((float)$wr->amount, 2); ?></td>
 								<td><span class="badge <?php echo $sc; ?>"><?php echo html_escape($sl); ?></span></td>
 								<td class="td-date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></td>
@@ -2192,6 +2218,11 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 								$b_class = 'badge--trade';
 								$tx_ft = 'trades';
 								$desc = 'Trade entry fee';
+							} elseif ($tx->source_type === 'trade_sell') {
+								$type_lbl = 'Trade Exit';
+								$b_class = 'badge--trade';
+								$tx_ft = 'trades';
+								$desc = 'Trade sold for instant profit';
 							} elseif ($tx->source_type === 'withdrawal') {
 								$type_lbl = 'Withdrawal';
 								$b_class = 'badge--withdrawal';
@@ -2237,6 +2268,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 					'deposit'          => ['ico--deposit',    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>'],
 					'question_result'  => ['ico--winning',    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'],
 					'trade_entry'      => ['ico--trade',      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'],
+					'trade_sell'       => ['ico--trade',      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h10"/><path d="M10 8l4 4-4 4"/><path d="M20 6v12"/></svg>'],
 					'withdrawal'       => ['ico--withdrawal', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>'],
 					'withdrawal_request' => ['ico--withdrawal', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>'],
 					'referral_bonus'   => ['ico--referral',   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>'],
@@ -2269,7 +2301,7 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 						<div class="wv-tx-card__ico <?php echo $ico_cls; ?>"><?php echo $ico_svg; ?></div>
 						<div class="wv-tx-card__body">
 							<div class="wv-tx-card__type">Withdrawal</div>
-							<div class="wv-tx-card__desc">Withdrawal request</div>
+							<div class="wv-tx-card__desc">Withdrawal request<?php echo !empty($wr->admin_note) ? ' - ' . html_escape($wr->admin_note) : ''; ?></div>
 							<div class="wv-tx-card__meta">
 								<span class="wv-tx-card__date"><?php echo html_escape(date('d M Y, h:i A', strtotime($wr->created_at))); ?></span>
 							</div>
@@ -2310,6 +2342,11 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 						$b_class = 'badge--trade';
 						$tx_ft = 'trades';
 						$desc = 'Trade entry fee';
+					} elseif ($src === 'trade_sell') {
+						$type_lbl = 'Trade Exit';
+						$b_class = 'badge--trade';
+						$tx_ft = 'trades';
+						$desc = 'Trade sold for instant profit';
 					} elseif ($src === 'withdrawal') {
 						$type_lbl = 'Withdrawal';
 						$b_class = 'badge--withdrawal';
@@ -2387,6 +2424,79 @@ $wallet_history_count = count($withdrawals) + count($transactions);
 		});
 
 		/* ── Rows dropdown ── */
+		var withdrawalStatusAlert = <?php echo json_encode($withdrawal_status_alert_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+		function rememberWalletAlert(notificationId) {
+			if (!notificationId || !window.localStorage) {
+				return;
+			}
+
+			try {
+				window.localStorage.setItem('wallet-withdrawal-alert-seen-' + notificationId, '1');
+			} catch (e) {}
+		}
+
+		function isWalletAlertRemembered(notificationId) {
+			if (!notificationId || !window.localStorage) {
+				return false;
+			}
+
+			try {
+				return window.localStorage.getItem('wallet-withdrawal-alert-seen-' + notificationId) === '1';
+			} catch (e) {
+				return false;
+			}
+		}
+
+		function markWalletNotificationRead(notificationId) {
+			if (!notificationId || typeof fetch === 'undefined') {
+				return;
+			}
+
+			fetch('<?php echo site_url('dashboard/mark-notification-read'); ?>', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: 'notification_id=' + encodeURIComponent(notificationId)
+			}).catch(function() {
+				return null;
+			});
+		}
+
+		function showWalletStatusAlert() {
+			if (!withdrawalStatusAlert || !withdrawalStatusAlert.id || !withdrawalStatusAlert.message) {
+				return;
+			}
+
+			if (isWalletAlertRemembered(withdrawalStatusAlert.id)) {
+				markWalletNotificationRead(withdrawalStatusAlert.id);
+				return;
+			}
+
+			if (typeof Swal !== 'undefined') {
+				Swal.fire({
+					icon: withdrawalStatusAlert.icon || 'info',
+					title: withdrawalStatusAlert.title || 'Withdrawal update',
+					html: withdrawalStatusAlert.html || withdrawalStatusAlert.message,
+					confirmButtonText: 'OK',
+					confirmButtonColor: '#2563eb',
+					allowOutsideClick: false
+				}).then(function() {
+					rememberWalletAlert(withdrawalStatusAlert.id);
+					markWalletNotificationRead(withdrawalStatusAlert.id);
+				});
+				return;
+			}
+
+			alert(withdrawalStatusAlert.message);
+			rememberWalletAlert(withdrawalStatusAlert.id);
+			markWalletNotificationRead(withdrawalStatusAlert.id);
+		}
+
+		showWalletStatusAlert();
+
 		var rowsBtn = document.getElementById('wvRowsBtn');
 		var rowsDd = document.getElementById('wvRowsDd');
 		var rowsLbl = document.getElementById('wvRowsLbl');

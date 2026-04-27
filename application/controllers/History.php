@@ -38,14 +38,18 @@ class History extends CI_Controller
         foreach ($history as $row) {
             $answer     = strtolower($row->answer ?? '');
             $key        = strtolower($row->answer_key ?? '');
-            $is_settled = !empty($row->answer_key);
+            $settlement_type = strtolower((string) ($row->settlement_type ?? ''));
+            $is_sold = $settlement_type === 'sell';
+            $is_settled = !empty($row->settled_at);
 
             $row->result = 'pending';
-            if ($is_settled && $key !== '') {
+            if ($is_sold) {
+                $row->result = 'sold';
+            } elseif ($is_settled && $key !== '') {
                 $row->result = ($answer === $key) ? 'win' : 'lose';
             }
 
-            $row->winning_amount = ($row->result === 'win')
+            $row->winning_amount = in_array($row->result, array('win', 'sold'), TRUE)
                 ? (float)($row->payout_amount ?? 0)
                 : 0.0;
         }

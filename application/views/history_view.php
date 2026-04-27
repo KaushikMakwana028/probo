@@ -739,6 +739,16 @@
         animation: blink 1.5s infinite;
     }
 
+    .s-sold {
+        background: var(--accent-light);
+        color: var(--accent);
+        border: 1px solid var(--accent-mid);
+    }
+
+    .s-sold::before {
+        background: var(--accent);
+    }
+
     /* Date */
     .date-v {
         font-size: 11.5px;
@@ -982,7 +992,7 @@ foreach ($history as $history_row) {
 
     $total_staked += $stake_amount;
 
-    if ($result === 'win') {
+    if ($result === 'win' || $result === 'sold') {
         $wins[] = $history_row;
         $total_won += $winning_amount;
         $win_stake += $stake_amount;
@@ -1249,7 +1259,7 @@ function th_cat($n)
                 value="<?= htmlspecialchars($search_q) ?>">
         </div>
         <div class="f-pills">
-            <?php foreach (['all' => 'All', 'win' => 'Win', 'lose' => 'Lose', 'pending' => 'Pending'] as $k => $l): ?>
+            <?php foreach (['all' => 'All', 'win' => 'Win', 'lose' => 'Lose', 'sold' => 'Sold', 'pending' => 'Pending'] as $k => $l): ?>
                 <button class="pill <?= $active_filter === $k ? 'active' : '' ?>"
                     data-filter="<?= $k ?>" onclick="thF('<?= $k ?>')"><?= $l ?></button>
             <?php endforeach; ?>
@@ -1278,6 +1288,9 @@ function th_cat($n)
                 if ($row->result === 'win') {
                     $sc = 's-win';
                     $sl = 'Win';
+                } elseif ($row->result === 'sold') {
+                    $sc = 's-sold';
+                    $sl = 'Sold';
                 } elseif ($row->result === 'lose') {
                     $sc = 's-lose';
                     $sl = 'Lose';

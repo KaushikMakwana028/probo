@@ -54,16 +54,11 @@ class Questions extends CI_Controller
 					'no_users' => isset($trade_breakdown['no_users']) ? (int) $trade_breakdown['no_users'] : 0
 				);
 
-				// total real users
 				$real_users = $this->Category_model->get_total_users_by_question($question_item->id);
-
-				// admin added users
 				$admin_users = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
 
 				$question_item->real_users = $real_users;
 				$question_item->admin_users = $admin_users;
-
-				// final
 				$question_item->total_users = $real_users + $admin_users;
 			}
 		}
@@ -83,6 +78,11 @@ class Questions extends CI_Controller
 		$this->load->view('admin/includes/footer', $data);
 	}
 
+	public function completed()
+	{
+		$this->render_questions_listing_page('completed');
+	}
+
 	public function detail($id)
 	{
 		$admin = $this->get_admin();
@@ -97,10 +97,11 @@ class Questions extends CI_Controller
 			'title' => 'Question Details',
 			'page_type' => 'dashboard',
 			'admin' => $admin,
-			'active_page' => 'questions_view',
+			'active_page' => $this->get_question_listing_active_page($context['selected_question']),
 			'categories' => $this->Category_model->get_all_categories(),
 			'selected_category' => $context['selected_category'],
 			'selected_question' => $context['selected_question'],
+			'list_page_url' => $this->get_question_listing_url($context['selected_question']),
 			'total_questions' => $this->Category_model->count_all_questions()
 		);
 
@@ -123,10 +124,11 @@ class Questions extends CI_Controller
 			'title' => 'Question User Details',
 			'page_type' => 'dashboard',
 			'admin' => $admin,
-			'active_page' => 'questions_view',
+			'active_page' => $this->get_question_listing_active_page($context['selected_question']),
 			'categories' => $this->Category_model->get_all_categories(),
 			'selected_category' => $context['selected_category'],
 			'selected_question' => $context['selected_question'],
+			'list_page_url' => $this->get_question_listing_url($context['selected_question']),
 			'total_questions' => $this->Category_model->count_all_questions()
 		);
 
@@ -314,9 +316,10 @@ class Questions extends CI_Controller
 			'title' => 'Edit Question',
 			'page_type' => 'dashboard',
 			'admin' => $admin,
-			'active_page' => 'questions_view',
+			'active_page' => $this->get_question_listing_active_page($question),
 			'question' => $question,
-			'categories' => $this->Category_model->get_all_categories()
+			'categories' => $this->Category_model->get_all_categories(),
+			'list_page_url' => $this->get_question_listing_url($question)
 		);
 
 		$this->load->view('admin/includes/header', $data);
@@ -416,6 +419,33 @@ class Questions extends CI_Controller
 			$update_data['admin_no_quantity'] = max(0, $entered_no_quantity - $actual_no_quantity);
 		}
 
+		$question_text = trim((string) $this->input->post('question', TRUE));
+		$current_question_text = trim((string) ($question->question ?? ''));
+		$current_status = strtolower(trim((string) ($question->status ?? '')));
+		$current_start_time = isset($question->start_time) ? (string) $question->start_time : NULL;
+		$current_end_time = isset($question->end_time) ? (string) $question->end_time : NULL;
+		$current_extra_yes_quantity = isset($question->admin_yes_quantity) ? (int) $question->admin_yes_quantity : 0;
+		$current_extra_no_quantity = isset($question->admin_no_quantity) ? (int) $question->admin_no_quantity : 0;
+		$new_extra_yes_quantity = isset($update_data['admin_yes_quantity']) ? (int) $update_data['admin_yes_quantity'] : $current_extra_yes_quantity;
+		$new_extra_no_quantity = isset($update_data['admin_no_quantity']) ? (int) $update_data['admin_no_quantity'] : $current_extra_no_quantity;
+
+		$question_changed = (
+			(int) ($question->category_id ?? 0) !== $category_id ||
+			$current_question_text !== $question_text ||
+			abs((float) ($question->yes_price ?? 0) - $yes_price) > 0.0001 ||
+			abs((float) ($question->no_price ?? 0) - $no_price) > 0.0001 ||
+			abs((float) ($question->multiplier ?? 0) - $multiplier) > 0.0001 ||
+			$current_status !== $status ||
+			(string) $current_start_time !== (string) $start_time_sql ||
+			(string) $current_end_time !== (string) $end_time_sql ||
+			$current_extra_yes_quantity !== $new_extra_yes_quantity ||
+			$current_extra_no_quantity !== $new_extra_no_quantity
+		);
+
+		if ($question_changed) {
+			$update_data['last_trade_edit_at'] = date('Y-m-d H:i:s');
+		}
+
 		$updated = $this->Category_model->update_question($id, $update_data);
 
 		if (!$updated) {
@@ -477,7 +507,7 @@ class Questions extends CI_Controller
 		}
 
 		$this->session->set_flashdata('success', $resolved_any ? 'Answer key saved successfully and winning amount credited to user wallets.' : 'Answer key saved successfully.');
-		redirect($selected_question_id > 0 ? 'admin/questions/detail/' . $selected_question_id : 'admin/questions/view?category_id=' . $category_id);
+		redirect('admin/questions/completed?category_id=' . $category_id);
 	}
 
 	public function delete($id)
@@ -493,11 +523,11 @@ class Questions extends CI_Controller
 
 		if (!$this->Category_model->delete_question($id)) {
 			$this->session->set_flashdata('error', 'Question could not be deleted. Please confirm the question table exists.');
-			redirect('admin/questions/view?category_id=' . (int) $question->category_id);
+			redirect($this->get_question_listing_url($question));
 		}
 
 		$this->session->set_flashdata('success', 'Question deleted successfully.');
-		redirect('admin/questions/view?category_id=' . (int) $question->category_id);
+		redirect($this->get_question_listing_url($question));
 	}
 
 	public function live_stats($category_id = 0)
@@ -541,6 +571,147 @@ class Questions extends CI_Controller
 		}
 
 		return $admin;
+	}
+
+	private function render_questions_listing_page($mode = 'active')
+	{
+		$admin = $this->get_admin();
+		$list_mode = $mode === 'completed' ? 'completed' : 'active';
+		$questions_payload = $this->build_question_listing_payload($list_mode);
+		$stats = $this->build_question_listing_stats($questions_payload);
+
+		$data = array(
+			'title' => $list_mode === 'completed' ? 'Completed Questions' : 'View Questions',
+			'page_type' => 'dashboard',
+			'admin' => $admin,
+			'active_page' => $list_mode === 'completed' ? 'questions_completed' : 'questions_view',
+			'categories' => $this->Category_model->get_all_categories(),
+			'total_questions' => $this->Category_model->count_all_questions(),
+			'list_mode' => $list_mode,
+			'initial_category_id' => (int) $this->input->get('category_id'),
+			'questions_payload' => $questions_payload,
+			'listing_stats' => $stats
+		);
+
+		$this->load->view('admin/includes/header', $data);
+		$this->load->view($list_mode === 'completed' ? 'admin/completed_questions_list_view' : 'admin/questions_list_view', $data);
+		$this->load->view('admin/includes/footer', $data);
+	}
+
+	private function build_question_listing_payload($mode = 'active')
+	{
+		$questions = $this->Category_model->get_all_questions();
+		$payload = array();
+		$now_ts = time();
+
+		foreach ($questions as $question_item) {
+			$answer_key = strtolower(trim((string) $question_item->answer_key));
+			$item_saved = in_array($answer_key, array('yes', 'no'), TRUE);
+
+			if ($mode === 'completed' && !$item_saved) {
+				continue;
+			}
+
+			if ($mode !== 'completed' && $item_saved) {
+				continue;
+			}
+
+			$real_users = $this->Category_model->get_total_users_by_question((int) $question_item->id);
+			$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
+			$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
+			$timing_class = 'live';
+			$timing_label = 'Live';
+			$sort_weight = 1;
+			$status = strtolower((string) $question_item->status);
+
+			if ($start_ts && $now_ts < $start_ts) {
+				$timing_class = 'upcoming';
+				$timing_label = 'Upcoming';
+				$sort_weight = 2;
+			} elseif ($end_ts && $now_ts > $end_ts) {
+				$timing_class = 'ended';
+				$timing_label = 'Ended';
+				$sort_weight = 3;
+			} elseif ($status !== 'open') {
+				$timing_class = 'ended';
+				$timing_label = ucfirst($status);
+				$sort_weight = 3;
+			}
+
+			$payload[] = array(
+				'id' => (int) $question_item->id,
+				'category_id' => (int) $question_item->category_id,
+				'category_name' => (string) $question_item->category_name,
+				'question' => (string) $question_item->question,
+				'yes_price' => number_format((float) $question_item->yes_price, 2),
+				'no_price' => number_format((float) $question_item->no_price, 2),
+				'start_time' => !empty($question_item->start_time) ? (string) $question_item->start_time : 'Not set',
+				'end_time' => !empty($question_item->end_time) ? (string) $question_item->end_time : 'Not set',
+				'item_saved' => $item_saved,
+				'answer_key' => $answer_key,
+				'real_users' => (int) $real_users,
+				'timing_class' => $timing_class,
+				'timing_label' => $timing_label,
+				'sort_weight' => $sort_weight,
+				'status' => $status,
+				'result_declared_at' => !empty($question_item->result_declared_at) ? (string) $question_item->result_declared_at : '',
+				'detail_url' => site_url('admin/questions/detail/' . (int) $question_item->id)
+			);
+		}
+
+		usort($payload, function ($a, $b) use ($mode) {
+			if ($mode === 'completed') {
+				$time_a = !empty($a['result_declared_at']) ? strtotime($a['result_declared_at']) : 0;
+				$time_b = !empty($b['result_declared_at']) ? strtotime($b['result_declared_at']) : 0;
+
+				if ($time_a === $time_b) {
+					return $b['id'] <=> $a['id'];
+				}
+
+				return $time_b <=> $time_a;
+			}
+
+			if ($a['sort_weight'] === $b['sort_weight']) {
+				return $b['id'] <=> $a['id'];
+			}
+
+			return $a['sort_weight'] <=> $b['sort_weight'];
+		});
+
+		return $payload;
+	}
+
+	private function build_question_listing_stats($questions_payload)
+	{
+		$category_ids = array();
+		$saved_total = 0;
+
+		foreach ($questions_payload as $question_item) {
+			$category_ids[(int) $question_item['category_id']] = TRUE;
+			if (!empty($question_item['item_saved'])) {
+				$saved_total++;
+			}
+		}
+
+		return array(
+			'page_total' => count($questions_payload),
+			'category_total' => count($category_ids),
+			'saved_total' => $saved_total
+		);
+	}
+
+	private function get_question_listing_active_page($question)
+	{
+		$answer_key = strtolower(trim((string) (isset($question->answer_key) ? $question->answer_key : '')));
+		return in_array($answer_key, array('yes', 'no'), TRUE) ? 'questions_completed' : 'questions_view';
+	}
+
+	private function get_question_listing_url($question)
+	{
+		$category_id = isset($question->category_id) ? (int) $question->category_id : 0;
+		$answer_key = strtolower(trim((string) (isset($question->answer_key) ? $question->answer_key : '')));
+		$path = in_array($answer_key, array('yes', 'no'), TRUE) ? 'admin/questions/completed' : 'admin/questions/view';
+		return $path . ($category_id > 0 ? '?category_id=' . $category_id : '');
 	}
 
 	private function build_question_detail_context($id)
@@ -648,17 +819,23 @@ class Questions extends CI_Controller
 			return;
 		}
 
-		// Fetch the question to get the admin-set multiplier
 		$question = $this->Category_model->get_question((int) $question_id);
-		$multiplier = ($question && (float) $question->multiplier > 0) ? (float) $question->multiplier : 1.25;
 
 		$settled_at = date('Y-m-d H:i:s');
 
 		foreach ($unsettled_answers as $answer) {
 			$is_winner = strtolower((string) $answer->answer) === strtolower((string) $answer_key);
-			$payout_amount = $is_winner ? round(((float) $answer->price * (int) $answer->quantity) * $multiplier, 2) : 0.00;
+			$locked_payout = isset($answer->entry_payout_amount) && (float) $answer->entry_payout_amount > 0
+				? (float) $answer->entry_payout_amount
+				: round(((float) $answer->price * (int) $answer->quantity) * (($question && (float) $question->multiplier > 0) ? (float) $question->multiplier : 1.25), 2);
+			$payout_amount = $is_winner ? $locked_payout : 0.00;
 
-			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at);
+			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at, array(
+				'settlement_type' => 'result',
+				'sell_price' => NULL,
+				'sell_multiplier' => NULL,
+				'sell_profit' => NULL
+			));
 
 			if ($payout_amount > 0) {
 				$this->User_model->adjust_wallet_balance((int) $answer->user_id, $payout_amount);

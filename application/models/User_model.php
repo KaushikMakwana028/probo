@@ -366,6 +366,20 @@ class User_model extends CI_Model {
 		return $this->db->update($this->notifications_table, array('is_read' => 1));
 	}
 
+	public function get_latest_unread_withdrawal_status_notification($user_id)
+	{
+		if (!$this->db->table_exists($this->notifications_table)) {
+			return NULL;
+		}
+
+		$this->db->where('user_id', (int) $user_id);
+		$this->db->where('is_read', 0);
+		$this->db->where('type', 'withdrawal');
+		$this->db->where("(LOWER(title) LIKE '%withdrawal approved%' OR LOWER(title) LIKE '%withdrawal rejected%')", NULL, FALSE);
+		$this->db->order_by('id', 'DESC');
+		return $this->db->get($this->notifications_table, 1)->row();
+	}
+
 	public function adjust_wallet_balance($user_id, $amount)
 	{
 		$user = $this->get_by_id($user_id);

@@ -7,7 +7,9 @@ if ($answer_error_flash === 'This market is not open for trading right now.' && 
 $selected_answer  = $selected_answer_state ? strtolower((string)$selected_answer_state->answer) : 'yes';
 $is_locked        = $selected_answer_state !== NULL;
 $is_settled       = $is_locked && !empty($selected_answer_state->settled_at);
-$is_correct_ans   = $is_settled && $selected_answer === strtolower((string)$selected_question->answer_key);
+$is_sold_trade    = $is_locked && strtolower((string)($selected_answer_state->settlement_type ?? '')) === 'sell';
+$is_correct_ans   = $is_sold_trade || ($is_settled && $selected_answer === strtolower((string)$selected_question->answer_key));
+$sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
 $yes_price        = (float)$selected_question->yes_price;
 $no_price         = (float)$selected_question->no_price;
 $market_total     = max(1.0, $yes_price + $no_price);
@@ -16,7 +18,15 @@ $default_price    = $default_price > 0 ? $default_price : max($yes_price, $no_pr
 $default_quantity = $selected_answer_state ? max(1, min(1000, (int)$selected_answer_state->quantity)) : 1;
 $price_max        = max(0.5, $market_total - 0.5);
 $multiplier       = isset($selected_question->multiplier) ? (float)$selected_question->multiplier : 1.25;
-$winning_preview  = round($default_price * $default_quantity * $multiplier, 2);
+if ($selected_answer_state && $default_price > 0 && $default_quantity > 0) {
+	$locked_preview = isset($selected_answer_state->entry_payout_amount) ? (float)$selected_answer_state->entry_payout_amount : 0;
+	if ($locked_preview > 0) {
+		$multiplier = round($locked_preview / ($default_price * $default_quantity), 4);
+	}
+}
+$winning_preview  = ($selected_answer_state && isset($selected_answer_state->entry_payout_amount) && (float)$selected_answer_state->entry_payout_amount > 0)
+	? (float)$selected_answer_state->entry_payout_amount
+	: round($default_price * $default_quantity * $multiplier, 2);
 $yes_trade_qty    = isset($trade_breakdown['yes_quantity']) ? (int)$trade_breakdown['yes_quantity'] : 0;
 $no_trade_qty     = isset($trade_breakdown['no_quantity'])  ? (int)$trade_breakdown['no_quantity']  : 0;
 $total_trade_qty  = $yes_trade_qty + $no_trade_qty;
@@ -830,6 +840,100 @@ $QTY_MIN          = 1;
 		margin-top: 14px;
 	}
 
+	.tp-sell-box {
+		margin-top: 14px;
+		padding: 16px;
+		border-radius: var(--r-md);
+		background: rgba(37, 99, 235, 0.07);
+		border: 1px solid rgba(37, 99, 235, 0.18);
+		display: grid;
+		gap: 12px;
+	}
+
+	.tp-sell-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.tp-sell-title {
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.tp-sell-chip {
+		display: inline-flex;
+		align-items: center;
+		padding: 6px 10px;
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 700;
+		background: rgba(34, 197, 94, 0.12);
+		color: #15803d;
+	}
+
+	.tp-sell-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.tp-sell-item {
+		padding: 12px;
+		border-radius: 12px;
+		background: var(--white);
+		border: 1px solid var(--border);
+	}
+
+	.tp-sell-item span {
+		display: block;
+		font-size: 11px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: .08em;
+		color: var(--hint);
+		margin-bottom: 6px;
+	}
+
+	.tp-sell-item strong {
+		font-size: 18px;
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.tp-sell-note {
+		font-size: 13px;
+		color: var(--muted);
+		line-height: 1.6;
+	}
+
+	.tp-sell-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.tp-sell-btn {
+		border: none;
+		border-radius: 12px;
+		padding: 12px 18px;
+		background: #2563eb;
+		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.tp-sell-muted {
+		font-size: 12px;
+		color: var(--hint);
+	}
+
 	.tp-inline-note {
 		display: inline-flex;
 		align-items: flex-start;
@@ -1306,6 +1410,40 @@ $QTY_MIN          = 1;
 						</div>
 					<?php endif; ?>
 
+					<?php if ($is_locked && !$is_sold_trade && !empty($sell_trade_summary) && !empty($sell_trade_summary['can_sell'])): ?>
+						<div class="tp-sell-box">
+							<div class="tp-sell-head">
+								<div class="tp-sell-title">Sell trade and book profit</div>
+								<span class="tp-sell-chip">Sell Available</span>
+							</div>
+							<div class="tp-sell-grid">
+								<div class="tp-sell-item">
+									<span>Booked Return</span>
+									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?></strong>
+								</div>
+								<div class="tp-sell-item">
+									<span>Current Return</span>
+									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['exit_amount'] ?? 0), 2); ?></strong>
+								</div>
+								<div class="tp-sell-item">
+									<span>Net Profit</span>
+									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['net_profit'] ?? 0), 2); ?></strong>
+								</div>
+							</div>
+							<div class="tp-sell-note"><?php echo html_escape((string) ($sell_trade_summary['message'] ?? '')); ?></div>
+							<div class="tp-sell-actions">
+								<div class="tp-sell-muted">
+									Current price Rs <?php echo number_format((float) ($sell_trade_summary['current_price'] ?? 0), 2); ?>
+									x <?php echo number_format((float) ($sell_trade_summary['current_multiplier'] ?? 0), 2); ?>
+								</div>
+								<form method="post" action="<?php echo site_url('questions/sell-trade'); ?>" class="js-sell-trade-form">
+									<input type="hidden" name="question_id" value="<?php echo (int) $selected_question->id; ?>">
+									<button type="submit" class="tp-sell-btn">Sell Trade Now</button>
+								</form>
+							</div>
+						</div>
+					<?php endif; ?>
+
 					<?php echo form_open('questions/save_answers'); ?>
 					<input type="hidden" name="category_id" value="<?php echo (int)$selected_category->id; ?>">
 					<input type="hidden" name="question_id" value="<?php echo (int)$selected_question->id; ?>">
@@ -1571,6 +1709,7 @@ $QTY_MIN          = 1;
 
 		var yR = document.getElementById('tp_yes'),
 			nR = document.getElementById('tp_no');
+		var sellTradeForm = document.querySelector('.js-sell-trade-form');
 		var heroSub = document.querySelector('.tp-hero-sub');
 		var pR = document.querySelector('.js-prange'),
 			pH = document.querySelector('.js-ph');
@@ -1590,16 +1729,39 @@ $QTY_MIN          = 1;
 
 		if (heroSub) {
 			heroSub.innerHTML = <?php echo json_encode(
-				($start_ts && $now < $start_ts)
-					? '<span class="tp-hero-sub-icon pending"><i class="fa-solid fa-clock"></i></span><span>Market starts at <strong>' . date('d M Y, h:i A', $start_ts) . '</strong></span>'
-					: (($end_ts && $now <= $end_ts)
-						? '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market closes at <strong>' . date('d M Y, h:i A', $end_ts) . '</strong></span>'
-						: '<span class="tp-hero-sub-icon closed"><i class="fa-solid fa-lock"></i></span><span>Market is closed</span>')
-			); ?>;
+									($start_ts && $now < $start_ts)
+										? '<span class="tp-hero-sub-icon pending"><i class="fa-solid fa-clock"></i></span><span>Market starts at <strong>' . date('d M Y, h:i A', $start_ts) . '</strong></span>'
+										: (($end_ts && $now <= $end_ts)
+											? '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market closes at <strong>' . date('d M Y, h:i A', $end_ts) . '</strong></span>'
+											: '<span class="tp-hero-sub-icon closed"><i class="fa-solid fa-lock"></i></span><span>Market is closed</span>')
+								); ?>;
 		}
 
 		if (sb) {
 			sb.textContent = sb.disabled ? 'Market Closed' : 'Place Trade Now';
+		}
+
+		if (sellTradeForm) {
+			sellTradeForm.addEventListener('submit', function(event) {
+				event.preventDefault();
+
+				if (typeof userSwalConfirm === 'function') {
+					userSwalConfirm('Sell this trade and credit the current return to your wallet?', {
+						icon: 'question',
+						confirmButtonText: 'Sell Trade',
+						cancelButtonText: 'Cancel'
+					}).then(function(confirmed) {
+						if (confirmed) {
+							sellTradeForm.submit();
+						}
+					});
+					return;
+				}
+
+				if (window.confirm('Sell this trade and credit the current return to your wallet?')) {
+					sellTradeForm.submit();
+				}
+			});
 		}
 
 		function fmt(v) {
