@@ -17,13 +17,14 @@ class Dashboard extends CI_Controller
 
 	public function index()
 	{
-		if (!$this->session->userdata('admin_id')) {
+		$admin_id = (int) $this->session->userdata('admin_id');
+
+		if ($admin_id <= 0) {
 			redirect('admin/login');
 		}
-		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
+		$admin = $this->User_model->get_admin_by_id($admin_id);
 
-		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array('admin_id', 'admin_name', 'admin_mobile', 'admin_email', 'admin_logged_in'));
+		if (!$admin) {
 			redirect('admin/login');
 		}
 

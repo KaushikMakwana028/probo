@@ -23,10 +23,20 @@ class Deposits extends CI_Controller
      */
     private function get_common_data()
     {
+        $admin_id = (int) $this->session->userdata('admin_id');
+
+        if ($admin_id <= 0) {
+            redirect('admin/login');
+        }
+
+        $admin = $this->User_model->get_admin_by_id($admin_id);
+
+        if (!$admin) {
+            redirect('admin/login');
+        }
+
         return [
-            'admin' => $this->db->get_where('users', [
-                'id' => $this->session->userdata('admin_id')
-            ])->row(),
+            'admin' => $admin,
             'page_type' => 'dashboard',
         ];
     }
@@ -481,3 +491,5 @@ class Deposits extends CI_Controller
         redirect('admin/deposits/settings');
     }
 }
+
+

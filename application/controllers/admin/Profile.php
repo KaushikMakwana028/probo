@@ -16,23 +16,7 @@ class Profile extends CI_Controller
 
 	public function index()
 	{
-
-		if (!$this->session->userdata('admin_id')) {
-			redirect('admin/login');
-		}
-		
-		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
-
-		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array(
-				'admin_id',
-				'admin_name',
-				'admin_mobile',
-				'admin_email',
-				'admin_logged_in'   // 🔥 IMPORTANT
-			));
-			redirect('admin/login');
-		}
+		$admin = $this->get_admin();
 
 		$data = array(
 			'title' => 'Admin Profile',
@@ -48,23 +32,8 @@ class Profile extends CI_Controller
 
 	public function update()
 	{
-		if (!$this->session->userdata('admin_id')) {
-			redirect('admin/login');
-		}
-
-		$admin_id = $this->session->userdata('admin_id');
-		$admin = $this->User_model->get_by_id($admin_id);
-
-		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array(
-				'admin_id',
-				'admin_name',
-				'admin_mobile',
-				'admin_email',
-				'admin_logged_in'
-			));
-			redirect('admin/login');
-		}
+		$admin = $this->get_admin();
+		$admin_id = (int) $admin->id;
 
 		$this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
 		$this->form_validation->set_rules('mobile', 'Mobile', 'required|trim|numeric|min_length[10]|max_length[15]');
@@ -119,23 +88,8 @@ class Profile extends CI_Controller
 
 	public function change_password()
 	{
-
-		if (!$this->session->userdata('admin_id')) {
-			redirect('admin/login');
-		}
-		$admin_id = $this->session->userdata('admin_id');
-		$admin = $this->User_model->get_by_id($admin_id);
-
-		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array(
-				'admin_id',
-				'admin_name',
-				'admin_mobile',
-				'admin_email',
-				'admin_logged_in'
-			));
-			redirect('admin/login');
-		}
+		$admin = $this->get_admin();
+		$admin_id = (int) $admin->id;
 
 		$this->form_validation->set_rules('new_password', 'New Password', 'required|trim|min_length[6]');
 
@@ -150,6 +104,23 @@ class Profile extends CI_Controller
 
 		$this->session->set_flashdata('success', 'Admin password changed successfully.');
 		redirect('admin/profile');
+	}
+
+	private function get_admin()
+	{
+		$admin_id = (int) $this->session->userdata('admin_id');
+
+		if ($admin_id <= 0) {
+			redirect('admin/login');
+		}
+
+		$admin = $this->User_model->get_admin_by_id($admin_id);
+
+		if (!$admin) {
+			redirect('admin/login');
+		}
+
+		return $admin;
 	}
 
 	private function handle_profile_upload($admin)
@@ -193,3 +164,6 @@ class Profile extends CI_Controller
 		return $new_image;
 	}
 }
+
+
+

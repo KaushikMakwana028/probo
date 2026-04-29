@@ -1,4 +1,29 @@
 <?php
+$selected_question = isset($selected_question) && is_object($selected_question) ? $selected_question : (object) array();
+$selected_category = isset($selected_category) && is_object($selected_category) ? $selected_category : (object) array();
+$selected_category->name = isset($selected_category->name) ? $selected_category->name : '';
+$selected_category->questions = isset($selected_category->questions) && is_array($selected_category->questions) ? $selected_category->questions : array();
+$selected_answer_state = isset($selected_answer_state) && is_object($selected_answer_state) ? $selected_answer_state : NULL;
+$trade_breakdown = isset($trade_breakdown) && is_array($trade_breakdown) ? $trade_breakdown : array();
+$price_history = isset($price_history) && is_array($price_history) ? $price_history : array();
+$user_answers = isset($user_answers) && is_array($user_answers) ? $user_answers : array();
+$sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
+$total_users = isset($total_users) ? (int) $total_users : 0;
+$market_is_open = isset($market_is_open) ? (bool) $market_is_open : FALSE;
+$answered_count = isset($answered_count) ? (int) $answered_count : 0;
+$correct_count = isset($correct_count) ? (int) $correct_count : 0;
+$wrong_count = isset($wrong_count) ? (int) $wrong_count : 0;
+$selected_question->id = isset($selected_question->id) ? (int) $selected_question->id : 0;
+$selected_question->question = isset($selected_question->question) ? $selected_question->question : '';
+$selected_question->yes_price = isset($selected_question->yes_price) ? (float) $selected_question->yes_price : 0;
+$selected_question->no_price = isset($selected_question->no_price) ? (float) $selected_question->no_price : 0;
+$selected_question->answer_key = isset($selected_question->answer_key) ? $selected_question->answer_key : '';
+$selected_question->status = isset($selected_question->status) ? $selected_question->status : 'draft';
+$selected_question->start_time = isset($selected_question->start_time) ? $selected_question->start_time : '';
+$selected_question->end_time = isset($selected_question->end_time) ? $selected_question->end_time : '';
+$selected_question->yes_multiplier = isset($selected_question->yes_multiplier) ? $selected_question->yes_multiplier : NULL;
+$selected_question->no_multiplier = isset($selected_question->no_multiplier) ? $selected_question->no_multiplier : NULL;
+$selected_question->multiplier = isset($selected_question->multiplier) ? $selected_question->multiplier : NULL;
 // ── DATA PREP ────────────────────────────────────────────────────────────────
 $answer_error_flash = $this->session->flashdata('error');
 if ($answer_error_flash === 'This market is not open for trading right now.' && !empty($market_is_open)) {
@@ -12,12 +37,14 @@ $is_correct_ans   = $is_sold_trade || ($is_settled && $selected_answer === strto
 $sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
 $yes_price        = (float)$selected_question->yes_price;
 $no_price         = (float)$selected_question->no_price;
+$yes_multiplier   = isset($selected_question->yes_multiplier) && (float)$selected_question->yes_multiplier > 0 ? (float)$selected_question->yes_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
+$no_multiplier    = isset($selected_question->no_multiplier) && (float)$selected_question->no_multiplier > 0 ? (float)$selected_question->no_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
 $market_total     = max(1.0, $yes_price + $no_price);
 $default_price    = $selected_answer_state ? (float)$selected_answer_state->price : ($selected_answer === 'no' ? $no_price : $yes_price);
 $default_price    = $default_price > 0 ? $default_price : max($yes_price, $no_price, 0.5);
 $default_quantity = $selected_answer_state ? max(1, min(1000, (int)$selected_answer_state->quantity)) : 1;
 $price_max        = max(0.5, $market_total - 0.5);
-$multiplier       = isset($selected_question->multiplier) ? (float)$selected_question->multiplier : 1.25;
+$multiplier       = $selected_answer === 'no' ? $no_multiplier : $yes_multiplier;
 if ($selected_answer_state && $default_price > 0 && $default_quantity > 0) {
 	$locked_preview = isset($selected_answer_state->entry_payout_amount) ? (float)$selected_answer_state->entry_payout_amount : 0;
 	if ($locked_preview > 0) {
@@ -27,6 +54,12 @@ if ($selected_answer_state && $default_price > 0 && $default_quantity > 0) {
 $winning_preview  = ($selected_answer_state && isset($selected_answer_state->entry_payout_amount) && (float)$selected_answer_state->entry_payout_amount > 0)
 	? (float)$selected_answer_state->entry_payout_amount
 	: round($default_price * $default_quantity * $multiplier, 2);
+$locked_stake_amount = $selected_answer_state ? (float)($selected_answer_state->stake_amount ?? 0) : 0.0;
+$locked_payout_amount = $selected_answer_state
+	? ((isset($selected_answer_state->entry_payout_amount) && (float)$selected_answer_state->entry_payout_amount > 0)
+		? (float)$selected_answer_state->entry_payout_amount
+		: (float)($selected_answer_state->payout_amount ?? 0))
+	: 0.0;
 $yes_trade_qty    = isset($trade_breakdown['yes_quantity']) ? (int)$trade_breakdown['yes_quantity'] : 0;
 $no_trade_qty     = isset($trade_breakdown['no_quantity'])  ? (int)$trade_breakdown['no_quantity']  : 0;
 $total_trade_qty  = $yes_trade_qty + $no_trade_qty;
@@ -442,6 +475,23 @@ $QTY_MIN          = 1;
 		margin-bottom: 3px;
 	}
 
+	.tp-result-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin: 8px 0 6px;
+	}
+
+	.tp-result-meta span {
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--ink-2);
+		padding: 6px 10px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.7);
+		border: 1px solid var(--border);
+	}
+
 	.tp-result p {
 		font-size: 12px;
 		color: var(--muted);
@@ -471,7 +521,7 @@ $QTY_MIN          = 1;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 8px;
-		margin-bottom: 16px;
+		margin: 16px 0px;
 	}
 
 	.tp-toggle input[type=radio] {
@@ -877,7 +927,7 @@ $QTY_MIN          = 1;
 
 	.tp-sell-grid {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 		gap: 10px;
 	}
 
@@ -1390,6 +1440,13 @@ $QTY_MIN          = 1;
 									<?php echo $is_settled ? ($is_correct_ans ? '✓ Correct answer' : '✗ Wrong answer') : '⏳ Awaiting result'; ?>
 								</div>
 								<h4>You answered <strong><?php echo strtoupper($selected_answer); ?></strong></h4>
+								<?php if (!$is_settled): ?>
+									<div class="tp-result-meta">
+										<span>Entry price ₹<?php echo number_format($default_price, 2); ?> × <?php echo (int) $default_quantity; ?></span>
+										<span>Stake ₹<?php echo number_format($locked_stake_amount, 2); ?></span>
+										<span>Locked payout ₹<?php echo number_format($locked_payout_amount, 2); ?></span>
+									</div>
+								<?php endif; ?>
 								<p>
 									<?php if ($is_settled):
 										echo $is_correct_ans
@@ -1404,7 +1461,7 @@ $QTY_MIN          = 1;
 								<?php if ($is_settled):
 									echo $is_correct_ans ? '+₹' . number_format((float)$selected_answer_state->payout_amount, 2) : '₹0.00';
 								else:
-									echo '₹' . number_format((float)$selected_answer_state->stake_amount, 2);
+									echo '₹' . number_format($locked_payout_amount, 2);
 								endif; ?>
 							</div>
 						</div>
@@ -1418,8 +1475,12 @@ $QTY_MIN          = 1;
 							</div>
 							<div class="tp-sell-grid">
 								<div class="tp-sell-item">
-									<span>Booked Return</span>
+									<span>Booked Stake</span>
 									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?></strong>
+								</div>
+								<div class="tp-sell-item">
+									<span>Locked Payout</span>
+									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?></strong>
 								</div>
 								<div class="tp-sell-item">
 									<span>Current Return</span>
@@ -1433,7 +1494,7 @@ $QTY_MIN          = 1;
 							<div class="tp-sell-note"><?php echo html_escape((string) ($sell_trade_summary['message'] ?? '')); ?></div>
 							<div class="tp-sell-actions">
 								<div class="tp-sell-muted">
-									Current price Rs <?php echo number_format((float) ($sell_trade_summary['current_price'] ?? 0), 2); ?>
+									Locked payout Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> · Current price Rs <?php echo number_format((float) ($sell_trade_summary['current_price'] ?? 0), 2); ?>
 									x <?php echo number_format((float) ($sell_trade_summary['current_multiplier'] ?? 0), 2); ?>
 								</div>
 								<form method="post" action="<?php echo site_url('questions/sell-trade'); ?>" class="js-sell-trade-form">
@@ -1460,7 +1521,7 @@ $QTY_MIN          = 1;
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">YES</div>
-										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?> per share</div>
+										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?> per share · ×<?php echo number_format($yes_multiplier, 2); ?></div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">YES</span>
@@ -1475,7 +1536,7 @@ $QTY_MIN          = 1;
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">NO</div>
-										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?> per share</div>
+										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?> per share · ×<?php echo number_format($no_multiplier, 2); ?></div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">NO</span>
@@ -1487,7 +1548,7 @@ $QTY_MIN          = 1;
 					<div class="tp-controls">
 						<div class="tp-ctrl">
 							<div class="tp-ctrl-top">
-								<span class="tp-ctrl-lbl">Price / share</span>
+								<span class="tp-ctrl-lbl"><?php echo $is_locked ? 'Booked price / share' : 'Price / share'; ?></span>
 								<strong class="tp-ctrl-val js-pdisplay">₹<?php echo number_format($default_price, 2); ?></strong>
 							</div>
 							<div class="tp-stepper">
@@ -1500,11 +1561,11 @@ $QTY_MIN          = 1;
 									<?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>
 								<button type="button" class="tp-step-btn js-pinc" <?php echo ($is_locked || !$market_is_open) ? 'disabled' : ''; ?>>+</button>
 							</div>
-							<div class="tp-ctrl-hint">₹0.50 – ₹<?php echo number_format($price_max, 2); ?></div>
+							<div class="tp-ctrl-hint"><?php echo $is_locked ? 'Locked entry price. Current live ' . strtoupper($selected_answer) . ' price is ₹' . number_format($selected_answer === 'no' ? $no_price : $yes_price, 2) : '₹0.50 – ₹' . number_format($price_max, 2); ?></div>
 						</div>
 						<div class="tp-ctrl">
 							<div class="tp-ctrl-top">
-								<span class="tp-ctrl-lbl">Quantity</span>
+								<span class="tp-ctrl-lbl"><?php echo $is_locked ? 'Booked quantity' : 'Quantity'; ?></span>
 								<strong class="tp-ctrl-val js-qdisplay"><?php echo (int)$default_quantity; ?></strong>
 							</div>
 							<div class="tp-stepper">
@@ -1526,17 +1587,17 @@ $QTY_MIN          = 1;
 					<div class="tp-stake">
 						<div class="tp-stake-hd">
 							<span class="tp-stake-hd-lbl">Trade summary</span>
-							<span class="tp-boost">×<?php echo number_format($multiplier, 2); ?> boost active</span>
+							<span class="tp-boost">×<span class="js-mult"><?php echo number_format($multiplier, 2); ?></span> boost active</span>
 						</div>
 						<div class="tp-stake-row"><span>Price × Quantity</span><strong class="js-formula">—</strong></div>
 						<div class="tp-stake-row tp-stake-total"><span>Total stake</span><strong class="js-stake">—</strong></div>
-						<div class="tp-stake-row tp-stake-win"><span>Winning preview (×<?php echo number_format($multiplier, 2); ?>)</span><strong class="js-win">—</strong></div>
+						<div class="tp-stake-row tp-stake-win"><span>Winning preview (×<span class="js-mult-label"><?php echo number_format($multiplier, 2); ?></span>)</span><strong class="js-win">—</strong></div>
 					</div>
 
 					<!-- How it works -->
 					<div class="tp-info">
 						If your answer matches the result, <strong class="js-win-inline">—</strong> will be credited.
-						Formula: Price × Quantity × <?php echo number_format($multiplier, 2); ?>. Wrong answer = ₹0.00.
+						Formula: Price × Quantity × <span class="js-mult-formula"><?php echo number_format($multiplier, 2); ?></span>. Wrong answer = ₹0.00.
 					</div>
 
 					<?php if ($is_locked): ?>
@@ -1581,7 +1642,7 @@ $QTY_MIN          = 1;
 						<div class="tp-chart-hdr">
 							<div>
 								<div class="tp-chart-title">Demand chart · <?php echo html_escape($selected_category->name); ?></div>
-								<div class="tp-chart-sub">Auto-scaled from latest price snapshots</div>
+								<div class="tp-chart-sub">Auto-scaled from latest market price snapshots</div>
 							</div>
 							<div class="tp-chart-legend">
 								<span class="tp-leg"><span class="tp-leg-dot" style="background:var(--green)"></span>YES</span>
@@ -1665,7 +1726,7 @@ $QTY_MIN          = 1;
 							$question_status = strtolower(trim((string)(isset($qi->status) ? $qi->status : '')));
 							$start_ts = (!empty($qi->start_time) && $qi->start_time !== '0000-00-00 00:00:00') ? strtotime($qi->start_time) : FALSE;
 							$end_ts = (!empty($qi->end_time) && $qi->end_time !== '0000-00-00 00:00:00') ? strtotime($qi->end_time) : FALSE;
-							$is_trade_open = $question_status === 'open'
+							$is_trade_open = !in_array($question_status, array('draft', 'resolved'), TRUE)
 								&& ($start_ts === FALSE || time() >= $start_ts)
 								&& ($end_ts === FALSE || time() <= $end_ts);
 							if ($la && !empty($la->settled_at)) $qs = strtolower((string)$la->answer) === strtolower((string)$qi->answer_key) ? 'correct' : 'wrong';
@@ -1705,7 +1766,8 @@ $QTY_MIN          = 1;
 			PMAX = <?php echo number_format($price_max, 4, '.', ''); ?>;
 		var DYES = <?php echo number_format($yes_price, 4, '.', ''); ?>,
 			DNO = <?php echo number_format($no_price, 4, '.', ''); ?>;
-		var MULT = <?php echo number_format($multiplier, 4, '.', ''); ?>;
+		var YESMULT = <?php echo number_format($yes_multiplier, 4, '.', ''); ?>,
+			NOMULT = <?php echo number_format($no_multiplier, 4, '.', ''); ?>;
 
 		var yR = document.getElementById('tp_yes'),
 			nR = document.getElementById('tp_no');
@@ -1721,6 +1783,9 @@ $QTY_MIN          = 1;
 			sEl = document.querySelector('.js-stake');
 		var wEl = document.querySelector('.js-win'),
 			wIn = document.querySelector('.js-win-inline');
+		var multEl = document.querySelector('.js-mult'),
+			multLabelEl = document.querySelector('.js-mult-label'),
+			multFormulaEl = document.querySelector('.js-mult-formula');
 		var sb = document.getElementById('js-sbtn');
 		var pDec = document.querySelector('.js-pdec'),
 			pInc = document.querySelector('.js-pinc');
@@ -1780,9 +1845,14 @@ $QTY_MIN          = 1;
 			return qI ? parseInt(qI.value) || QMIN : QMIN;
 		}
 
+		function gM() {
+			return (nR && nR.checked) ? NOMULT : YESMULT;
+		}
+
 		function update() {
 			var p = clamp(gP(), PMIN, PMAX),
 				q = gQ(),
+				m = gM(),
 				over = q > QMAX;
 			if (over) {
 				q = QMAX;
@@ -1791,7 +1861,7 @@ $QTY_MIN          = 1;
 			if (qW) qW.classList.toggle('show', over);
 			q = clamp(q, QMIN, QMAX);
 			var stake = p * q,
-				win = stake * MULT;
+				win = stake * m;
 			if (pH) pH.value = p.toFixed(2);
 			if (pD) pD.textContent = fmt(p);
 			if (qD) qD.textContent = q;
@@ -1799,6 +1869,9 @@ $QTY_MIN          = 1;
 			if (sEl) sEl.textContent = fmt(stake);
 			if (wEl) wEl.textContent = fmt(win);
 			if (wIn) wIn.textContent = fmt(win);
+			if (multEl) multEl.textContent = Number(m).toFixed(2);
+			if (multLabelEl) multLabelEl.textContent = Number(m).toFixed(2);
+			if (multFormulaEl) multFormulaEl.textContent = Number(m).toFixed(2);
 			if (sb) sb.disabled = !(p >= PMIN && p <= PMAX && q >= QMIN && q <= QMAX);
 		}
 
@@ -1874,6 +1947,8 @@ $QTY_MIN          = 1;
 			var vN = pts.map(function(p) {
 				return parseFloat(p.no_price || 0);
 			});
+			if (vY.length === 1) vY = [vY[0], vY[0]];
+			if (vN.length === 1) vN = [vN[0], vN[0]];
 			var all = vY.concat(vN).filter(function(v) {
 				return !isNaN(v);
 			});
@@ -1889,11 +1964,37 @@ $QTY_MIN          = 1;
 			var mn = Math.min.apply(null, all),
 				mx = Math.max.apply(null, all.concat([mn + 0.01]));
 
-			function norm(vals) {
+			function sameSeries(a, b) {
+				if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+					return false;
+				}
+
+				for (var i = 0; i < a.length; i++) {
+					if (Math.abs(Number(a[i] || 0) - Number(b[i] || 0)) > 0.0001) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			var overlapSeries = sameSeries(vY, vN);
+
+			function pointY(v, seriesKey) {
+				var r = (v - mn) / (mx - mn);
+				var y = H - PB - r * (H - PT - PB);
+
+				if (overlapSeries) {
+					y += seriesKey === 'yes' ? -8 : 8;
+				}
+
+				return y;
+			}
+
+			function norm(vals, seriesKey) {
 				return vals.map(function(v, i) {
 					var x = vals.length === 1 ? W / 2 : PX + (i / (vals.length - 1)) * (W - PX * 2);
-					var r = (v - mn) / (mx - mn);
-					var y = H - PB - r * (H - PT - PB);
+					var y = pointY(v, seriesKey);
 					return x.toFixed(1) + ',' + y.toFixed(1);
 				}).join(' ');
 			}
@@ -1902,8 +2003,8 @@ $QTY_MIN          = 1;
 				'<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;display:block;min-height:' + H + 'px">' +
 				'<line x1="' + PX + '" y1="' + (H - PB) + '" x2="' + (W - PX) + '" y2="' + (H - PB) + '" stroke="#e2e8f0" stroke-width="1"/>' +
 				'<line x1="' + PX + '" y1="' + Math.round((H - PB + PT) / 2) + '" x2="' + (W - PX) + '" y2="' + Math.round((H - PB + PT) / 2) + '" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 4"/>' +
-				'<polyline fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vY) + '"/>' +
-				'<polyline fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vN) + '"/>' +
+				'<polyline fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vY, 'yes') + '"/>' +
+				'<polyline fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + norm(vN, 'no') + '"/>' +
 				'</svg>';
 		}());
 	}());

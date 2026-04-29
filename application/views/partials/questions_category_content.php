@@ -621,7 +621,7 @@
 				$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 				$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 				$now_ts = time();
-				$is_trade_open = $question_status === 'open'
+				$is_trade_open = !in_array($question_status, array('draft', 'resolved'), TRUE)
 					&& ($start_ts === FALSE || $now_ts >= $start_ts)
 					&& ($end_ts === FALSE || $now_ts <= $end_ts);
 				$state        = 'state-pending';

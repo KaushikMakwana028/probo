@@ -209,7 +209,6 @@ class Questions extends CI_Controller
 		$this->get_admin();
 		$this->form_validation->set_rules('category_id', 'Category', 'required|integer');
 		$this->form_validation->set_rules('question_count', 'Question count', 'required|integer|greater_than[0]|less_than_equal_to[100]');
-		$this->form_validation->set_rules('multiplier', 'Multiplier', 'required|numeric|greater_than[0]');
 
 		if ($this->form_validation->run() === FALSE) {
 			$this->set_validation_error_flashdata();
@@ -228,7 +227,8 @@ class Questions extends CI_Controller
 		$questions_input = $this->input->post('questions');
 		$yes_prices = $this->input->post('yes_prices');
 		$no_prices = $this->input->post('no_prices');
-		$multiplier = (float) $this->input->post('multiplier', TRUE);
+		$yes_multipliers = $this->input->post('yes_multipliers');
+		$no_multipliers = $this->input->post('no_multipliers');
 		$start_time = trim((string) $this->input->post('start_time', TRUE));
 		$end_time = trim((string) $this->input->post('end_time', TRUE));
 		$start_time_sql = $this->normalize_datetime_input($start_time);
@@ -255,6 +255,8 @@ class Questions extends CI_Controller
 			$question_text = isset($questions_input[$i]) ? trim($questions_input[$i]) : '';
 			$yes_price = isset($yes_prices[$i]) ? (float) $yes_prices[$i] : 0;
 			$no_price = isset($no_prices[$i]) ? (float) $no_prices[$i] : 0;
+			$yes_multiplier = isset($yes_multipliers[$i]) ? (float) $yes_multipliers[$i] : 1.25;
+			$no_multiplier = isset($no_multipliers[$i]) ? (float) $no_multipliers[$i] : 1.25;
 
 			if ($question_text === '') {
 				$this->session->set_flashdata('error', 'Please fill all question textboxes before saving.');
@@ -263,6 +265,11 @@ class Questions extends CI_Controller
 
 			if ($yes_price < 0 || $no_price < 0) {
 				$this->session->set_flashdata('error', 'Yes price and No price must be zero or greater.');
+				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
+			}
+
+			if ($yes_multiplier <= 0 || $no_multiplier <= 0) {
+				$this->session->set_flashdata('error', 'YES and NO multipliers must be greater than zero.');
 				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
@@ -276,7 +283,8 @@ class Questions extends CI_Controller
 				'question' => $question_text,
 				'yes_price' => $yes_price,
 				'no_price' => $no_price,
-				'multiplier' => $multiplier,
+				'yes_multiplier' => $yes_multiplier,
+				'no_multiplier' => $no_multiplier,
 				'start_time' => $start_time_sql,
 				'end_time' => $end_time_sql,
 				'status' => $status
@@ -342,7 +350,8 @@ class Questions extends CI_Controller
 		$this->form_validation->set_rules('question', 'Question', 'required|trim');
 		$this->form_validation->set_rules('yes_price', 'Yes price', 'required|numeric');
 		$this->form_validation->set_rules('no_price', 'No price', 'required|numeric');
-		$this->form_validation->set_rules('multiplier', 'Multiplier', 'required|numeric|greater_than[0]');
+		$this->form_validation->set_rules('yes_multiplier', 'YES Multiplier', 'required|numeric|greater_than[0]');
+		$this->form_validation->set_rules('no_multiplier', 'NO Multiplier', 'required|numeric|greater_than[0]');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[draft,open,closed]');
 		$this->form_validation->set_rules('admin_yes_quantity', 'Yes quantity', 'required|integer|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('admin_no_quantity', 'No quantity', 'required|integer|greater_than_equal_to[0]');
@@ -356,7 +365,8 @@ class Questions extends CI_Controller
 		$category = $this->Category_model->get_category($category_id);
 		$yes_price = (float) $this->input->post('yes_price', TRUE);
 		$no_price = (float) $this->input->post('no_price', TRUE);
-		$multiplier = (float) $this->input->post('multiplier', TRUE);
+		$yes_multiplier = (float) $this->input->post('yes_multiplier', TRUE);
+		$no_multiplier = (float) $this->input->post('no_multiplier', TRUE);
 		$entered_yes_quantity = (int) $this->input->post('admin_yes_quantity', TRUE);
 		$entered_no_quantity = (int) $this->input->post('admin_no_quantity', TRUE);
 		$status = strtolower(trim((string) $this->input->post('status', TRUE)));
@@ -403,7 +413,8 @@ class Questions extends CI_Controller
 			'question' => $this->input->post('question', TRUE),
 			'yes_price' => $yes_price,
 			'no_price' => $no_price,
-			'multiplier' => $multiplier,
+			'yes_multiplier' => $yes_multiplier,
+			'no_multiplier' => $no_multiplier,
 			'answer_key' => '',
 			'start_time' => $start_time_sql,
 			'end_time' => $end_time_sql,
@@ -434,7 +445,8 @@ class Questions extends CI_Controller
 			$current_question_text !== $question_text ||
 			abs((float) ($question->yes_price ?? 0) - $yes_price) > 0.0001 ||
 			abs((float) ($question->no_price ?? 0) - $no_price) > 0.0001 ||
-			abs((float) ($question->multiplier ?? 0) - $multiplier) > 0.0001 ||
+			abs((float) ($question->yes_multiplier ?? 0) - $yes_multiplier) > 0.0001 ||
+			abs((float) ($question->no_multiplier ?? 0) - $no_multiplier) > 0.0001 ||
 			$current_status !== $status ||
 			(string) $current_start_time !== (string) $start_time_sql ||
 			(string) $current_end_time !== (string) $end_time_sql ||
@@ -617,6 +629,9 @@ class Questions extends CI_Controller
 			}
 
 			$real_users = $this->Category_model->get_total_users_by_question((int) $question_item->id);
+			$admin_extra = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
+			$total_joined_users = $real_users + $admin_extra;
+			
 			$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 			$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 			$timing_class = 'live';
@@ -649,7 +664,7 @@ class Questions extends CI_Controller
 				'end_time' => !empty($question_item->end_time) ? (string) $question_item->end_time : 'Not set',
 				'item_saved' => $item_saved,
 				'answer_key' => $answer_key,
-				'real_users' => (int) $real_users,
+				'real_users' => $total_joined_users,
 				'timing_class' => $timing_class,
 				'timing_label' => $timing_label,
 				'sort_weight' => $sort_weight,
@@ -827,7 +842,7 @@ class Questions extends CI_Controller
 			$is_winner = strtolower((string) $answer->answer) === strtolower((string) $answer_key);
 			$locked_payout = isset($answer->entry_payout_amount) && (float) $answer->entry_payout_amount > 0
 				? (float) $answer->entry_payout_amount
-				: round(((float) $answer->price * (int) $answer->quantity) * (($question && (float) $question->multiplier > 0) ? (float) $question->multiplier : 1.25), 2);
+				: round(((float) $answer->price * (int) $answer->quantity) * $this->get_question_multiplier($question, $answer->answer), 2);
 			$payout_amount = $is_winner ? $locked_payout : 0.00;
 
 			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at, array(
@@ -872,5 +887,29 @@ class Questions extends CI_Controller
 			->result();
 
 		echo json_encode($questions);
+	}
+
+	private function get_question_multiplier($question, $answer)
+	{
+		$answer_key = strtolower(trim((string) $answer));
+		$fallback = 1.25;
+
+		if ($question && isset($question->multiplier) && (float) $question->multiplier > 0) {
+			$fallback = (float) $question->multiplier;
+		}
+
+		if (!$question) {
+			return $fallback;
+		}
+
+		if ($answer_key === 'no' && isset($question->no_multiplier) && (float) $question->no_multiplier > 0) {
+			return (float) $question->no_multiplier;
+		}
+
+		if ($answer_key === 'yes' && isset($question->yes_multiplier) && (float) $question->yes_multiplier > 0) {
+			return (float) $question->yes_multiplier;
+		}
+
+		return $fallback;
 	}
 }

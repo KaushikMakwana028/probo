@@ -56,6 +56,17 @@ class User_model extends CI_Model {
 		return $this->General_model->getrow($this->table, array('mobile' => $mobile, 'role' => 1));
 	}
 
+	public function get_admin_by_id($id)
+	{
+		$id = (int) $id;
+
+		if ($id <= 0) {
+			return NULL;
+		}
+
+		return $this->General_model->getrow($this->table, array('id' => $id, 'role' => 1));
+	}
+
 	public function get_by_reset_code($email, $code)
 	{
 		$this->db->where('email', $email);

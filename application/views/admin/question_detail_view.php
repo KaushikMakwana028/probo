@@ -6,7 +6,24 @@
 <?php endif; ?>
 
 <?php
+$selected_question = isset($selected_question) && is_object($selected_question) ? $selected_question : (object) array();
+$selected_category = isset($selected_category) && is_object($selected_category) ? $selected_category : NULL;
 $detail_question = $selected_question;
+$detail_question->id = isset($detail_question->id) ? (int) $detail_question->id : 0;
+$detail_question->question = isset($detail_question->question) ? $detail_question->question : '';
+$detail_question->category_id = isset($detail_question->category_id) ? (int) $detail_question->category_id : 0;
+$detail_question->yes_price = isset($detail_question->yes_price) ? (float) $detail_question->yes_price : 0;
+$detail_question->no_price = isset($detail_question->no_price) ? (float) $detail_question->no_price : 0;
+$detail_question->answer_key = isset($detail_question->answer_key) ? $detail_question->answer_key : '';
+$detail_question->status = isset($detail_question->status) ? $detail_question->status : 'draft';
+$detail_question->start_time = isset($detail_question->start_time) ? $detail_question->start_time : '';
+$detail_question->end_time = isset($detail_question->end_time) ? $detail_question->end_time : '';
+$detail_question->yes_multiplier = isset($detail_question->yes_multiplier) ? $detail_question->yes_multiplier : NULL;
+$detail_question->no_multiplier = isset($detail_question->no_multiplier) ? $detail_question->no_multiplier : NULL;
+$detail_question->multiplier = isset($detail_question->multiplier) ? $detail_question->multiplier : NULL;
+$detail_question->trade_totals = isset($detail_question->trade_totals) && is_array($detail_question->trade_totals) ? $detail_question->trade_totals : array();
+$detail_question->user_counts = isset($detail_question->user_counts) && is_array($detail_question->user_counts) ? $detail_question->user_counts : array();
+$detail_question->real_users = isset($detail_question->real_users) ? $detail_question->real_users : 0;
 $questions_in_category = $selected_category && !empty($selected_category->questions) ? $selected_category->questions : array();
 $cat_q_count = count($questions_in_category);
 $saved_count = 0;
@@ -578,9 +595,14 @@ if ($start_ts && $now_ts < $start_ts) {
 				<small>Spread: <span class="js-spread">Rs <?php echo number_format($spread_total, 2); ?></span></small>
 			</div>
 			<div class="qd-fact">
-				<label>Multiplier</label>
-				<strong>×<?php echo number_format((float) (isset($detail_question->multiplier) ? $detail_question->multiplier : 1.25), 2); ?></strong>
-				<small>Current reward multiplier</small>
+				<label>YES Multiplier</label>
+				<strong>×<?php echo number_format((float) ($detail_question->yes_multiplier ?? $detail_question->multiplier ?? 1.25), 2); ?></strong>
+				<small>Current YES reward multiplier</small>
+			</div>
+			<div class="qd-fact">
+				<label>NO Multiplier</label>
+				<strong>×<?php echo number_format((float) ($detail_question->no_multiplier ?? $detail_question->multiplier ?? 1.25), 2); ?></strong>
+				<small>Current NO reward multiplier</small>
 			</div>
 			<div class="qd-fact">
 				<label>Start time</label>
@@ -665,6 +687,8 @@ if ($start_ts && $now_ts < $start_ts) {
 			var noVals = points.map(function(p) {
 				return parseFloat(p.no_price || 0);
 			});
+			if (yesVals.length === 1) yesVals = [yesVals[0], yesVals[0]];
+			if (noVals.length === 1) noVals = [noVals[0], noVals[0]];
 
 			if (!yesVals.length) {
 				container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:150px;color:#9ca3af;font-size:13px;">No history recorded yet.</div>';
@@ -679,11 +703,37 @@ if ($start_ts && $now_ts < $start_ts) {
 				pX = 18,
 				pY = 14;
 
-			function pts(vals) {
+			function sameSeries(a, b) {
+				if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+					return false;
+				}
+
+				for (var i = 0; i < a.length; i++) {
+					if (Math.abs(Number(a[i] || 0) - Number(b[i] || 0)) > 0.0001) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			var overlapSeries = sameSeries(yesVals, noVals);
+
+			function pointY(v, seriesKey) {
+				var r = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
+				var y = H - pY - r * (H - pY * 2);
+
+				if (overlapSeries) {
+					y += seriesKey === 'yes' ? -8 : 8;
+				}
+
+				return y;
+			}
+
+			function pts(vals, seriesKey) {
 				return vals.map(function(v, i) {
 					var x = vals.length === 1 ? W / 2 : pX + (i / (vals.length - 1)) * (W - pX * 2);
-					var r = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
-					var y = H - pY - r * (H - pY * 2);
+					var y = pointY(v, seriesKey);
 					return x.toFixed(1) + ',' + y.toFixed(1);
 				}).join(' ');
 			}
@@ -697,8 +747,8 @@ if ($start_ts && $now_ts < $start_ts) {
 				'<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="6" fill="transparent"/>' +
 				'<line x1="' + pX + '" y1="' + (H - pY) + '" x2="' + (W - pX) + '" y2="' + (H - pY) + '" stroke="rgba(0,0,0,.1)" stroke-width="0.5"/>' +
 				'<line x1="' + pX + '" y1="' + Math.round(H / 2) + '" x2="' + (W - pX) + '" y2="' + Math.round(H / 2) + '" stroke="rgba(0,0,0,.08)" stroke-width="0.5" stroke-dasharray="4 4"/>' +
-				'<polyline fill="none" stroke="url(#qdYes)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(yesVals) + '"/>' +
-				'<polyline fill="none" stroke="url(#qdNo)"  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(noVals) + '"/>' +
+				'<polyline fill="none" stroke="url(#qdYes)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(yesVals, 'yes') + '"/>' +
+				'<polyline fill="none" stroke="url(#qdNo)"  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(noVals, 'no') + '"/>' +
 				'</svg>';
 		}
 

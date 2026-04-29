@@ -683,14 +683,13 @@ class Category_model extends CI_Model
 
 	public function get_total_users_by_question($question_id)
 	{
-		$row = $this->db
-			->select("COUNT(DISTINCT user_id) as total")
-			->from('user_question_answers')
-			->where('question_id', $question_id)
-			->get()
-			->row();
+		if (!$this->db->table_exists('user_question_answers')) {
+			return 0;
+		}
 
-		return (int) ($row->total ?? 0);
+		return (int) $this->db
+			->where('question_id', (int) $question_id)
+			->count_all_results('user_question_answers');
 	}
 
 	public function get_question_user_counts($question_id)

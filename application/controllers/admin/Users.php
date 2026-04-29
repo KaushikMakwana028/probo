@@ -143,16 +143,15 @@ class Users extends CI_Controller
 
 	private function get_admin()
 	{
-		$admin = $this->User_model->get_by_id($this->session->userdata('admin_id'));
+		$admin_id = (int) $this->session->userdata('admin_id');
 
-		if (!$admin || (int) $admin->role !== 1) {
-			$this->session->unset_userdata(array(
-				'admin_id',
-				'admin_name',
-				'admin_mobile',
-				'admin_email',
-				'admin_logged_in'   // 🔥 VERY IMPORTANT
-			));
+		if ($admin_id <= 0) {
+			redirect('admin/login');
+		}
+
+		$admin = $this->User_model->get_admin_by_id($admin_id);
+
+		if (!$admin) {
 			redirect('admin/login');
 		}
 
@@ -226,3 +225,5 @@ class Users extends CI_Controller
 		redirect('admin/users/add_users_to_question');
 	}
 }
+
+

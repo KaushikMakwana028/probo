@@ -1121,7 +1121,7 @@ $answer_key_label = !empty($detail_question->answer_key) ? strtoupper((string)$d
 				<div class="qp-stat">
 					<div class="qp-stat-l">Real Users</div>
 					<div class="qp-stat-v"><?php echo $real_users; ?></div>
-					<div class="qp-stat-s">Distinct</div>
+					<div class="qp-stat-s">Trades</div>
 				</div>
 				<div class="qp-stat">
 					<div class="qp-stat-l">Trade Qty</div>

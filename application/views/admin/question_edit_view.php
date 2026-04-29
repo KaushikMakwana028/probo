@@ -2,6 +2,21 @@
 	<div class="question-edit-flash question-edit-flash-error"><?php echo $this->session->flashdata('error'); ?></div>
 <?php endif; ?>
 <?php
+$question = isset($question) && is_object($question) ? $question : (object) array();
+$categories = isset($categories) && is_array($categories) ? $categories : array();
+$question->id = isset($question->id) ? (int) $question->id : 0;
+$question->category_id = isset($question->category_id) ? (int) $question->category_id : 0;
+$question->category_name = isset($question->category_name) ? $question->category_name : '';
+$question->question = isset($question->question) ? $question->question : '';
+$question->yes_price = isset($question->yes_price) ? (float) $question->yes_price : 0;
+$question->no_price = isset($question->no_price) ? (float) $question->no_price : 0;
+$question->status = isset($question->status) ? $question->status : 'draft';
+$question->start_time = isset($question->start_time) ? $question->start_time : '';
+$question->end_time = isset($question->end_time) ? $question->end_time : '';
+$question->yes_multiplier = isset($question->yes_multiplier) ? $question->yes_multiplier : NULL;
+$question->no_multiplier = isset($question->no_multiplier) ? $question->no_multiplier : NULL;
+$question->multiplier = isset($question->multiplier) ? $question->multiplier : NULL;
+$question->trade_totals = isset($question->trade_totals) && is_array($question->trade_totals) ? $question->trade_totals : array();
 $trade_totals = isset($question->trade_totals) && is_array($question->trade_totals) ? $question->trade_totals : array();
 $display_yes_quantity = isset($trade_totals['yes_quantity']) ? (int) $trade_totals['yes_quantity'] : (int) ($question->admin_yes_quantity ?? 0);
 $display_no_quantity = isset($trade_totals['no_quantity']) ? (int) $trade_totals['no_quantity'] : (int) ($question->admin_no_quantity ?? 0);
@@ -96,8 +111,13 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 				</div>
 
 				<div class="form-group">
-					<label for="multiplier">Multiplier</label>
-					<input type="number" id="multiplier" name="multiplier" min="0.01" step="0.01" value="<?php echo set_value('multiplier', number_format((float) ($question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
+					<label for="yes_multiplier">YES Multiplier</label>
+					<input type="number" id="yes_multiplier" name="yes_multiplier" min="0.01" step="0.01" value="<?php echo set_value('yes_multiplier', number_format((float) ($question->yes_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
+				</div>
+
+				<div class="form-group">
+					<label for="no_multiplier">NO Multiplier</label>
+					<input type="number" id="no_multiplier" name="no_multiplier" min="0.01" step="0.01" value="<?php echo set_value('no_multiplier', number_format((float) ($question->no_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
 				</div>
 
 				<div class="form-group">

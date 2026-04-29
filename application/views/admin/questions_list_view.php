@@ -6,6 +6,9 @@
 <?php endif; ?>
 
 <?php
+$selected_category = isset($selected_category) && is_object($selected_category) ? $selected_category : NULL;
+$categories = isset($categories) && is_array($categories) ? $categories : array();
+$total_questions = isset($total_questions) ? (int) $total_questions : 0;
 $cat_q_count = 0;
 $saved_count = 0;
 $now_ts = time();
@@ -22,13 +25,29 @@ if ($selected_category && !empty($selected_category->questions)) {
 
 		$cat_q_count++;
 
+		// AFTER:
 		$real_users = isset($question_item->real_users) ? (int) $question_item->real_users : 0;
+		if ($real_users <= 0 && isset($question_item->trade_totals['total_users'])) {
+			$real_users = (int) $question_item->trade_totals['total_users'];
+		}
+		if ($real_users <= 0 && isset($question_item->user_counts)) {
+			$real_users = (int) (($question_item->user_counts['yes_users'] ?? 0) + ($question_item->user_counts['no_users'] ?? 0));
+		}
+		// Add admin-injected users so the displayed count matches the user-facing total
+		$admin_extra = isset($question_item->admin_users) ? (int) $question_item->admin_users : 0;
+		if ($admin_extra <= 0) {
+			$admin_extra = isset($question_item->total_users)
+				? max(0, (int) $question_item->total_users - $real_users)
+				: 0;
+		}
+		$display_users = $real_users + $admin_extra;
 		$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 		$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 		$timing_class = 'live';
 		$timing_label = 'Live';
 		$sort_weight = 1;
 
+		// AFTER:
 		if ($start_ts && $now_ts < $start_ts) {
 			$timing_class = 'upcoming';
 			$timing_label = 'Upcoming';
@@ -37,7 +56,9 @@ if ($selected_category && !empty($selected_category->questions)) {
 			$timing_class = 'ended';
 			$timing_label = 'Ended';
 			$sort_weight = 3;
-		} elseif (strtolower((string) $question_item->status) !== 'open') {
+		} elseif (!$end_ts && strtolower((string) $question_item->status) !== 'open') {
+			// Only use status-based label if there is NO end_time set.
+			// If end_time is set and hasn't passed, trust the time window.
 			$timing_class = 'ended';
 			$timing_label = ucfirst((string) $question_item->status);
 			$sort_weight = 3;
@@ -52,7 +73,7 @@ if ($selected_category && !empty($selected_category->questions)) {
 			'start_time' => !empty($question_item->start_time) ? html_escape($question_item->start_time) : 'Not set',
 			'end_time' => !empty($question_item->end_time) ? html_escape($question_item->end_time) : 'Not set',
 			'item_saved' => $item_saved,
-			'real_users' => $real_users,
+			'real_users' => $display_users,
 			'timing_class' => $timing_class,
 			'timing_label' => $timing_label,
 			'sort_weight' => $sort_weight,
@@ -843,7 +864,7 @@ if ($selected_category && !empty($selected_category->questions)) {
 						<div class="aq-meta-item">
 							<label>joined users</label>
 							<strong>${q.real_users}</strong>
-							<small>Only Real Users</small>
+<small>Total Joined</small>
 						</div>
 						<div class="aq-meta-item">
 							<label>Yes price</label>

@@ -1,4 +1,5 @@
 <?php
+$categories = isset($categories) && is_array($categories) ? $categories : array();
 $selected_category_id = (int) $this->input->get('category_id');
 $question_count = (int) $this->input->get('question_count');
 
@@ -1247,8 +1248,12 @@ foreach ($categories as $category_item) {
 									<input type="number" class="js-no-price" id="no_price_<?php echo $i; ?>" name="no_prices[<?php echo $i; ?>]" min="0.01" step="0.01" value="<?php echo set_value('no_prices[' . $i . ']', '10.00'); ?>" required>
 								</div>
 								<div class="form-group">
-									<label>Multiplier</label>
-									<input type="number" step="0.01" name="multiplier" class="form-control" value="1.25" required>
+									<label for="yes_multiplier_<?php echo $i; ?>">YES Multiplier</label>
+									<input type="number" id="yes_multiplier_<?php echo $i; ?>" step="0.01" name="yes_multipliers[<?php echo $i; ?>]" class="form-control" value="<?php echo set_value('yes_multipliers[' . $i . ']', '1.25'); ?>" required>
+								</div>
+								<div class="form-group">
+									<label for="no_multiplier_<?php echo $i; ?>">NO Multiplier</label>
+									<input type="number" id="no_multiplier_<?php echo $i; ?>" step="0.01" name="no_multipliers[<?php echo $i; ?>]" class="form-control" value="<?php echo set_value('no_multipliers[' . $i . ']', '1.25'); ?>" required>
 								</div>
 							</div>
 							<div class="question-price-summary">

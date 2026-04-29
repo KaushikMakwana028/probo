@@ -298,9 +298,8 @@ class Questions extends CI_Controller
 		}
 
 		$stake_amount = round($selected_price * $selected_quantity, 2);
-		$multiplier = isset($selected_question->multiplier) ? (float)$selected_question->multiplier : 1.25;
-
-		$winning_amount = round($selected_price * $selected_quantity * $multiplier, 2);
+		$multiplier = $this->get_question_multiplier($selected_question, $selected_answer);
+		$winning_amount = round($stake_amount * $multiplier, 2);
 
 		if ($stake_amount <= 0) {
 			$this->session->set_flashdata('error', 'Trade amount is invalid.');
@@ -472,7 +471,14 @@ class Questions extends CI_Controller
 		$start_ts = $this->parse_question_timestamp(isset($question->start_time) ? $question->start_time : NULL);
 		$end_ts = $this->parse_question_timestamp(isset($question->end_time) ? $question->end_time : NULL);
 
-		if ($status !== 'open') {
+		// Keep market availability aligned with the configured time window.
+		// A question should trade until end_time unless it is clearly not tradable.
+		if (in_array($status, array('draft', 'resolved'), TRUE)) {
+			return FALSE;
+		}
+
+		// 'closed' status blocks trading regardless of time window
+		if ($status === 'closed') {
 			return FALSE;
 		}
 
@@ -493,21 +499,6 @@ class Questions extends CI_Controller
 
 		if ($value === '' || $value === '0000-00-00 00:00:00') {
 			return FALSE;
-		}
-
-		$formats = array(
-			'Y-m-d H:i:s',
-			'Y-m-d H:i',
-			'Y-m-d\TH:i',
-			'd-m-Y H:i',
-			'd/m/Y H:i'
-		);
-
-		foreach ($formats as $format) {
-			$date = DateTime::createFromFormat($format, $value);
-			if ($date instanceof DateTime) {
-				return $date->getTimestamp();
-			}
 		}
 
 		return strtotime($value);
@@ -555,47 +546,67 @@ class Questions extends CI_Controller
 			? (float) $question->no_price
 			: (float) $question->yes_price;
 		$current_quantity = max(1, (int) $answer_state->quantity);
-		$entry_amount = isset($answer_state->entry_payout_amount) && (float) $answer_state->entry_payout_amount > 0
+		$booked_amount = isset($answer_state->stake_amount) ? (float) $answer_state->stake_amount : 0.0;
+		$booked_return = (isset($answer_state->entry_payout_amount) && (float) $answer_state->entry_payout_amount > 0)
 			? (float) $answer_state->entry_payout_amount
-			: (float) $answer_state->payout_amount;
-		$current_multiplier = isset($question->multiplier) ? (float) $question->multiplier : 1.25;
+			: ((float) $answer_state->payout_amount > 0
+				? (float) $answer_state->payout_amount
+				: $booked_amount);
+		$current_multiplier = $this->get_question_multiplier($question, (string) $answer_state->answer);
 		$entry_price = isset($answer_state->price) ? (float) $answer_state->price : 0.0;
-		$entry_multiplier = ($entry_price > 0 && $current_quantity > 0 && $entry_amount > 0)
-			? round($entry_amount / ($entry_price * $current_quantity), 4)
+		$entry_multiplier = ($entry_price > 0 && $current_quantity > 0 && $booked_return > 0)
+			? round($booked_return / ($entry_price * $current_quantity), 4)
 			: $current_multiplier;
-		$exit_amount = round($current_price * $current_quantity * $current_multiplier, 2);
-		$net_profit = round($exit_amount - (float) $answer_state->stake_amount, 2);
+		$current_return = round($current_price * $current_quantity * $current_multiplier, 2);
+		$exit_amount = $current_return;
+		$net_profit = round($exit_amount - $booked_amount, 2);
 		$price_changed = abs($current_price - $entry_price) > 0.0001;
 		$multiplier_changed = abs($current_multiplier - $entry_multiplier) > 0.0001;
 		$market_changed_after_entry = $price_changed || $multiplier_changed;
-		$trade_created_at = isset($answer_state->created_at) ? strtotime((string) $answer_state->created_at) : FALSE;
-		$question_edited_at = isset($question->last_trade_edit_at) ? strtotime((string) $question->last_trade_edit_at) : FALSE;
-		$edited_after_trade = ($trade_created_at && $question_edited_at) ? ($question_edited_at > $trade_created_at) : FALSE;
-		$allow_sell_from_live_change = $market_changed_after_entry && !$question_edited_at;
 
 		$summary['current_price'] = $current_price;
 		$summary['current_multiplier'] = $current_multiplier;
 		$summary['exit_amount'] = $exit_amount;
-		$summary['entry_amount'] = $entry_amount;
+		$summary['entry_amount'] = $booked_amount;
+		$summary['booked_return'] = $booked_return;
 		$summary['net_profit'] = $net_profit;
 
-		if (!$edited_after_trade && !$allow_sell_from_live_change) {
-			$summary['message'] = 'Sell option will unlock only after admin changes this question after your trade is placed.';
-			return $summary;
-		}
-
 		if (!$market_changed_after_entry) {
-			$summary['message'] = 'Sell option will unlock when the updated market gives a better live return than your booked trade.';
+			$summary['message'] = 'Sell option will unlock when the live market return moves above your booked return.';
 			return $summary;
 		}
 
-		if ($exit_amount <= $entry_amount) {
+		if ($exit_amount <= $booked_return) {
 			$summary['message'] = 'Sell option will unlock when the current return moves above your booked return.';
 			return $summary;
 		}
 
 		$summary['can_sell'] = TRUE;
-		$summary['message'] = 'You can sell this trade now and book the current profit.';
+		$summary['message'] = 'You can sell this trade now and book the current live profit.';
 		return $summary;
+	}
+
+	private function get_question_multiplier($question, $answer)
+	{
+		$answer_key = strtolower(trim((string) $answer));
+		$fallback = 1.25;
+
+		if ($question && isset($question->multiplier) && (float) $question->multiplier > 0) {
+			$fallback = (float) $question->multiplier;
+		}
+
+		if (!$question) {
+			return $fallback;
+		}
+
+		if ($answer_key === 'no' && isset($question->no_multiplier) && (float) $question->no_multiplier > 0) {
+			return (float) $question->no_multiplier;
+		}
+
+		if ($answer_key === 'yes' && isset($question->yes_multiplier) && (float) $question->yes_multiplier > 0) {
+			return (float) $question->yes_multiplier;
+		}
+
+		return $fallback;
 	}
 }
