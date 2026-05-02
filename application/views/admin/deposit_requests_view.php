@@ -37,7 +37,7 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
                 <p class="dr-header__sub">Review and manage incoming deposit requests</p>
             </div>
         </div>
-        <button class="dr-refresh-btn" onclick="location.reload()" title="Refresh page">
+        <button class="dr-refresh-btn" id="drRefreshBtn" type="button" title="Refresh page">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10" />
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
@@ -102,24 +102,24 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
     <!-- Filter Tabs -->
     <div class="dr-tabs-wrap">
         <div class="dr-tabs">
-            <a href="<?php echo site_url('admin/deposits/requests'); ?>"
+            <a href="<?php echo site_url('admin/deposits/requests'); ?>" data-status=""
                 class="dr-tab <?php echo (!$status_filter) ? 'dr-tab--active' : ''; ?>">
                 All
                 <span class="dr-tab__count"><?php echo $stats['total']; ?></span>
             </a>
-            <a href="<?php echo site_url('admin/deposits/requests?status=pending'); ?>"
+            <a href="<?php echo site_url('admin/deposits/requests?status=pending'); ?>" data-status="pending"
                 class="dr-tab <?php echo ($status_filter == 'pending') ? 'dr-tab--active dr-tab--pending' : ''; ?>">
                 Pending
                 <?php if (!empty($stats['pending'])): ?>
                     <span class="dr-tab__count dr-tab__count--hot"><?php echo $stats['pending']; ?></span>
                 <?php endif; ?>
             </a>
-            <a href="<?php echo site_url('admin/deposits/requests?status=approved'); ?>"
+            <a href="<?php echo site_url('admin/deposits/requests?status=approved'); ?>" data-status="approved"
                 class="dr-tab <?php echo ($status_filter == 'approved') ? 'dr-tab--active dr-tab--approved' : ''; ?>">
                 Approved
                 <span class="dr-tab__count"><?php echo $stats['approved']; ?></span>
             </a>
-            <a href="<?php echo site_url('admin/deposits/requests?status=rejected'); ?>"
+            <a href="<?php echo site_url('admin/deposits/requests?status=rejected'); ?>" data-status="rejected"
                 class="dr-tab <?php echo ($status_filter == 'rejected') ? 'dr-tab--active dr-tab--rejected' : ''; ?>">
                 Rejected
                 <span class="dr-tab__count"><?php echo $stats['rejected']; ?></span>
@@ -152,88 +152,203 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
 
     <!-- Main Content -->
     <div class="dr-card">
-        <?php if (!empty($all_sorted)): ?>
+        <div class="dr-card__loading" id="drCardLoading" hidden>
+            <div class="dr-card__loading-box">
+                <div class="dr-card__spinner"></div>
+                <span>Loading requests...</span>
+            </div>
+        </div>
+        <div id="drListing">
+            <?php if (!empty($all_sorted)): ?>
 
-            <!-- Desktop Table -->
-            <div class="dr-desktop-table">
-                <table class="dr-table">
-                    <thead>
-                        <tr>
-                            <th class="dr-th dr-th--num">#</th>
-                            <th class="dr-th">User</th>
-                            <th class="dr-th">Amount</th>
-                            <th class="dr-th">Receipt</th>
-                            <th class="dr-th">Date</th>
-                            <th class="dr-th">Status</th>
-                            <th class="dr-th">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $prev_status = null;
-                        $row_num = 1;
-                        foreach ($all_sorted as $r):
-                            if ($prev_status !== null && $prev_status !== $r->status):
-                        ?>
-                                <tr class="dr-divider-row">
-                                    <td colspan="7">
-                                        <div class="dr-divider-inner">
-                                            <?php if ($r->status === 'approved'): ?>
+                <!-- Desktop Table -->
+                <div class="dr-desktop-table">
+                    <table class="dr-table">
+                        <thead>
+                            <tr>
+                                <th class="dr-th dr-th--num">#</th>
+                                <th class="dr-th">User</th>
+                                <th class="dr-th">Amount</th>
+                                <th class="dr-th">Receipt</th>
+                                <th class="dr-th">Date</th>
+                                <th class="dr-th">Status</th>
+                                <th class="dr-th">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $prev_status = null;
+                            $row_num = 1;
+                            foreach ($all_sorted as $r):
+                                if ($prev_status !== null && $prev_status !== $r->status):
+                            ?>
+                                    <tr class="dr-divider-row">
+                                        <td colspan="7">
+                                            <div class="dr-divider-inner">
+                                                <?php if ($r->status === 'approved'): ?>
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                                    </svg>Approved Requests
+                                                <?php elseif ($r->status === 'rejected'): ?>
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                        <circle cx="12" cy="12" r="10" />
+                                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                                    </svg>Rejected Requests
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php
+                                endif;
+                                $prev_status = $r->status;
+                                $user_name = trim((string) ($r->name ?? ''));
+                                $user_email = (string) ($r->email ?? '');
+                                $user_label = $user_name !== '' ? $user_name : 'Unknown User';
+                                $avatar_bg = '#' . substr(md5($user_label), 0, 6);
+                                $avatar_initial = strtoupper(substr($user_label, 0, 1));
+                                ?>
+                                <tr class="dr-row dr-row--<?php echo $r->status; ?>" id="row-<?php echo $r->id; ?>">
+                                    <td class="dr-td dr-td--num"><?php echo $row_num++; ?></td>
+                                    <td class="dr-td">
+                                        <div class="dr-user">
+                                            <div class="dr-avatar" style="background:<?php echo $avatar_bg; ?>">
+                                                <?php echo $avatar_initial; ?>
+                                            </div>
+                                            <div>
+                                                <div class="dr-user__name"><?php echo htmlspecialchars($user_label, ENT_QUOTES, 'UTF-8'); ?></div>
+                                                <div class="dr-user__email"><?php echo htmlspecialchars($user_email, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="dr-td">
+                                        <span class="dr-amount">₹<?php echo number_format($r->amount, 2); ?></span>
+                                    </td>
+                                    <td class="dr-td">
+                                        <?php if (!empty($r->receipt)): ?>
+                                            <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="dr-receipt-btn">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                                View
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="dr-nil">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="dr-td">
+                                        <div class="dr-date">
+                                            <?php echo isset($r->created_at) ? date('d M Y', strtotime($r->created_at)) : 'N/A'; ?>
+                                            <span class="dr-date__time"><?php echo isset($r->created_at) ? date('h:i A', strtotime($r->created_at)) : ''; ?></span>
+                                        </div>
+                                    </td>
+                                    <td class="dr-td">
+                                        <?php if ($r->status === 'pending'): ?>
+                                            <span class="dr-badge dr-badge--pending"><span class="dr-pulse"></span>Pending</span>
+                                        <?php elseif ($r->status === 'approved'): ?>
+                                            <span class="dr-badge dr-badge--approved">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                                Approved
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="dr-badge dr-badge--rejected">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                                </svg>
+                                                Rejected
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="dr-td">
+                                        <?php if ($r->status === 'pending'): ?>
+                                            <div class="dr-action-btns">
+                                                <button class="dr-btn-approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
+                                                    Approve
+                                                </button>
+                                                <button class="dr-btn-reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                                    </svg>
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        <?php elseif ($r->status === 'approved'): ?>
+                                            <div class="dr-processed dr-processed--approved">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                                     <polyline points="22 4 12 14.01 9 11.01" />
-                                                </svg>Approved Requests
-                                            <?php elseif ($r->status === 'rejected'): ?>
+                                                </svg>
+                                                <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : 'Processed'; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="dr-processed dr-processed--rejected">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                                     <circle cx="12" cy="12" r="10" />
                                                     <line x1="15" y1="9" x2="9" y2="15" />
                                                     <line x1="9" y1="9" x2="15" y2="15" />
-                                                </svg>Rejected Requests
-                                            <?php endif; ?>
-                                        </div>
+                                                </svg>
+                                                <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : 'Processed'; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-                            <?php
-                            endif;
-                            $prev_status = $r->status;
-                            $avatar_bg = '#' . substr(md5($r->name), 0, 6);
-                            ?>
-                            <tr class="dr-row dr-row--<?php echo $r->status; ?>" id="row-<?php echo $r->id; ?>">
-                                <td class="dr-td dr-td--num"><?php echo $row_num++; ?></td>
-                                <td class="dr-td">
-                                    <div class="dr-user">
-                                        <div class="dr-avatar" style="background:<?php echo $avatar_bg; ?>">
-                                            <?php echo strtoupper(substr($r->name, 0, 1)); ?>
-                                        </div>
-                                        <div>
-                                            <div class="dr-user__name"><?php echo htmlspecialchars($r->name); ?></div>
-                                            <div class="dr-user__email"><?php echo htmlspecialchars($r->email ?? ''); ?></div>
-                                        </div>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="dr-mobile-list">
+                    <?php
+                    $prev_status = null;
+                    foreach ($all_sorted as $r):
+                        if ($prev_status !== null && $prev_status !== $r->status):
+                    ?>
+                            <div class="dr-mobile-sep">
+                                <?php if ($r->status === 'approved'): ?>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                    Approved
+                                <?php elseif ($r->status === 'rejected'): ?>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                    Rejected
+                                <?php endif; ?>
+                            </div>
+                        <?php
+                        endif;
+                        $prev_status = $r->status;
+                        $user_name = trim((string) ($r->name ?? ''));
+                        $user_email = (string) ($r->email ?? '');
+                        $user_label = $user_name !== '' ? $user_name : 'Unknown User';
+                        $avatar_bg = '#' . substr(md5($user_label), 0, 6);
+                        $initials = strtoupper(substr($user_label, 0, 2));
+                        ?>
+                        <div class="dr-mcard dr-mcard--<?php echo $r->status; ?>" id="mcard-<?php echo $r->id; ?>">
+                            <div class="dr-mcard__top">
+                                <div class="dr-mcard__user">
+                                    <div class="dr-mcard__avatar" style="background:<?php echo $avatar_bg; ?>"><?php echo $initials; ?></div>
+                                    <div class="dr-mcard__info">
+                                        <span class="dr-mcard__name"><?php echo htmlspecialchars($user_label, ENT_QUOTES, 'UTF-8'); ?></span>
+                                        <span class="dr-mcard__email"><?php echo htmlspecialchars($user_email, ENT_QUOTES, 'UTF-8'); ?></span>
                                     </div>
-                                </td>
-                                <td class="dr-td">
-                                    <span class="dr-amount">₹<?php echo number_format($r->amount, 2); ?></span>
-                                </td>
-                                <td class="dr-td">
-                                    <?php if (!empty($r->receipt)): ?>
-                                        <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="dr-receipt-btn">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                <circle cx="12" cy="12" r="3" />
-                                            </svg>
-                                            View
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="dr-nil">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="dr-td">
-                                    <div class="dr-date">
-                                        <?php echo isset($r->created_at) ? date('d M Y', strtotime($r->created_at)) : 'N/A'; ?>
-                                        <span class="dr-date__time"><?php echo isset($r->created_at) ? date('h:i A', strtotime($r->created_at)) : ''; ?></span>
-                                    </div>
-                                </td>
-                                <td class="dr-td">
+                                </div>
+                                <div class="dr-mcard__right">
+                                    <div class="dr-mcard__amount">₹<?php echo number_format($r->amount, 2); ?></div>
                                     <?php if ($r->status === 'pending'): ?>
                                         <span class="dr-badge dr-badge--pending"><span class="dr-pulse"></span>Pending</span>
                                     <?php elseif ($r->status === 'approved'): ?>
@@ -252,196 +367,96 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
                                             Rejected
                                         </span>
                                     <?php endif; ?>
-                                </td>
-                                <td class="dr-td">
-                                    <?php if ($r->status === 'pending'): ?>
-                                        <div class="dr-action-btns">
-                                            <button class="dr-btn-approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                                Approve
-                                            </button>
-                                            <button class="dr-btn-reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                                </svg>
-                                                Reject
-                                            </button>
-                                        </div>
-                                    <?php elseif ($r->status === 'approved'): ?>
-                                        <div class="dr-processed dr-processed--approved">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                                <polyline points="22 4 12 14.01 9 11.01" />
-                                            </svg>
-                                            <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : 'Processed'; ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="dr-processed dr-processed--rejected">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <circle cx="12" cy="12" r="10" />
-                                                <line x1="15" y1="9" x2="9" y2="15" />
-                                                <line x1="9" y1="9" x2="15" y2="15" />
-                                            </svg>
-                                            <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : 'Processed'; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Cards -->
-            <div class="dr-mobile-list">
-                <?php
-                $prev_status = null;
-                foreach ($all_sorted as $r):
-                    if ($prev_status !== null && $prev_status !== $r->status):
-                ?>
-                        <div class="dr-mobile-sep">
-                            <?php if ($r->status === 'approved'): ?>
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <polyline points="22 4 12 14.01 9 11.01" />
-                                </svg>
-                                Approved
-                            <?php elseif ($r->status === 'rejected'): ?>
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="15" y1="9" x2="9" y2="15" />
-                                    <line x1="9" y1="9" x2="15" y2="15" />
-                                </svg>
-                                Rejected
-                            <?php endif; ?>
-                        </div>
-                    <?php
-                    endif;
-                    $prev_status = $r->status;
-                    $avatar_bg = '#' . substr(md5($r->name), 0, 6);
-                    $initials = strtoupper(substr($r->name, 0, 2));
-                    ?>
-                    <div class="dr-mcard dr-mcard--<?php echo $r->status; ?>" id="mcard-<?php echo $r->id; ?>">
-                        <div class="dr-mcard__top">
-                            <div class="dr-mcard__user">
-                                <div class="dr-mcard__avatar" style="background:<?php echo $avatar_bg; ?>"><?php echo $initials; ?></div>
-                                <div class="dr-mcard__info">
-                                    <span class="dr-mcard__name"><?php echo htmlspecialchars($r->name); ?></span>
-                                    <span class="dr-mcard__email"><?php echo htmlspecialchars($r->email ?? ''); ?></span>
                                 </div>
                             </div>
-                            <div class="dr-mcard__right">
-                                <div class="dr-mcard__amount">₹<?php echo number_format($r->amount, 2); ?></div>
-                                <?php if ($r->status === 'pending'): ?>
-                                    <span class="dr-badge dr-badge--pending"><span class="dr-pulse"></span>Pending</span>
-                                <?php elseif ($r->status === 'approved'): ?>
-                                    <span class="dr-badge dr-badge--approved">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+
+                            <div class="dr-mcard__meta">
+                                <div class="dr-mcard__meta-item">
+                                    <span class="dr-mcard__meta-label">Date</span>
+                                    <span class="dr-mcard__meta-val"><?php echo isset($r->created_at) ? date('d M Y, h:i A', strtotime($r->created_at)) : 'N/A'; ?></span>
+                                </div>
+                                <?php if (!empty($r->receipt)): ?>
+                                    <div class="dr-mcard__meta-item">
+                                        <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="dr-receipt-link">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                            View Receipt
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if ($r->status === 'pending'): ?>
+                                <div class="dr-mcard__actions">
+                                    <button class="dr-mcard__approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
-                                        Approved
-                                    </span>
-                                <?php else: ?>
-                                    <span class="dr-badge dr-badge--rejected">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        Approve
+                                    </button>
+                                    <button class="dr-mcard__reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                             <line x1="18" y1="6" x2="6" y2="18" />
                                             <line x1="6" y1="6" x2="18" y2="18" />
                                         </svg>
-                                        Rejected
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="dr-mcard__meta">
-                            <div class="dr-mcard__meta-item">
-                                <span class="dr-mcard__meta-label">Date</span>
-                                <span class="dr-mcard__meta-val"><?php echo isset($r->created_at) ? date('d M Y, h:i A', strtotime($r->created_at)) : 'N/A'; ?></span>
-                            </div>
-                            <?php if (!empty($r->receipt)): ?>
-                                <div class="dr-mcard__meta-item">
-                                    <a href="<?php echo base_url('uploads/receipts/' . $r->receipt); ?>" target="_blank" class="dr-receipt-link">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                            <circle cx="12" cy="12" r="3" />
-                                        </svg>
-                                        View Receipt
-                                    </a>
+                                        Reject
+                                    </button>
+                                </div>
+                            <?php elseif ($r->status === 'approved'): ?>
+                                <div class="dr-mcard__status-bar dr-mcard__status-bar--approved">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                    Approved <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : ''; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="dr-mcard__status-bar dr-mcard__status-bar--rejected">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                    Rejected <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : ''; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
-
-                        <?php if ($r->status === 'pending'): ?>
-                            <div class="dr-mcard__actions">
-                                <button class="dr-mcard__approve" onclick="handleAction('approve', <?php echo $r->id; ?>, this)">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    Approve
-                                </button>
-                                <button class="dr-mcard__reject" onclick="handleAction('reject', <?php echo $r->id; ?>, this)">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                    Reject
-                                </button>
-                            </div>
-                        <?php elseif ($r->status === 'approved'): ?>
-                            <div class="dr-mcard__status-bar dr-mcard__status-bar--approved">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <polyline points="22 4 12 14.01 9 11.01" />
-                                </svg>
-                                Approved <?php echo isset($r->approved_at) ? date('d M, h:i A', strtotime($r->approved_at)) : ''; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="dr-mcard__status-bar dr-mcard__status-bar--rejected">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="15" y1="9" x2="9" y2="15" />
-                                    <line x1="9" y1="9" x2="15" y2="15" />
-                                </svg>
-                                Rejected <?php echo isset($r->rejected_at) ? date('d M, h:i A', strtotime($r->rejected_at)) : ''; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Footer -->
-            <div class="dr-footer">
-                <span class="dr-footer__text">
-                    Showing <strong><?php echo count($all_sorted); ?></strong> record(s)
-                    <?php if ($status_filter): ?>
-                        &mdash; filtered by <strong><?php echo ucfirst($status_filter); ?></strong>
-                    <?php endif; ?>
-                </span>
-                <?php if ($status_filter): ?>
-                    <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="dr-clear-link">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                        Clear filter
-                    </a>
-                <?php endif; ?>
-            </div>
-
-        <?php else: ?>
-            <div class="dr-empty">
-                <div class="dr-empty__icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                    </svg>
+                    <?php endforeach; ?>
                 </div>
-                <p class="dr-empty__title">No deposit requests found</p>
-                <span class="dr-empty__sub">New requests will appear here automatically</span>
-            </div>
-        <?php endif; ?>
+
+                <!-- Footer -->
+                <div class="dr-footer">
+                    <span class="dr-footer__text">
+                        Showing <strong><?php echo count($all_sorted); ?></strong> record(s)
+                        <?php if ($status_filter): ?>
+                            &mdash; filtered by <strong><?php echo ucfirst($status_filter); ?></strong>
+                        <?php endif; ?>
+                    </span>
+                    <?php if ($status_filter): ?>
+                        <a href="<?php echo site_url('admin/deposits/requests'); ?>" class="dr-clear-link">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            Clear filter
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+            <?php else: ?>
+                <div class="dr-empty">
+                    <div class="dr-empty__icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                    </div>
+                    <p class="dr-empty__title">No deposit requests found</p>
+                    <span class="dr-empty__sub">New requests will appear here automatically</span>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
@@ -815,6 +830,44 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
         border-radius: var(--radius-lg);
         border: 1px solid var(--gray-100);
         overflow: hidden;
+        position: relative;
+    }
+
+    .dr-card__loading {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, .78);
+        z-index: 3;
+    }
+
+    .dr-card__loading[hidden] {
+        display: none !important;
+    }
+
+    .dr-card__loading-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+        color: var(--gray-700);
+        font-size: .84rem;
+        font-weight: 600;
+    }
+
+    .dr-card__spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--gray-200);
+        border-top-color: var(--indigo-600);
+        border-radius: 50%;
+        animation: spin .65s linear infinite;
     }
 
     /* ── Desktop Table ── */
@@ -1393,6 +1446,69 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
 
     .dr-clear-link:hover {
         text-decoration: underline;
+    }
+
+    .dr-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 20px 18px;
+        border-top: 1px solid var(--gray-100);
+        background: #fff;
+        flex-wrap: wrap;
+    }
+
+    .dr-page-numbers {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .dr-page-btn,
+    .dr-page-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 40px;
+        padding: 0 14px;
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--gray-700);
+        font-size: .82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .15s ease;
+        font-family: var(--f-body);
+    }
+
+    .dr-page-btn:hover,
+    .dr-page-num:hover {
+        background: var(--gray-50);
+        border-color: var(--gray-300);
+    }
+
+    .dr-page-btn[disabled],
+    .dr-page-num[disabled] {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .dr-page-num.active {
+        background: var(--indigo-600);
+        border-color: var(--indigo-600);
+        color: #fff;
+    }
+
+    .dr-page-ellipsis {
+        color: var(--gray-400);
+        font-weight: 700;
+        letter-spacing: .08em;
     }
 
     /* ── Empty ── */
@@ -2012,6 +2128,137 @@ $all_sorted = array_merge($pending_requests, $approved_requests, $rejected_reque
 </style>
 
 <script>
+    (function() {
+        var endpoint = <?php echo json_encode(site_url('admin/deposits/requests-data')); ?>;
+        var listingEl = document.getElementById('drListing');
+        var loadingEl = document.getElementById('drCardLoading');
+        var refreshBtn = document.getElementById('drRefreshBtn');
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.dr-tab'));
+        var requestState = {
+            status: <?php echo json_encode(isset($status_filter) ? (string) $status_filter : ''); ?>,
+            page: <?php echo isset($listing['page']) ? (int) $listing['page'] : 1; ?>
+        };
+        var activeRequest = null;
+
+        function setListingLoading(isLoading) {
+            if (loadingEl) {
+                loadingEl.hidden = !isLoading;
+            }
+        }
+
+        function updateTabs() {
+            tabs.forEach(function(tab) {
+                var tabStatus = tab.getAttribute('data-status') || '';
+                tab.classList.remove('dr-tab--active', 'dr-tab--pending', 'dr-tab--approved', 'dr-tab--rejected');
+                if (tabStatus === requestState.status) {
+                    tab.classList.add('dr-tab--active');
+                    if (tabStatus === 'pending') tab.classList.add('dr-tab--pending');
+                    if (tabStatus === 'approved') tab.classList.add('dr-tab--approved');
+                    if (tabStatus === 'rejected') tab.classList.add('dr-tab--rejected');
+                }
+            });
+        }
+
+        function syncUrl() {
+            if (!window.history || !window.history.replaceState) {
+                return;
+            }
+
+            var params = new URLSearchParams();
+            if (requestState.status) {
+                params.set('status', requestState.status);
+            }
+            if (requestState.page > 1) {
+                params.set('page', String(requestState.page));
+            }
+
+            var nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            window.history.replaceState({}, '', nextUrl);
+        }
+
+        function fetchListing() {
+            if (activeRequest && typeof activeRequest.abort === 'function') {
+                activeRequest.abort();
+            }
+
+            activeRequest = new AbortController();
+            var params = new URLSearchParams();
+            if (requestState.status) {
+                params.set('status', requestState.status);
+            }
+            params.set('page', String(requestState.page));
+
+            setListingLoading(true);
+
+            fetch(endpoint + '?' + params.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                signal: activeRequest.signal
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+                return response.json();
+            }).then(function(payload) {
+                if (!payload || payload.status !== 'success') {
+                    throw new Error('Invalid response');
+                }
+                listingEl.innerHTML = payload.html;
+                requestState.status = payload.status_filter || '';
+                requestState.page = payload.pagination && payload.pagination.page ? payload.pagination.page : requestState.page;
+                updateTabs();
+                syncUrl();
+            }).catch(function(error) {
+                if (error.name === 'AbortError') {
+                    return;
+                }
+                if (typeof adminSwalAlert === 'function') {
+                    adminSwalAlert('Unable to load deposit requests right now.', 'error');
+                }
+            }).finally(function() {
+                setListingLoading(false);
+            });
+        }
+
+        document.querySelector('.dr-tabs').addEventListener('click', function(event) {
+            var link = event.target.closest('a.dr-tab');
+            if (!link) {
+                return;
+            }
+            event.preventDefault();
+            requestState.status = link.getAttribute('data-status') || '';
+            requestState.page = 1;
+            fetchListing();
+        });
+
+        listingEl.addEventListener('click', function(event) {
+            var pageBtn = event.target.closest('[data-page]');
+            if (pageBtn && (pageBtn.classList.contains('dr-page-btn') || pageBtn.classList.contains('dr-page-num') || pageBtn.classList.contains('dr-clear-link'))) {
+                event.preventDefault();
+                if (pageBtn.disabled) {
+                    return;
+                }
+                if (pageBtn.classList.contains('dr-clear-link')) {
+                    requestState.status = '';
+                    requestState.page = 1;
+                } else {
+                    requestState.page = parseInt(pageBtn.getAttribute('data-page'), 10) || 1;
+                }
+                fetchListing();
+            }
+        });
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                fetchListing();
+            });
+        }
+
+        updateTabs();
+        fetchListing();
+    }());
+
     function handleAction(action, id, btnEl) {
         var isApprove = action === 'approve';
         var message = isApprove ? 'Approve this deposit and credit wallet?' : 'Reject this deposit request?';

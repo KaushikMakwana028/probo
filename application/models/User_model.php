@@ -316,6 +316,95 @@ class User_model extends CI_Model {
 		return $this->db->get()->result();
 	}
 
+	public function get_referral_rewards_listing($options = array())
+	{
+		$page = max(1, (int) (isset($options['page']) ? $options['page'] : 1));
+		$per_page = (int) (isset($options['per_page']) ? $options['per_page'] : 10);
+		$allowed_per_page = array(5, 10, 25, 50, 100);
+
+		if (!in_array($per_page, $allowed_per_page, TRUE)) {
+			$per_page = 10;
+		}
+
+		if (
+			!$this->db->table_exists($this->referral_rewards_table) ||
+			!$this->db->table_exists($this->table)
+		) {
+			return array(
+				'rows' => array(),
+				'total' => 0,
+				'filtered_total' => 0,
+				'page' => 1,
+				'per_page' => $per_page,
+				'total_pages' => 1
+			);
+		}
+
+		$total = (int) $this->db->count_all($this->referral_rewards_table);
+
+		$this->db->from($this->referral_rewards_table . ' rr');
+		$this->db->join($this->table . ' referrer', 'referrer.id = rr.referrer_user_id', 'left');
+		$this->db->join($this->table . ' referred', 'referred.id = rr.referred_user_id', 'left');
+		$this->apply_referral_rewards_filters($options);
+		$filtered_total = (int) $this->db->count_all_results();
+
+		$total_pages = max(1, (int) ceil($filtered_total / $per_page));
+		$page = min($page, $total_pages);
+		$offset = ($page - 1) * $per_page;
+
+		$this->db->select('
+			rr.*,
+			referrer.name AS referrer_name,
+			referrer.email AS referrer_email,
+			referrer.mobile AS referrer_mobile,
+			referred.name AS referred_name,
+			referred.email AS referred_email,
+			referred.mobile AS referred_mobile
+		');
+		$this->db->from($this->referral_rewards_table . ' rr');
+		$this->db->join($this->table . ' referrer', 'referrer.id = rr.referrer_user_id', 'left');
+		$this->db->join($this->table . ' referred', 'referred.id = rr.referred_user_id', 'left');
+		$this->apply_referral_rewards_filters($options);
+		$this->db->order_by('rr.id', 'DESC');
+		$this->db->limit($per_page, $offset);
+
+		return array(
+			'rows' => $this->db->get()->result(),
+			'total' => $total,
+			'filtered_total' => $filtered_total,
+			'page' => $page,
+			'per_page' => $per_page,
+			'total_pages' => $total_pages
+		);
+	}
+
+	private function apply_referral_rewards_filters($options = array())
+	{
+		$search = trim((string) (isset($options['search']) ? $options['search'] : ''));
+		$date_from = trim((string) (isset($options['date_from']) ? $options['date_from'] : ''));
+		$date_to = trim((string) (isset($options['date_to']) ? $options['date_to'] : ''));
+
+		if ($search !== '') {
+			$this->db->group_start();
+			$this->db->like('referred.name', $search);
+			$this->db->or_like('referred.email', $search);
+			$this->db->or_like('referred.mobile', $search);
+			$this->db->or_like('referrer.name', $search);
+			$this->db->or_like('referrer.email', $search);
+			$this->db->or_like('referrer.mobile', $search);
+			$this->db->or_like('rr.referral_code', $search);
+			$this->db->group_end();
+		}
+
+		if ($date_from !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_from)) {
+			$this->db->where('DATE(rr.created_at) >=', $date_from);
+		}
+
+		if ($date_to !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_to)) {
+			$this->db->where('DATE(rr.created_at) <=', $date_to);
+		}
+	}
+
 	public function add_notification($data)
 	{
 		if (!$this->db->table_exists($this->notifications_table)) {

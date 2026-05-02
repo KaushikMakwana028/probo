@@ -62,19 +62,77 @@ class Referrals extends CI_Controller
 	public function list()
 	{
 		$admin = $this->get_admin();
+		$listing = $this->User_model->get_referral_rewards_listing(array(
+			'page' => 1,
+			'per_page' => 10
+		));
 
 		$data = array(
 			'title' => 'Referral List',
 			'page_type' => 'dashboard',
 			'admin' => $admin,
 			'settings' => $this->User_model->get_referral_settings(),
-			'referral_rewards' => $this->User_model->get_referral_rewards(),
+			'referral_rewards' => $listing['rows'],
+			'referral_listing' => $listing,
 			'active_page' => 'referrals_list'
 		);
 
 		$this->load->view('admin/includes/header', $data);
 		$this->load->view('admin/referral_list_view', $data);
 		$this->load->view('admin/includes/footer', $data);
+	}
+
+	public function list_data()
+	{
+		$this->get_admin();
+
+		if (!$this->input->is_ajax_request()) {
+			show_404();
+		}
+
+		$listing = $this->User_model->get_referral_rewards_listing(array(
+			'page' => (int) $this->input->get('page'),
+			'per_page' => (int) $this->input->get('per_page'),
+			'search' => $this->input->get('search', TRUE),
+			'date_from' => $this->input->get('date_from', TRUE),
+			'date_to' => $this->input->get('date_to', TRUE)
+		));
+
+		$start = $listing['filtered_total'] > 0 ? (($listing['page'] - 1) * $listing['per_page']) + 1 : 0;
+		$end = min($listing['filtered_total'], $listing['page'] * $listing['per_page']);
+		$rows = array();
+
+		foreach ($listing['rows'] as $index => $reward) {
+			$rows[] = array(
+				'position' => $start + $index,
+				'referred_name' => (string) $reward->referred_name,
+				'referred_email' => (string) $reward->referred_email,
+				'referred_mobile' => (string) $reward->referred_mobile,
+				'referrer_name' => (string) $reward->referrer_name,
+				'referrer_email' => (string) $reward->referrer_email,
+				'referrer_mobile' => (string) $reward->referrer_mobile,
+				'referral_code' => (string) $reward->referral_code,
+				'referred_bonus' => number_format((float) $reward->referred_bonus, 2),
+				'referrer_bonus' => number_format((float) $reward->referrer_bonus, 2),
+				'created_at' => !empty($reward->created_at) ? (string) $reward->created_at : '-'
+			);
+		}
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status' => 'success',
+				'rows' => $rows,
+				'pagination' => array(
+					'total' => $listing['total'],
+					'filtered_total' => $listing['filtered_total'],
+					'page' => $listing['page'],
+					'per_page' => $listing['per_page'],
+					'total_pages' => $listing['total_pages'],
+					'start' => $start,
+					'end' => $end
+				)
+			)));
 	}
 
 	private function get_admin()

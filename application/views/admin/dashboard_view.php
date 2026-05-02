@@ -5,8 +5,8 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
 <style>
 	/* ─── RESET ─────────────────────────────────────────────── */
@@ -30,15 +30,15 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 
 	/* ─── TOKENS ─────────────────────────────────────────────── */
 	:root {
-		--font: 'Roboto', sans-serif;
+		--font: 'Plus Jakarta Sans', system-ui, sans-serif;
 		--gap: 12px;
 
-		--bg-page: #edf1f9;
+		--bg-page: #eef2fb;
 		--bg-card: #ffffff;
-		--bg-subtle: #f4f7fd;
+		--bg-subtle: #f5f7fd;
 
 		--blue-50: #e8f0fe;
-		--blue-100: #c6d9fc;
+		--blue-100: #c5d8fc;
 		--blue-500: #2463eb;
 		--blue-600: #1a52d4;
 		--blue-700: #1340b8;
@@ -56,15 +56,15 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		--orange: #f97316;
 		--purple: #7c3aed;
 
-		--radius-sm: 8px;
+		--radius-sm: 10px;
 		--radius-md: 14px;
 		--radius-lg: 18px;
 
-		--shadow-sm: 0 1px 4px rgba(15, 28, 53, 0.06);
-		--shadow-md: 0 4px 18px rgba(15, 28, 53, 0.09);
+		--shadow-sm: 0 1px 4px rgba(15, 28, 53, .06);
+		--shadow-md: 0 4px 18px rgba(15, 28, 53, .10);
 	}
 
-	/* ─── WRAPPER ────────────────────────────────────────────── */
+	/* ─── WRAPPER ─────────────────────────────────────────────── */
 	.adash {
 		font-family: var(--font);
 		background: var(--bg-page);
@@ -74,6 +74,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		flex-direction: column;
 		gap: var(--gap);
 		min-height: 100vh;
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
 	}
 
 	/* ═══════════════════════════════════════════════════════════
@@ -82,65 +85,72 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-hero {
 		border-radius: var(--radius-lg);
 		background: linear-gradient(135deg, #1340b8 0%, #2463eb 60%, #3b82f6 100%);
-		padding: 20px 18px;
+		padding: 18px 16px;
 		position: relative;
 		overflow: hidden;
+		width: 100%;
 	}
 
 	/* Blobs */
 	.a-hero-blob {
 		position: absolute;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.07);
+		background: rgba(255, 255, 255, .07);
 		pointer-events: none;
 	}
 
 	.a-hero-blob-1 {
-		width: 220px;
-		height: 220px;
-		right: -55px;
-		top: -70px;
+		width: 160px;
+		height: 160px;
+		right: -40px;
+		top: -50px;
 	}
 
 	.a-hero-blob-2 {
-		width: 120px;
-		height: 120px;
-		right: 50px;
-		bottom: -50px;
+		width: 90px;
+		height: 90px;
+		right: 30px;
+		bottom: -35px;
 	}
 
-	/* Profile row */
+	/* Profile row — MOBILE: top-left pill */
 	.a-hero-profile {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-bottom: 18px;
+		gap: 9px;
+		margin-bottom: 16px;
 		position: relative;
 		z-index: 1;
+		/* Constrain so it never overflows */
+		max-width: 100%;
 	}
 
 	.a-hero-av {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 2px solid rgba(255, 255, 255, 0.55);
+		border: 2px solid rgba(255, 255, 255, .5);
 		flex-shrink: 0;
-		background: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, .15);
 	}
 
 	.a-hero-pname {
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 700;
 		color: #fff;
 		line-height: 1.2;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 180px;
 	}
 
 	.a-hero-prole {
-		font-size: 10px;
-		color: rgba(255, 255, 255, 0.6);
+		font-size: 9.5px;
+		color: rgba(255, 255, 255, .6);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: .08em;
 		margin-top: 2px;
 		font-weight: 500;
 	}
@@ -155,16 +165,16 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		background: rgba(255, 255, 255, 0.14);
-		border: 1px solid rgba(255, 255, 255, 0.28);
+		background: rgba(255, 255, 255, .14);
+		border: 1px solid rgba(255, 255, 255, .28);
 		border-radius: 30px;
 		padding: 4px 11px;
-		font-size: 9.5px;
+		font-size: 9px;
 		font-weight: 700;
-		letter-spacing: 0.09em;
+		letter-spacing: .09em;
 		text-transform: uppercase;
-		color: rgba(255, 255, 255, 0.9);
-		margin-bottom: 10px;
+		color: rgba(255, 255, 255, .9);
+		margin-bottom: 9px;
 	}
 
 	.a-hero-dot {
@@ -186,53 +196,43 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		}
 
 		50% {
-			opacity: 0.4;
-			transform: scale(0.8);
+			opacity: .4;
+			transform: scale(.8);
 		}
 	}
 
 	.a-hero-title {
-		font-size: 24px;
-		font-weight: 900;
+		font-size: 22px;
+		font-weight: 800;
 		color: #fff;
-		letter-spacing: -0.5px;
+		letter-spacing: -.4px;
 		line-height: 1.15;
-		margin-bottom: 7px;
+		margin-bottom: 6px;
 	}
 
 	.a-hero-sub {
-		font-size: 12.5px;
+		font-size: 12px;
 		font-weight: 300;
-		color: rgba(255, 255, 255, 0.65);
+		color: rgba(255, 255, 255, .65);
 		line-height: 1.55;
 	}
 
-	/* Quick stat pills — mobile hidden, shown ≥600px */
+	/* Quick stat pills (hidden on mobile, shown ≥600px) */
 	.a-hero-strip {
 		display: none;
 	}
 
 	/* ═══════════════════════════════════════════════════════════
    STATS GRID
-   KEY FIX: Always 2 cols on mobile. QA card spans full width.
-   Stats: 5 cards in 2-col = rows of [2,2,1]. We fix this by
-   placing QA between rows so the orphan card pairs with QA.
 ═══════════════════════════════════════════════════════════ */
 	.a-stats {
 		display: grid;
-		/* Always 2 equal columns on mobile */
 		grid-template-columns: 1fr 1fr;
 		gap: var(--gap);
+		width: 100%;
 	}
 
-	/* The 5th stat card needs to pair with QA on mobile.
-   We use explicit grid placement to fix the orphan. */
-	.a-sc:nth-child(5) {
-		/* Stays in column 1, row 3 */
-		grid-column: 1;
-	}
-
-	/* QA block spans full width ALWAYS */
+	/* QA block always full-width on mobile */
 	.a-qa {
 		grid-column: 1 / -1;
 	}
@@ -241,13 +241,15 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-sc {
 		background: var(--bg-card);
 		border-radius: var(--radius-md);
-		padding: 16px 14px 14px;
+		padding: 14px 13px 12px;
 		border: 1px solid var(--border);
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		transition: transform .2s, box-shadow .2s;
 		cursor: default;
+		min-width: 0;
+		/* prevent overflow in grid */
 	}
 
 	.a-sc::before {
@@ -264,13 +266,13 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-sc::after {
 		content: '';
 		position: absolute;
-		right: -14px;
-		bottom: -14px;
-		width: 70px;
-		height: 70px;
+		right: -12px;
+		bottom: -12px;
+		width: 60px;
+		height: 60px;
 		border-radius: 50%;
 		background: var(--cc);
-		opacity: 0.07;
+		opacity: .07;
 		pointer-events: none;
 	}
 
@@ -295,54 +297,53 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-sc:active {
-		transform: scale(0.97);
+		transform: scale(.97);
 	}
 
 	.a-sc-top {
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
-		margin-bottom: 12px;
-		gap: 6px;
+		margin-bottom: 10px;
+		gap: 4px;
 	}
 
 	.a-sc-ico {
-		width: 36px;
-		height: 36px;
-		border-radius: 10px;
+		width: 32px;
+		height: 32px;
+		border-radius: 9px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 14px;
+		font-size: 13px;
 		background: color-mix(in srgb, var(--cc) 12%, #fff);
 		color: var(--cc);
 		flex-shrink: 0;
 	}
 
 	.a-sc-lbl {
-		font-size: 9.5px;
+		font-size: 9px;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: .06em;
 		color: var(--text-muted);
 		text-align: right;
-		line-height: 1.35;
+		line-height: 1.3;
 	}
 
 	.a-sc-val {
-		font-size: 30px;
-		font-weight: 900;
+		font-size: 26px;
+		font-weight: 800;
 		color: var(--text-primary);
 		line-height: 1;
 		letter-spacing: -1px;
-		margin-bottom: 5px;
+		margin-bottom: 4px;
 	}
 
 	.a-sc-note {
-		font-size: 10.5px;
+		font-size: 10px;
 		color: var(--text-muted);
 		line-height: 1.4;
-		font-weight: 400;
 	}
 
 	/* ─── QUICK ACTIONS ──────────────────────────────────────── */
@@ -350,7 +351,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		background: var(--bg-subtle);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		padding: 16px 14px 14px;
+		padding: 14px 13px 12px;
 		position: relative;
 		overflow: hidden;
 	}
@@ -367,19 +368,19 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-qa-title {
-		font-size: 9.5px;
+		font-size: 9px;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.09em;
+		letter-spacing: .09em;
 		color: var(--text-muted);
-		margin-bottom: 11px;
+		margin-bottom: 10px;
 	}
 
 	/* Mobile: 3-col icon grid */
 	.a-qa-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
-		gap: 9px;
+		gap: 8px;
 	}
 
 	.a-qa-btn {
@@ -387,59 +388,60 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
-		padding: 13px 6px;
+		gap: 7px;
+		padding: 12px 5px;
 		border-radius: var(--radius-sm);
 		background: var(--bg-card);
 		border: 1px solid var(--border);
 		color: var(--text-primary);
 		font-family: var(--font);
-		font-size: 11px;
+		font-size: 10.5px;
 		font-weight: 600;
 		text-align: center;
 		line-height: 1.3;
-		transition: all 0.18s ease;
+		transition: all .18s;
 		box-shadow: var(--shadow-sm);
 		cursor: pointer;
+		min-width: 0;
 	}
 
 	.a-qa-btn:hover {
 		background: var(--blue-500);
 		color: #fff;
 		border-color: var(--blue-500);
-		box-shadow: 0 6px 18px rgba(36, 99, 235, 0.28);
+		box-shadow: 0 6px 18px rgba(36, 99, 235, .28);
 		transform: translateY(-2px);
 	}
 
 	.a-qa-btn:hover .a-qa-ico {
-		background: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, .2);
 		color: #fff;
 	}
 
 	.a-qa-btn:active {
-		transform: scale(0.97);
+		transform: scale(.97);
 	}
 
 	.a-qa-ico {
-		width: 34px;
-		height: 34px;
-		border-radius: 10px;
+		width: 32px;
+		height: 32px;
+		border-radius: 9px;
 		background: var(--blue-50);
 		color: var(--blue-500);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 13px;
+		font-size: 12px;
 		flex-shrink: 0;
-		transition: all 0.18s ease;
+		transition: all .18s;
 	}
 
 	/* ─── SECTION LABEL ──────────────────────────────────────── */
 	.a-section-label {
-		font-size: 10.5px;
+		font-size: 10px;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
+		letter-spacing: .1em;
 		color: var(--text-muted);
 		padding: 0 2px;
 		margin-bottom: -4px;
@@ -452,6 +454,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		border: 1px solid var(--border);
 		box-shadow: var(--shadow-sm);
 		overflow: hidden;
+		width: 100%;
 	}
 
 	.a-panel-hd {
@@ -459,7 +462,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		align-items: center;
 		justify-content: space-between;
 		gap: 10px;
-		padding: 16px;
+		padding: 14px 15px;
 		border-bottom: 1px solid var(--border-light);
 		flex-wrap: wrap;
 	}
@@ -467,17 +470,18 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-panel-left {
 		display: flex;
 		align-items: center;
-		gap: 11px;
+		gap: 10px;
+		min-width: 0;
 	}
 
 	.a-panel-ico {
-		width: 38px;
-		height: 38px;
-		border-radius: 10px;
+		width: 36px;
+		height: 36px;
+		border-radius: 9px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 14px;
+		font-size: 13px;
 		flex-shrink: 0;
 	}
 
@@ -492,32 +496,32 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-panel-ttl {
-		font-size: 14px;
+		font-size: 13.5px;
 		font-weight: 700;
 		color: var(--text-primary);
 	}
 
 	.a-panel-sub {
-		font-size: 11.5px;
+		font-size: 11px;
 		color: var(--text-muted);
 		margin-top: 2px;
-		font-weight: 400;
 	}
 
 	.a-view-all {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		padding: 6px 12px;
+		padding: 6px 11px;
 		border-radius: var(--radius-sm);
 		background: var(--blue-50);
 		border: 1px solid var(--blue-100);
 		color: var(--blue-600);
 		font-family: var(--font);
-		font-size: 11.5px;
+		font-size: 11px;
 		font-weight: 700;
 		white-space: nowrap;
-		transition: all 0.17s ease;
+		transition: all .17s;
+		flex-shrink: 0;
 	}
 
 	.a-view-all:hover {
@@ -535,10 +539,11 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-user-row {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 16px;
+		gap: 9px;
+		padding: 11px 15px;
 		border-bottom: 1px solid var(--border-light);
-		transition: background 0.15s ease;
+		transition: background .15s;
+		min-width: 0;
 	}
 
 	.a-user-row:last-child {
@@ -550,13 +555,13 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-user-num {
-		width: 24px;
-		height: 24px;
+		width: 22px;
+		height: 22px;
 		border-radius: 6px;
 		background: var(--bg-subtle);
 		border: 1px solid var(--border);
 		color: var(--text-muted);
-		font-size: 10.5px;
+		font-size: 10px;
 		font-weight: 700;
 		display: flex;
 		align-items: center;
@@ -565,19 +570,19 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-user-av {
-		width: 38px;
-		height: 38px;
-		border-radius: 10px;
+		width: 34px;
+		height: 34px;
+		border-radius: 9px;
 		background: linear-gradient(135deg, var(--blue-500), #4f46e5);
 		color: #fff;
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 700;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		text-transform: uppercase;
 		flex-shrink: 0;
-		letter-spacing: 0.5px;
+		letter-spacing: .5px;
 	}
 
 	.a-user-info {
@@ -586,7 +591,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-user-name {
-		font-size: 13px;
+		font-size: 12.5px;
 		font-weight: 600;
 		color: var(--text-primary);
 		white-space: nowrap;
@@ -595,16 +600,15 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-user-email {
-		font-size: 11px;
+		font-size: 10.5px;
 		color: var(--text-muted);
 		margin-top: 2px;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		font-weight: 400;
 	}
 
-	/* Mobile: hide phone number — too cramped */
+	/* Hide phone on mobile — too cramped */
 	.a-user-mobile {
 		display: none;
 	}
@@ -613,9 +617,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		padding: 3px 8px;
+		padding: 3px 7px;
 		border-radius: 20px;
-		font-size: 10px;
+		font-size: 9.5px;
 		font-weight: 700;
 		white-space: nowrap;
 		flex-shrink: 0;
@@ -628,9 +632,9 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-empty {
-		padding: 32px 18px;
+		padding: 30px 16px;
 		color: var(--text-muted);
-		font-size: 13px;
+		font-size: 12.5px;
 		text-align: center;
 	}
 
@@ -638,25 +642,26 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	.a-lb-body {
 		display: flex;
 		flex-direction: column;
-		gap: 9px;
-		padding: 14px;
+		gap: 8px;
+		padding: 12px;
 	}
 
 	.a-lb-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 13px 14px 13px 18px;
+		gap: 9px;
+		padding: 12px 13px 12px 17px;
 		border-radius: var(--radius-md);
 		background: var(--bg-subtle);
 		border: 1px solid var(--border);
 		position: relative;
 		overflow: hidden;
-		transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+		transition: box-shadow .2s, transform .2s;
+		min-width: 0;
 	}
 
 	.a-lb-item:active {
-		transform: scale(0.99);
+		transform: scale(.99);
 	}
 
 	.a-lb-item::before {
@@ -683,14 +688,14 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-lb-rank {
-		width: 44px;
-		height: 44px;
-		border-radius: 11px;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 17px;
-		font-weight: 900;
+		font-size: 16px;
+		font-weight: 800;
 		flex-shrink: 0;
 		background: var(--bg-card);
 		color: var(--text-secondary);
@@ -721,27 +726,25 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.a-lb-info h4 {
-		font-size: 13.5px;
+		font-size: 13px;
 		font-weight: 700;
 		color: var(--text-primary);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		margin-bottom: 3px;
+		margin-bottom: 2px;
 	}
 
 	.a-lb-info p {
-		font-size: 11.5px;
+		font-size: 11px;
 		color: var(--text-muted);
-		font-weight: 400;
 	}
 
 	.a-lb-info small {
-		font-size: 10.5px;
+		font-size: 10px;
 		color: #aab5cc;
 		display: block;
 		margin-top: 2px;
-		font-weight: 400;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -754,43 +757,42 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 
 	.a-lb-val strong {
 		display: block;
-		font-size: 15px;
-		font-weight: 900;
+		font-size: 14px;
+		font-weight: 800;
 		color: var(--green);
-		letter-spacing: -0.3px;
+		letter-spacing: -.3px;
 	}
 
 	.a-lb-val span {
-		font-size: 10.5px;
+		font-size: 10px;
 		color: var(--text-muted);
 		margin-top: 2px;
 		display: block;
-		font-weight: 400;
 	}
 
 	.a-lb-empty {
 		display: flex;
 		align-items: center;
-		gap: 13px;
-		padding: 22px 14px;
+		gap: 12px;
+		padding: 20px 12px;
 		border-radius: var(--radius-md);
 		background: var(--bg-subtle);
 		border: 1.5px dashed var(--border);
 		color: var(--text-muted);
-		font-size: 13px;
+		font-size: 12.5px;
 		line-height: 1.55;
 	}
 
 	.a-lb-empty-ico {
-		width: 42px;
-		height: 42px;
-		border-radius: 11px;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
 		background: var(--bg-card);
 		border: 1px solid var(--border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 17px;
+		font-size: 16px;
 		color: var(--text-muted);
 		flex-shrink: 0;
 	}
@@ -799,7 +801,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	@keyframes aup {
 		from {
 			opacity: 0;
-			transform: translateY(16px);
+			transform: translateY(14px);
 		}
 
 		to {
@@ -809,31 +811,31 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	}
 
 	.adash>* {
-		animation: aup 0.38s ease both;
+		animation: aup .38s ease both;
 	}
 
 	.adash>*:nth-child(1) {
-		animation-delay: 0.04s;
+		animation-delay: .04s;
 	}
 
 	.adash>*:nth-child(2) {
-		animation-delay: 0.10s;
+		animation-delay: .10s;
 	}
 
 	.adash>*:nth-child(3) {
-		animation-delay: 0.18s;
+		animation-delay: .18s;
 	}
 
 	.adash>*:nth-child(4) {
-		animation-delay: 0.24s;
+		animation-delay: .24s;
 	}
 
 	.adash>*:nth-child(5) {
-		animation-delay: 0.30s;
+		animation-delay: .30s;
 	}
 
 	.adash>*:nth-child(6) {
-		animation-delay: 0.36s;
+		animation-delay: .36s;
 	}
 
 	/* ═══════════════════════════════════════════════════════════
@@ -841,83 +843,91 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 ═══════════════════════════════════════════════════════════ */
 	@media (max-width: 360px) {
 		:root {
-			--gap: 10px;
+			--gap: 9px;
 		}
 
 		.adash {
-			padding: 10px;
+			padding: 9px;
 		}
 
 		.a-hero {
-			padding: 16px 14px;
+			padding: 14px 12px;
 		}
 
 		.a-hero-title {
-			font-size: 20px;
+			font-size: 19px;
 		}
 
 		.a-hero-av {
-			width: 36px;
-			height: 36px;
+			width: 32px;
+			height: 32px;
+		}
+
+		.a-hero-pname {
+			font-size: 12px;
+			max-width: 140px;
 		}
 
 		.a-sc {
-			padding: 13px 11px 11px;
+			padding: 12px 10px 10px;
 		}
 
 		.a-sc-val {
-			font-size: 26px;
+			font-size: 23px;
 		}
 
 		.a-sc-ico {
-			width: 32px;
-			height: 32px;
-			font-size: 12px;
-			border-radius: 8px;
+			width: 28px;
+			height: 28px;
+			font-size: 11px;
+			border-radius: 7px;
+		}
+
+		.a-sc-lbl {
+			font-size: 8.5px;
 		}
 
 		.a-qa-btn {
-			font-size: 10px;
-			padding: 10px 4px;
-			gap: 6px;
+			font-size: 9.5px;
+			padding: 10px 3px;
+			gap: 5px;
 		}
 
 		.a-qa-ico {
-			width: 28px;
-			height: 28px;
-			font-size: 12px;
+			width: 26px;
+			height: 26px;
+			font-size: 11px;
 		}
 
 		.a-lb-rank {
-			width: 38px;
-			height: 38px;
-			font-size: 15px;
+			width: 36px;
+			height: 36px;
+			font-size: 14px;
 		}
 
 		.a-lb-val strong {
-			font-size: 13px;
+			font-size: 12px;
 		}
 
 		.a-lb-info h4 {
-			font-size: 12.5px;
+			font-size: 12px;
 		}
 
 		.a-lb-body {
-			padding: 10px;
+			padding: 9px;
 		}
 
 		.a-panel-hd {
-			padding: 13px;
+			padding: 11px 12px;
 		}
 
 		.a-user-row {
-			padding: 11px 13px;
+			padding: 10px 12px;
 		}
 	}
 
 	/* ═══════════════════════════════════════════════════════════
    RESPONSIVE  ≥ 480px  — large phones / phablets
-   KEY: switch to 3-col stats so QA is a proper 3rd column
 ═══════════════════════════════════════════════════════════ */
 	@media (min-width: 480px) {
 		:root {
@@ -928,17 +938,11 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 			padding: 14px;
 		}
 
-		/* 3-col stats: 5 cards + QA = 2 rows of 3 */
+		/* 3-col stats: 5 cards + QA as 3rd col in row 2 */
 		.a-stats {
 			grid-template-columns: 1fr 1fr 1fr;
 		}
 
-		/* Reset the explicit placement we set for mobile */
-		.a-sc:nth-child(5) {
-			grid-column: auto;
-		}
-
-		/* QA fills its natural cell (col 3, row 2) */
 		.a-qa {
 			grid-column: auto;
 		}
@@ -957,11 +961,11 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		}
 
 		.a-hero {
-			padding: 24px 22px;
+			padding: 22px 20px;
 		}
 
 		.a-hero-title {
-			font-size: 26px;
+			font-size: 25px;
 		}
 	}
 
@@ -978,11 +982,11 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		}
 
 		.a-hero {
-			padding: 28px 26px;
+			padding: 26px 24px;
 		}
 
 		.a-hero-title {
-			font-size: 28px;
+			font-size: 27px;
 		}
 
 		/* Show phone col in users */
@@ -994,7 +998,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		.a-hero-strip {
 			display: flex;
 			gap: 9px;
-			margin-top: 18px;
+			margin-top: 16px;
 			flex-wrap: wrap;
 			position: relative;
 			z-index: 1;
@@ -1004,8 +1008,8 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 			display: flex;
 			align-items: center;
 			gap: 7px;
-			background: rgba(255, 255, 255, 0.12);
-			border: 1px solid rgba(255, 255, 255, 0.22);
+			background: rgba(255, 255, 255, .12);
+			border: 1px solid rgba(255, 255, 255, .22);
 			border-radius: 30px;
 			padding: 5px 13px;
 			color: #fff;
@@ -1016,7 +1020,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 
 		.a-hero-pill i {
 			font-size: 10px;
-			opacity: 0.75;
+			opacity: .75;
 		}
 	}
 
@@ -1037,19 +1041,24 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			padding: 34px 38px;
+			padding: 32px 36px;
 			gap: 20px;
 		}
 
 		.a-hero-profile {
 			order: 2;
 			margin-bottom: 0;
-			background: rgba(255, 255, 255, 0.12);
-			border: 1px solid rgba(255, 255, 255, 0.22);
+			background: rgba(255, 255, 255, .12);
+			border: 1px solid rgba(255, 255, 255, .22);
 			border-radius: 50px;
 			padding: 7px 18px 7px 7px;
 			flex-shrink: 0;
 			backdrop-filter: blur(10px);
+			max-width: none;
+		}
+
+		.a-hero-pname {
+			max-width: none;
 		}
 
 		.a-hero-content {
@@ -1062,13 +1071,12 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		}
 
 		.a-hero-title {
-			font-size: 34px;
+			font-size: 32px;
 		}
 
-		/* Hover effects */
 		.a-sc:hover {
 			transform: translateY(-3px);
-			box-shadow: 0 10px 28px rgba(15, 28, 53, 0.11);
+			box-shadow: 0 10px 28px rgba(15, 28, 53, .11);
 		}
 
 		.a-lb-item:hover {
@@ -1078,7 +1086,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 		}
 
 		.a-panel-hd {
-			padding: 18px 22px;
+			padding: 16px 22px;
 		}
 
 		.a-user-row {
@@ -1135,14 +1143,6 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 	</section>
 
 	<!-- ── STATS + QUICK ACTIONS ──────────────────────────────── -->
-	<!--
-    MOBILE LAYOUT LOGIC:
-    Grid is 2 columns. 5 stat cards + 1 QA card.
-    Cards 1-4 fill 2 rows of 2.
-    Card 5 goes col 1, row 3. QA spans 1/-1 (full width) below.
-    
-    At ≥480px: grid becomes 3 cols. 5 cards + QA = 2 rows of 3. Perfect.
-  -->
 	<div class="a-stats">
 
 		<div class="a-sc" data-c="blue">
@@ -1181,7 +1181,6 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 			<div class="a-sc-note">Available categories</div>
 		</div>
 
-		<!-- 5th card: col-1 on mobile so it doesn't orphan -->
 		<div class="a-sc" data-c="orange">
 			<div class="a-sc-top">
 				<div class="a-sc-ico"><i class="fa-solid fa-circle-question"></i></div>
@@ -1247,7 +1246,7 @@ $profile_image_src = preg_match('/^https?:\/\//i', $profile_image) ? $profile_im
 				<?php endforeach; ?>
 			<?php else: ?>
 				<div class="a-empty">
-					<i class="fa-solid fa-users" style="display:block;font-size:26px;color:#d1d9ec;margin:0 auto 10px;"></i>
+					<i class="fa-solid fa-users" style="display:block;font-size:24px;color:#d1d9ec;margin:0 auto 10px;"></i>
 					No regular users registered yet.
 				</div>
 			<?php endif; ?>

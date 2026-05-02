@@ -2658,25 +2658,34 @@ if (!empty($withdrawal_status_alert)) {
 			});
 			bc.appendChild(prevBtn);
 
-			var lastDot = false;
-			for (var p = 1; p <= pages; p++) {
-				var show = p === 1 || p === pages || (p >= currentPage - 2 && p <= currentPage + 2);
-				if (show) {
-					lastDot = false;
-					var pb = makeBtn(p, false, p === currentPage);
+			var visiblePages = [];
+			if (pages <= 7) {
+				for (var p = 1; p <= pages; p++) visiblePages.push(p);
+			} else {
+				var left = Math.max(2, currentPage - 1);
+				var right = Math.min(pages - 1, currentPage + 1);
+				visiblePages.push(1);
+				if (left > 2) visiblePages.push('…');
+				for (var p = left; p <= right; p++) visiblePages.push(p);
+				if (right < pages - 1) visiblePages.push('…');
+				visiblePages.push(pages);
+			}
+			for (var vi = 0; vi < visiblePages.length; vi++) {
+				var item = visiblePages[vi];
+				if (item === '…') {
+					var d = document.createElement('span');
+					d.className = 'wv-page-dots';
+					d.textContent = '…';
+					bc.appendChild(d);
+				} else {
+					var pb = makeBtn(item, false, item === currentPage);
 					(function(n) {
 						pb.addEventListener('click', function() {
 							currentPage = n;
 							render();
 						});
-					}(p));
+					}(item));
 					bc.appendChild(pb);
-				} else if (!lastDot) {
-					lastDot = true;
-					var d = document.createElement('span');
-					d.className = 'wv-page-dots';
-					d.textContent = '…';
-					bc.appendChild(d);
 				}
 			}
 

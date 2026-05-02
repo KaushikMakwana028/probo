@@ -631,7 +631,7 @@ class Questions extends CI_Controller
 			$real_users = $this->Category_model->get_total_users_by_question((int) $question_item->id);
 			$admin_extra = (int) (isset($question_item->admin_extra_users) ? $question_item->admin_extra_users : 0);
 			$total_joined_users = $real_users + $admin_extra;
-			
+
 			$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 			$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 			$timing_class = 'live';
@@ -664,7 +664,7 @@ class Questions extends CI_Controller
 				'end_time' => !empty($question_item->end_time) ? (string) $question_item->end_time : 'Not set',
 				'item_saved' => $item_saved,
 				'answer_key' => $answer_key,
-				'real_users' => $total_joined_users,
+				'real_users' => $real_users,
 				'timing_class' => $timing_class,
 				'timing_label' => $timing_label,
 				'sort_weight' => $sort_weight,

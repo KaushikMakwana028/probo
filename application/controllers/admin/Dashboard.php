@@ -31,7 +31,7 @@ class Dashboard extends CI_Controller
 		$total_users = $this->User_model->count_all_users();
 		$total_admins = $this->User_model->count_users_by_role(1);
 		$total_members = $this->User_model->count_users_by_role(0);
-		$winner_leaderboard = $this->User_model->get_leaderboard(10, TRUE);
+		$winner_leaderboard = $this->User_model->get_leaderboard(5, TRUE);
 
 		$data = array(
 			'title' => 'Admin Dashboard',

@@ -630,7 +630,8 @@ class Category_model extends CI_Model
 				'no_price' => (float) $question->no_price,
 				'market_total' => round((float) $question->yes_price + (float) $question->no_price, 2),
 				'trade_totals' => $breakdown,
-				'price_history' => $history_points
+				'price_history' => $history_points,
+				'real_users' => (int) $breakdown['total_users']
 			);
 		}
 

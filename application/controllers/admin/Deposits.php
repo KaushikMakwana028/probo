@@ -3,6 +3,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Deposits extends CI_Controller
 {
+    private $deposit_request_columns = null;
+
     public function __construct()
     {
         parent::__construct();
@@ -202,6 +204,118 @@ class Deposits extends CI_Controller
             show_error('An error occurred while loading deposit requests.');
         }
     }
+    public function requests_page()
+    {
+        try {
+            $status_filter = $this->normalize_status_filter($this->input->get('status', TRUE));
+            $page = max(1, (int) $this->input->get('page'));
+            $listing = $this->get_deposit_requests_listing($status_filter, $page, 10);
+            $stats = $this->get_deposit_statistics();
+
+            $data = $this->get_common_data();
+            $data['requests'] = $listing['rows'];
+            $data['listing'] = $listing;
+            $data['stats'] = $stats;
+            $data['active_page'] = 'deposits_requests';
+            $data['title'] = 'Deposit Requests';
+            $data['status_filter'] = $status_filter;
+
+            $this->load->view('admin/includes/header', $data);
+            $this->load->view('admin/deposit_requests_view', $data);
+            $this->load->view('admin/includes/footer');
+        } catch (Exception $e) {
+            log_message('error', 'Deposit Requests Error: ' . $e->getMessage());
+            show_error('An error occurred while loading deposit requests.');
+        }
+    }
+
+    public function requests_data()
+    {
+        try {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+            }
+
+            $status_filter = $this->normalize_status_filter($this->input->get('status', TRUE));
+            $page = max(1, (int) $this->input->get('page'));
+            $listing = $this->get_deposit_requests_listing($status_filter, $page, 10);
+
+            $html = $this->load->view('admin/deposit_requests_listing_partial', array(
+                'requests' => $listing['rows'],
+                'listing' => $listing,
+                'status_filter' => $status_filter
+            ), TRUE);
+
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => 'success',
+                    'html' => $html,
+                    'status_filter' => $status_filter,
+                    'pagination' => array(
+                        'page' => $listing['page'],
+                        'total_pages' => $listing['total_pages']
+                    )
+                )));
+        } catch (Exception $e) {
+            log_message('error', 'Deposit Requests AJAX Error: ' . $e->getMessage());
+            $this->output
+                ->set_status_header(500)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => 'error',
+                    'message' => 'Unable to load deposit requests right now.'
+                )));
+        }
+    }
+
+    private function normalize_status_filter($status_filter)
+    {
+        $status_filter = trim((string) $status_filter);
+        return in_array($status_filter, array('pending', 'approved', 'rejected'), TRUE) ? $status_filter : '';
+    }
+
+    private function get_deposit_requests_listing($status_filter = '', $page = 1, $per_page = 10)
+    {
+        $page = max(1, (int) $page);
+        $per_page = max(1, (int) $per_page);
+
+        $this->db->from('deposit_requests');
+        if ($status_filter !== '') {
+            $this->db->where('status', $status_filter);
+        }
+        $total_filtered = (int) $this->db->count_all_results();
+
+        $total_pages = max(1, (int) ceil($total_filtered / $per_page));
+        $page = min($page, $total_pages);
+        $offset = ($page - 1) * $per_page;
+
+        $this->db->select('deposit_requests.*, users.name, users.email');
+        $this->db->from('deposit_requests');
+        $this->db->join('users', 'users.id = deposit_requests.user_id', 'left');
+
+        if ($status_filter !== '') {
+            $this->db->where('deposit_requests.status', $status_filter);
+        }
+
+        $this->db->order_by("FIELD(deposit_requests.status, 'pending', 'approved', 'rejected')");
+        $this->db->order_by('deposit_requests.created_at', 'DESC');
+        $this->db->limit($per_page, $offset);
+
+        $start = $total_filtered > 0 ? $offset + 1 : 0;
+        $end = min($offset + $per_page, $total_filtered);
+
+        return array(
+            'rows' => $this->db->get()->result(),
+            'page' => $page,
+            'per_page' => $per_page,
+            'total_filtered' => $total_filtered,
+            'total_pages' => $total_pages,
+            'start' => $start,
+            'end' => $end
+        );
+    }
+
     /**
      * Get deposit statistics
      */
@@ -241,6 +355,57 @@ class Deposits extends CI_Controller
         }
 
         return $stats;
+    }
+
+    /**
+     * Cache deposit_requests table columns so status updates stay compatible
+     * with older schemas that may not have approval/rejection audit fields.
+     */
+    private function get_deposit_request_columns()
+    {
+        if ($this->deposit_request_columns !== null) {
+            return $this->deposit_request_columns;
+        }
+
+        $fields = $this->db->list_fields('deposit_requests');
+        $this->deposit_request_columns = is_array($fields) ? array_flip($fields) : array();
+
+        return $this->deposit_request_columns;
+    }
+
+    private function build_deposit_status_update($status)
+    {
+        $columns = $this->get_deposit_request_columns();
+        $admin_id = $this->session->userdata('admin_id');
+        $now = date('Y-m-d H:i:s');
+
+        $data = array(
+            'status' => $status,
+        );
+
+        if (isset($columns['updated_at'])) {
+            $data['updated_at'] = $now;
+        }
+
+        if ($status === 'approved') {
+            if (isset($columns['approved_at'])) {
+                $data['approved_at'] = $now;
+            }
+
+            if (isset($columns['approved_by'])) {
+                $data['approved_by'] = $admin_id;
+            }
+        } elseif ($status === 'rejected') {
+            if (isset($columns['rejected_at'])) {
+                $data['rejected_at'] = $now;
+            }
+
+            if (isset($columns['rejected_by'])) {
+                $data['rejected_by'] = $admin_id;
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -317,11 +482,7 @@ class Deposits extends CI_Controller
             // ================================
             // 4️⃣ UPDATE REQUEST STATUS
             // ================================
-            $this->db->update('deposit_requests', [
-                'status'      => 'approved',
-                'approved_at' => date('Y-m-d H:i:s'),
-                'approved_by' => $this->session->userdata('admin_id')
-            ], ['id' => $id]);
+            $this->db->update('deposit_requests', $this->build_deposit_status_update('approved'), ['id' => $id]);
 
             // ================================
             // 5️⃣ ADD USER NOTIFICATION
@@ -389,11 +550,7 @@ class Deposits extends CI_Controller
                 return;
             }
 
-            $this->db->update('deposit_requests', [
-                'status' => 'rejected',
-                'rejected_at' => date('Y-m-d H:i:s'),
-                'rejected_by' => $this->session->userdata('admin_id')
-            ], ['id' => $id]);
+            $this->db->update('deposit_requests', $this->build_deposit_status_update('rejected'), ['id' => $id]);
 
             // Log the transaction
             $this->log_transaction($req->user_id, 'deposit_rejected', $req->amount, $id);
