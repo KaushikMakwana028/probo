@@ -158,7 +158,13 @@ class Category_model extends CI_Model
 		$this->db->from($this->question_table . ' q');
 		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->order_by('q.id', 'DESC');
-		return $this->db->get()->result();
+		$questions = $this->db->get()->result();
+
+		foreach ($questions as $question) {
+			$this->hydrate_question_market_fields($question);
+		}
+
+		return $questions;
 	}
 
 	public function get_questions_by_category($category_id)
@@ -174,7 +180,13 @@ class Category_model extends CI_Model
 		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->where('q.category_id', (int) $category_id);
 		$this->db->order_by('q.id', 'ASC');
-		return $this->db->get()->result();
+		$questions = $this->db->get()->result();
+
+		foreach ($questions as $question) {
+			$this->hydrate_question_market_fields($question);
+		}
+
+		return $questions;
 	}
 
 	public function get_visible_questions_by_category_for_user($category_id, $user_id)
@@ -224,7 +236,13 @@ class Category_model extends CI_Model
 		$this->db->from($this->question_table . ' q');
 		$this->db->join($this->category_table . ' c', 'c.id = q.category_id');
 		$this->db->where('q.id', (int) $id);
-		return $this->db->get()->row();
+		$question = $this->db->get()->row();
+
+		if ($question) {
+			$this->hydrate_question_market_fields($question);
+		}
+
+		return $question;
 	}
 
 	public function create_question($data)
@@ -345,7 +363,7 @@ class Category_model extends CI_Model
 			return array();
 		}
 
-		$this->db->select('a.question_id, a.answer, a.price, a.quantity, a.payout_amount, a.stake_amount, a.entry_payout_amount, a.created_at, a.settled_at, a.settlement_type, a.sell_price, a.sell_multiplier, a.sell_profit');
+		$this->db->select('a.question_id, a.answer, a.price, a.quantity, a.payout_amount, a.stake_amount, a.entry_payout_amount, a.created_at, a.settled_at, a.settlement_type, a.sell_price, a.sell_multiplier, a.sell_profit, a.peak_sell_price, a.peak_sell_multiplier');
 		$this->db->from($this->answer_table . ' a');
 		$this->db->join($this->question_table . ' q', 'q.id = a.question_id');
 		$this->db->where('a.user_id', (int) $user_id);
@@ -366,7 +384,9 @@ class Category_model extends CI_Model
 				'settlement_type' => isset($row->settlement_type) ? (string) $row->settlement_type : '',
 				'sell_price' => isset($row->sell_price) ? (float) $row->sell_price : 0,
 				'sell_multiplier' => isset($row->sell_multiplier) ? (float) $row->sell_multiplier : 0,
-				'sell_profit' => isset($row->sell_profit) ? (float) $row->sell_profit : 0
+				'sell_profit' => isset($row->sell_profit) ? (float) $row->sell_profit : 0,
+				'peak_sell_price' => isset($row->peak_sell_price) ? (float) $row->peak_sell_price : 0,
+				'peak_sell_multiplier' => isset($row->peak_sell_multiplier) ? (float) $row->peak_sell_multiplier : 0
 			);
 		}
 
@@ -411,7 +431,9 @@ class Category_model extends CI_Model
 			'settlement_type' => isset($extra_data['settlement_type']) ? $extra_data['settlement_type'] : NULL,
 			'sell_price' => isset($extra_data['sell_price']) ? (float) $extra_data['sell_price'] : NULL,
 			'sell_multiplier' => isset($extra_data['sell_multiplier']) ? (float) $extra_data['sell_multiplier'] : NULL,
-			'sell_profit' => isset($extra_data['sell_profit']) ? (float) $extra_data['sell_profit'] : NULL
+			'sell_profit' => isset($extra_data['sell_profit']) ? (float) $extra_data['sell_profit'] : NULL,
+			'peak_sell_price' => isset($extra_data['peak_sell_price']) ? (float) $extra_data['peak_sell_price'] : NULL,
+			'peak_sell_multiplier' => isset($extra_data['peak_sell_multiplier']) ? (float) $extra_data['peak_sell_multiplier'] : NULL
 		);
 
 		if ($existing) {
@@ -533,12 +555,27 @@ class Category_model extends CI_Model
 		$yes_quantity = (int) $totals['yes_quantity'];
 		$no_quantity = (int) $totals['no_quantity'];
 		$total_quantity = $yes_quantity + $no_quantity;
+		$base_yes_price = isset($question->base_yes_price) && (float) $question->base_yes_price > 0
+			? (float) $question->base_yes_price
+			: (float) $question->yes_price;
+		$base_no_price = isset($question->base_no_price) && (float) $question->base_no_price > 0
+			? (float) $question->base_no_price
+			: (float) $question->no_price;
 
 		if ($total_quantity <= 0) {
-			return TRUE;
+			$updated = $this->update_question((int) $question_id, array(
+				'yes_price' => round($base_yes_price, 2),
+				'no_price' => round($base_no_price, 2)
+			));
+
+			if ($updated) {
+				$this->record_price_history((int) $question_id, round($base_yes_price, 2), round($base_no_price, 2));
+			}
+
+			return $updated;
 		}
 
-		$market_total = max(1.0, (float) $question->yes_price + (float) $question->no_price);
+		$market_total = $this->get_prediction_market_total();
 		$yes_price = round(max(0.5, min($market_total - 0.5, ($yes_quantity / $total_quantity) * $market_total)), 2);
 		$no_price = round($market_total - $yes_price, 2);
 
@@ -667,6 +704,7 @@ class Category_model extends CI_Model
 		}
 
 		$this->db->where('id', (int) $answer_id);
+		$this->db->where('settled_at IS NULL', NULL, FALSE);
 		return $this->db->update($this->answer_table, $data);
 	}
 
@@ -839,7 +877,9 @@ class Category_model extends CI_Model
 			'settlement_type' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `settlement_type` VARCHAR(20) NULL AFTER `settled_at`",
 			'sell_price' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_price` DECIMAL(10,2) NULL AFTER `settlement_type`",
 			'sell_multiplier' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_multiplier` DECIMAL(10,2) NULL AFTER `sell_price`",
-			'sell_profit' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_profit` DECIMAL(12,2) NULL AFTER `sell_multiplier`"
+			'sell_profit' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `sell_profit` DECIMAL(12,2) NULL AFTER `sell_multiplier`",
+			'peak_sell_price' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `peak_sell_price` DECIMAL(10,2) NULL AFTER `sell_profit`",
+			'peak_sell_multiplier' => "ALTER TABLE `{$this->answer_table}` ADD COLUMN `peak_sell_multiplier` DECIMAL(10,2) NULL AFTER `peak_sell_price`"
 		);
 
 		foreach ($column_queries as $column => $sql) {
@@ -855,8 +895,131 @@ class Category_model extends CI_Model
 			return;
 		}
 
+		if (!$this->db->field_exists('base_yes_price', $this->question_table)) {
+			$this->db->query("ALTER TABLE `{$this->question_table}` ADD COLUMN `base_yes_price` DECIMAL(10,2) NOT NULL DEFAULT 10.00 AFTER `yes_price`");
+			$this->db->query("UPDATE `{$this->question_table}` SET `base_yes_price` = `yes_price` WHERE `base_yes_price` = 10.00 AND `yes_price` > 0");
+		}
+
+		if (!$this->db->field_exists('base_no_price', $this->question_table)) {
+			$this->db->query("ALTER TABLE `{$this->question_table}` ADD COLUMN `base_no_price` DECIMAL(10,2) NOT NULL DEFAULT 10.00 AFTER `no_price`");
+			$this->db->query("UPDATE `{$this->question_table}` SET `base_no_price` = `no_price` WHERE `base_no_price` = 10.00 AND `no_price` > 0");
+		}
+
 		if (!$this->db->field_exists('last_trade_edit_at', $this->question_table)) {
 			$this->db->query("ALTER TABLE `{$this->question_table}` ADD COLUMN `last_trade_edit_at` DATETIME NULL AFTER `result_declared_at`");
 		}
+	}
+
+	private function hydrate_question_market_fields(&$question)
+	{
+		if (!$question || !isset($question->id)) {
+			return;
+		}
+
+		$totals = $this->get_question_trade_totals((int) $question->id);
+		$actual_yes_quantity = (int) $totals['yes_quantity'];
+		$actual_no_quantity = (int) $totals['no_quantity'];
+		$total_quantity = $actual_yes_quantity + $actual_no_quantity;
+		list($base_yes_price, $base_no_price) = $this->resolve_base_prices_for_question($question, $actual_yes_quantity, $actual_no_quantity);
+		$market_total = max(1.0, round($base_yes_price + $base_no_price, 2));
+
+		if ($total_quantity > 0) {
+			$live_yes_price = round(max(0.5, min($market_total - 0.5, ($actual_yes_quantity / $total_quantity) * $market_total)), 2);
+			$live_no_price = round($market_total - $live_yes_price, 2);
+		} else {
+			$live_yes_price = round($base_yes_price, 2);
+			$live_no_price = round($base_no_price, 2);
+		}
+
+		$question->base_yes_price = $base_yes_price;
+		$question->base_no_price = $base_no_price;
+		$question->live_yes_price = $live_yes_price;
+		$question->live_no_price = $live_no_price;
+		$question->market_total = $market_total;
+		$question->yes_price = $live_yes_price;
+		$question->no_price = $live_no_price;
+	}
+
+	private function resolve_base_prices_for_question($question, $actual_yes_quantity = 0, $actual_no_quantity = 0)
+	{
+		$base_yes_price = isset($question->base_yes_price) && (float) $question->base_yes_price > 0
+			? (float) $question->base_yes_price
+			: 0.0;
+		$base_no_price = isset($question->base_no_price) && (float) $question->base_no_price > 0
+			? (float) $question->base_no_price
+			: 0.0;
+
+		$can_use_history_recovery = $this->db->table_exists($this->price_history_table);
+		$should_try_history = $can_use_history_recovery && (
+			$base_yes_price <= 0 ||
+			$base_no_price <= 0 ||
+			(
+				($actual_yes_quantity + $actual_no_quantity) > 0 &&
+				empty($question->last_trade_edit_at) &&
+				abs($base_yes_price - (float) ($question->yes_price ?? 0)) < 0.0001 &&
+				abs($base_no_price - (float) ($question->no_price ?? 0)) < 0.0001
+			)
+		);
+
+		if ($should_try_history) {
+			$history_row = $this->db
+				->select('yes_price, no_price')
+				->where('question_id', (int) $question->id)
+				->order_by('id', 'ASC')
+				->limit(1)
+				->get($this->price_history_table)
+				->row();
+
+			if ($history_row && (float) $history_row->yes_price > 0 && (float) $history_row->no_price > 0) {
+				$base_yes_price = (float) $history_row->yes_price;
+				$base_no_price = (float) $history_row->no_price;
+
+				if ($this->db->field_exists('base_yes_price', $this->question_table) && $this->db->field_exists('base_no_price', $this->question_table)) {
+					$this->db->where('id', (int) $question->id);
+					$this->db->update($this->question_table, array(
+						'base_yes_price' => round($base_yes_price, 2),
+						'base_no_price' => round($base_no_price, 2)
+					));
+				}
+			}
+		}
+
+		// Legacy recovery:
+		// some old records copied the then-live price into base price fields.
+		// If the base still matches a skewed stored live value on an old traded question,
+		// reset the base to an even split so edit shows the admin/default market again.
+		if (
+			($actual_yes_quantity + $actual_no_quantity) > 0 &&
+			empty($question->last_trade_edit_at) &&
+			$base_yes_price > 0 &&
+			$base_no_price > 0 &&
+			abs($base_yes_price - (float) ($question->yes_price ?? 0)) < 0.0001 &&
+			abs($base_no_price - (float) ($question->no_price ?? 0)) < 0.0001 &&
+			abs($base_yes_price - $base_no_price) >= 5
+		) {
+			$market_total = $this->get_prediction_market_total();
+			$base_yes_price = round($market_total / 2, 2);
+			$base_no_price = round($market_total - $base_yes_price, 2);
+
+			if ($this->db->field_exists('base_yes_price', $this->question_table) && $this->db->field_exists('base_no_price', $this->question_table)) {
+				$this->db->where('id', (int) $question->id);
+				$this->db->update($this->question_table, array(
+					'base_yes_price' => $base_yes_price,
+					'base_no_price' => $base_no_price
+				));
+			}
+		}
+
+		if ($base_yes_price <= 0 || $base_no_price <= 0) {
+			$base_yes_price = max(0.5, (float) ($question->yes_price ?? 10));
+			$base_no_price = max(0.5, (float) ($question->no_price ?? 10));
+		}
+
+		return array(round($base_yes_price, 2), round($base_no_price, 2));
+	}
+
+	private function get_prediction_market_total()
+	{
+		return 20.0;
 	}
 }

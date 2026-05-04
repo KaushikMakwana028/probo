@@ -31,6 +31,7 @@ class Questions extends CI_Controller
 
 		if ($selected_category) {
 			$selected_category->questions = $this->Category_model->get_visible_questions_by_category_for_user($selected_category->id, $user->id);
+			$selected_category->questions = $this->sort_questions_for_user_display($selected_category->questions, $this->Category_model->get_user_answers_by_category($user->id, $selected_category->id));
 		}
 
 		$categories = $this->Category_model->get_all_categories_with_visible_question_counts_for_user($user->id);
@@ -90,6 +91,7 @@ class Questions extends CI_Controller
 
 		if ($selected_category) {
 			$selected_category->questions = $this->Category_model->get_visible_questions_by_category_for_user($selected_category->id, $user->id);
+			$selected_category->questions = $this->sort_questions_for_user_display($selected_category->questions, $this->Category_model->get_user_answers_by_category($user->id, $selected_category->id));
 		}
 		$payload = $this->build_category_payload($user, $selected_category);
 
@@ -141,6 +143,7 @@ class Questions extends CI_Controller
 		}
 
 		$selected_category->questions = $this->Category_model->get_visible_questions_by_category_for_user((int) $selected_category->id, (int) $user->id);
+		$selected_category->questions = $this->sort_questions_for_user_display($selected_category->questions, $this->Category_model->get_user_answers_by_category($user->id, (int) $selected_category->id));
 		$is_visible_question = FALSE;
 
 		foreach ($selected_category->questions as $question_item) {
@@ -382,12 +385,20 @@ class Questions extends CI_Controller
 		}
 
 		$settled_at = date('Y-m-d H:i:s');
-		$this->Category_model->mark_answer_settlement((int) $answer_state->id, (float) $sell_summary['exit_amount'], $settled_at, array(
+		$this->db->trans_start();
+
+		$settled = $this->Category_model->mark_answer_settlement((int) $answer_state->id, (float) $sell_summary['exit_amount'], $settled_at, array(
 			'settlement_type' => 'sell',
 			'sell_price' => (float) $sell_summary['current_price'],
 			'sell_multiplier' => (float) $sell_summary['current_multiplier'],
 			'sell_profit' => (float) $sell_summary['net_profit']
 		));
+
+		if (!$settled || $this->db->affected_rows() < 1) {
+			$this->db->trans_complete();
+			$this->session->set_flashdata('error', 'This trade was already settled or sold. Please refresh the question page.');
+			redirect('questions/answer/' . $question_id);
+		}
 
 		$this->User_model->adjust_wallet_balance((int) $user->id, (float) $sell_summary['exit_amount']);
 
@@ -410,6 +421,13 @@ class Questions extends CI_Controller
 			'type' => 'trade'
 		));
 
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->session->set_flashdata('error', 'We could not complete the sell trade request right now. Please try again.');
+			redirect('questions/answer/' . $question_id);
+		}
+
 		$this->session->set_flashdata('success', 'Trade sold successfully. Rs ' . number_format((float) $sell_summary['exit_amount'], 2) . ' was added to your wallet.');
 		redirect('questions/answer/' . $question_id);
 	}
@@ -421,6 +439,10 @@ class Questions extends CI_Controller
 		$correct_count = 0;
 		$wrong_count = 0;
 		$total_questions = $selected_category && !empty($selected_category->questions) ? count($selected_category->questions) : 0;
+
+		if ($selected_category && !empty($selected_category->questions)) {
+			$selected_category->questions = $this->sort_questions_for_user_display($selected_category->questions, $user_answers);
+		}
 
 		if ($selected_category && !empty($selected_category->questions)) {
 			foreach ($selected_category->questions as $question_item) {
@@ -462,6 +484,53 @@ class Questions extends CI_Controller
 			'total_questions' => $total_questions,
 			'html' => $html
 		);
+	}
+
+	private function sort_questions_for_user_display($questions, $user_answers = array())
+	{
+		if (empty($questions)) {
+			return array();
+		}
+
+		$user_answers = is_array($user_answers) ? $user_answers : array();
+		$indexed_questions = array_values($questions);
+
+		usort($indexed_questions, function ($left, $right) use ($user_answers) {
+			$left_bucket = $this->get_user_question_display_bucket($left, isset($user_answers[(int) $left->id]) ? $user_answers[(int) $left->id] : NULL);
+			$right_bucket = $this->get_user_question_display_bucket($right, isset($user_answers[(int) $right->id]) ? $user_answers[(int) $right->id] : NULL);
+
+			if ($left_bucket !== $right_bucket) {
+				return $left_bucket - $right_bucket;
+			}
+
+			$left_start = $this->parse_question_timestamp(isset($left->start_time) ? $left->start_time : NULL);
+			$right_start = $this->parse_question_timestamp(isset($right->start_time) ? $right->start_time : NULL);
+
+			if ($left_start !== FALSE && $right_start !== FALSE && $left_start !== $right_start) {
+				return $left_start < $right_start ? -1 : 1;
+			}
+
+			if ((int) $left->id === (int) $right->id) {
+				return 0;
+			}
+
+			return ((int) $left->id < (int) $right->id) ? -1 : 1;
+		});
+
+		return $indexed_questions;
+	}
+
+	private function get_user_question_display_bucket($question, $answer_state = NULL)
+	{
+		if ($answer_state && !empty($answer_state->settled_at)) {
+			return 4; // completed
+		}
+
+		if ($answer_state) {
+			return 2; // review
+		}
+
+		return $this->is_question_open_for_trade($question) ? 1 : 3; // open, then draft/not-open
 	}
 
 	private function is_question_open_for_trade($question)
@@ -518,13 +587,14 @@ class Questions extends CI_Controller
 	private function build_sell_trade_summary($question, $answer_state)
 	{
 		$summary = array(
-			'can_sell' => FALSE,
-			'message' => 'This trade cannot be sold right now.',
-			'current_price' => 0.0,
+			'can_sell'           => FALSE,
+			'message'            => 'This trade cannot be sold right now.',
+			'current_price'      => 0.0,
 			'current_multiplier' => 0.0,
-			'exit_amount' => 0.0,
-			'entry_amount' => 0.0,
-			'net_profit' => 0.0
+			'exit_amount'        => 0.0,
+			'entry_amount'       => 0.0,
+			'booked_return'      => 0.0,
+			'net_profit'         => 0.0
 		);
 
 		if (!$question || !$answer_state) {
@@ -542,47 +612,80 @@ class Questions extends CI_Controller
 			return $summary;
 		}
 
-		$current_price = strtolower((string) $answer_state->answer) === 'no'
+		$answer_side     = strtolower((string) $answer_state->answer);
+		$current_price   = $answer_side === 'no'
 			? (float) $question->no_price
 			: (float) $question->yes_price;
-		$current_quantity = max(1, (int) $answer_state->quantity);
-		$booked_amount = isset($answer_state->stake_amount) ? (float) $answer_state->stake_amount : 0.0;
+		$current_quantity    = max(1, (int) $answer_state->quantity);
+		$entry_price         = isset($answer_state->price) ? (float) $answer_state->price : 0.0;
+		$stake_amount        = isset($answer_state->stake_amount)
+			? (float) $answer_state->stake_amount
+			: 0.0;
+
+		// The payout locked at entry time
 		$booked_return = (isset($answer_state->entry_payout_amount) && (float) $answer_state->entry_payout_amount > 0)
 			? (float) $answer_state->entry_payout_amount
 			: ((float) $answer_state->payout_amount > 0
 				? (float) $answer_state->payout_amount
-				: $booked_amount);
-		$current_multiplier = $this->get_question_multiplier($question, (string) $answer_state->answer);
-		$entry_price = isset($answer_state->price) ? (float) $answer_state->price : 0.0;
-		$entry_multiplier = ($entry_price > 0 && $current_quantity > 0 && $booked_return > 0)
-			? round($booked_return / ($entry_price * $current_quantity), 4)
-			: $current_multiplier;
-		$current_return = round($current_price * $current_quantity * $current_multiplier, 2);
-		$exit_amount = $current_return;
-		$net_profit = round($exit_amount - $booked_amount, 2);
-		$price_changed = abs($current_price - $entry_price) > 0.0001;
-		$multiplier_changed = abs($current_multiplier - $entry_multiplier) > 0.0001;
-		$market_changed_after_entry = $price_changed || $multiplier_changed;
+				: $stake_amount);
 
-		$summary['current_price'] = $current_price;
-		$summary['current_multiplier'] = $current_multiplier;
-		$summary['exit_amount'] = $exit_amount;
-		$summary['entry_amount'] = $booked_amount;
-		$summary['booked_return'] = $booked_return;
-		$summary['net_profit'] = $net_profit;
-
-		if (!$market_changed_after_entry) {
-			$summary['message'] = 'Sell option will unlock when the live market return moves above your booked return.';
-			return $summary;
+		$entry_multiplier = 0.0;
+		$entry_notional = $entry_price * $current_quantity;
+		if ($entry_notional > 0 && $booked_return > 0) {
+			$entry_multiplier = round($booked_return / $entry_notional, 4);
+		} elseif ($stake_amount > 0 && $booked_return > 0) {
+			$entry_multiplier = round($booked_return / $stake_amount, 4);
+		}
+		if ($entry_multiplier <= 0) {
+			$entry_multiplier = $this->get_question_multiplier($question, $answer_side);
 		}
 
-		if ($exit_amount <= $booked_return) {
-			$summary['message'] = 'Sell option will unlock when the current return moves above your booked return.';
+		$current_multiplier = $this->get_question_multiplier($question, $answer_side);
+		$stored_peak_price = isset($answer_state->peak_sell_price) ? (float) $answer_state->peak_sell_price : 0.0;
+		$stored_peak_multiplier = isset($answer_state->peak_sell_multiplier) ? (float) $answer_state->peak_sell_multiplier : 0.0;
+		$peak_price = max($stored_peak_price, $current_price, $entry_price);
+		$peak_multiplier = max($stored_peak_multiplier, $current_multiplier, $entry_multiplier);
+
+		// Persist higher admin/live peaks so sell stays available even if reduced later.
+		if (
+			isset($answer_state->id) &&
+			(
+				$peak_price > $stored_peak_price + 0.0001 ||
+				$peak_multiplier > $stored_peak_multiplier + 0.0001
+			)
+		) {
+			$this->db->where('id', (int) $answer_state->id);
+			$this->db->where('settled_at IS NULL', NULL, FALSE);
+			$this->db->update('user_question_answers', array(
+				'peak_sell_price' => round($peak_price, 2),
+				'peak_sell_multiplier' => round($peak_multiplier, 2)
+			));
+		}
+
+		$effective_price = $peak_price;
+		$effective_multiplier = $peak_multiplier;
+		$exit_amount = round($effective_price * $current_quantity * $effective_multiplier, 2);
+
+		// Net profit in sell box should compare current return vs locked payout.
+		$net_profit = round($exit_amount - $booked_return, 2);
+
+		$summary['current_price']      = $effective_price;
+		$summary['current_multiplier'] = $effective_multiplier;
+		$summary['exit_amount']        = $exit_amount;
+		$summary['entry_amount']       = $stake_amount;
+		$summary['booked_return']      = $booked_return;
+		$summary['net_profit']         = $net_profit;
+
+		// ✅ CORRECT unlock condition: user must be in profit vs what they paid
+		$is_higher_than_entry = ($effective_price > $entry_price + 0.0001) || ($effective_multiplier > $entry_multiplier + 0.0001);
+
+		if (!$is_higher_than_entry) {
+			$summary['message'] = 'Sell option will unlock once edited price or multiplier moves above your original trade values.';
 			return $summary;
 		}
 
 		$summary['can_sell'] = TRUE;
-		$summary['message'] = 'You can sell this trade now and book the current live profit.';
+		$summary['message']  = 'You can sell this trade now based on the highest edited price/multiplier above your original trade values.';
 		return $summary;
 	}
 

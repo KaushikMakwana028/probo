@@ -621,7 +621,7 @@
 				$start_ts = (!empty($question_item->start_time) && $question_item->start_time !== '0000-00-00 00:00:00') ? strtotime($question_item->start_time) : FALSE;
 				$end_ts = (!empty($question_item->end_time) && $question_item->end_time !== '0000-00-00 00:00:00') ? strtotime($question_item->end_time) : FALSE;
 				$now_ts = time();
-				$is_trade_open = !in_array($question_status, array('draft', 'resolved'), TRUE)
+				$is_trade_open = !in_array($question_status, array('draft', 'resolved', 'closed'), TRUE)
 					&& ($start_ts === FALSE || $now_ts >= $start_ts)
 					&& ($end_ts === FALSE || $now_ts <= $end_ts);
 				$state        = 'state-pending';
@@ -651,6 +651,21 @@
 					$tag_class = 'tag-not-open';
 					$tag_icon = 'fa-solid fa-lock';
 					$tag_label = 'Not open';
+				}
+
+				if ($answer_state && !empty($answer_state->settled_at)) {
+					$is_sold = strtolower((string) ($answer_state->settlement_type ?? '')) === 'sell';
+					$is_correct = strtolower((string) $answer_state->answer) === strtolower((string) $question_item->answer_key);
+					$state = ($is_sold || $is_correct) ? 'state-correct' : 'state-wrong';
+					$tag_class = $is_sold ? 'tag-review' : ($is_correct ? 'tag-won' : 'tag-lost');
+					$tag_icon = $is_sold ? 'fa-solid fa-arrow-up-right-from-square' : ($is_correct ? 'fa-solid fa-check' : 'fa-solid fa-xmark');
+					$tag_label = $is_sold ? 'Completed' : ($is_correct ? 'Won' : 'Lost');
+					$payout_text = ($is_sold || $is_correct) ? '+ Rs ' . number_format((float) $answer_state->payout_amount, 2) : 'Rs 0.00';
+					$payout_class = ($is_sold || $is_correct) ? 'win' : 'loss';
+				} elseif ($answer_state) {
+					$payout_text = 'Stake Rs ' . number_format((float) $answer_state->stake_amount, 2);
+				} elseif (!$is_trade_open && $question_status === 'draft') {
+					$tag_label = 'Draft question';
 				}
 				?>
 				<a class="ql-card <?php echo $state; ?>" href="<?php echo site_url('questions/answer/' . (int)$question_item->id); ?>">
@@ -688,11 +703,15 @@
 						<div class="ql-card-footer">
 							<div class="ql-footer-left">
 								<?php if ($answer_state): ?>
-									<i class="fa-solid fa-eye" style="font-size:11px"></i> Review question
+									<?php if (!empty($answer_state->settled_at)): ?>
+										<i class="fa-solid fa-flag-checkered" style="font-size:11px"></i> Completed question
+									<?php else: ?>
+										<i class="fa-solid fa-eye" style="font-size:11px"></i> Review question
+									<?php endif; ?>
 								<?php elseif ($is_trade_open): ?>
 									<i class="fa-solid fa-circle-dot" style="font-size:11px;color:var(--ql-blue)"></i> Open to trade
 								<?php else: ?>
-									<i class="fa-solid fa-lock" style="font-size:11px"></i> Not open for trade
+									<i class="fa-solid fa-lock" style="font-size:11px"></i> <?php echo $question_status === 'draft' ? 'Draft question' : 'Not open for trade'; ?>
 								<?php endif; ?>
 							</div>
 							<div class="ql-footer-right">

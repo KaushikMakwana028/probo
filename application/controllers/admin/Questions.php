@@ -252,19 +252,19 @@ class Questions extends CI_Controller
 		}
 
 		for ($i = 0; $i < $question_count; $i++) {
-			$question_text = isset($questions_input[$i]) ? trim($questions_input[$i]) : '';
-			$yes_price = isset($yes_prices[$i]) ? (float) $yes_prices[$i] : 0;
-			$no_price = isset($no_prices[$i]) ? (float) $no_prices[$i] : 0;
-			$yes_multiplier = isset($yes_multipliers[$i]) ? (float) $yes_multipliers[$i] : 1.25;
-			$no_multiplier = isset($no_multipliers[$i]) ? (float) $no_multipliers[$i] : 1.25;
+			$question_text = $this->normalize_question_text(isset($questions_input[$i]) ? $questions_input[$i] : '');
+			$yes_price = $this->normalize_market_price(isset($yes_prices[$i]) ? $yes_prices[$i] : 0);
+			$no_price = $this->normalize_market_price(isset($no_prices[$i]) ? $no_prices[$i] : 0);
+			$yes_multiplier = round(max(0, (float) (isset($yes_multipliers[$i]) ? $yes_multipliers[$i] : 0)), 4);
+			$no_multiplier = round(max(0, (float) (isset($no_multipliers[$i]) ? $no_multipliers[$i] : 0)), 4);
 
 			if ($question_text === '') {
 				$this->session->set_flashdata('error', 'Please fill all question textboxes before saving.');
 				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
-			if ($yes_price < 0 || $no_price < 0) {
-				$this->session->set_flashdata('error', 'Yes price and No price must be zero or greater.');
+			if (!$this->is_valid_price_pair($yes_price, $no_price)) {
+				$this->session->set_flashdata('error', 'YES and NO prices must both be at least Rs 0.50.');
 				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
@@ -273,16 +273,13 @@ class Questions extends CI_Controller
 				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
-			if (!$this->is_valid_price_pair($yes_price, $no_price)) {
-				$this->session->set_flashdata('error', 'YES and NO prices must both be greater than zero.');
-				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
-			}
-
 			$batch[] = array(
 				'category_id' => $category_id,
 				'question' => $question_text,
 				'yes_price' => $yes_price,
+				'base_yes_price' => $yes_price,
 				'no_price' => $no_price,
+				'base_no_price' => $no_price,
 				'yes_multiplier' => $yes_multiplier,
 				'no_multiplier' => $no_multiplier,
 				'start_time' => $start_time_sql,
@@ -363,10 +360,11 @@ class Questions extends CI_Controller
 
 		$category_id = (int) $this->input->post('category_id');
 		$category = $this->Category_model->get_category($category_id);
-		$yes_price = (float) $this->input->post('yes_price', TRUE);
-		$no_price = (float) $this->input->post('no_price', TRUE);
-		$yes_multiplier = (float) $this->input->post('yes_multiplier', TRUE);
-		$no_multiplier = (float) $this->input->post('no_multiplier', TRUE);
+		$question_text = $this->normalize_question_text($this->input->post('question', TRUE));
+		$yes_price = $this->normalize_market_price($this->input->post('yes_price', TRUE));
+		$no_price = $this->normalize_market_price($this->input->post('no_price', TRUE));
+		$yes_multiplier = round(max(0, (float) $this->input->post('yes_multiplier', TRUE)), 4);
+		$no_multiplier = round(max(0, (float) $this->input->post('no_multiplier', TRUE)), 4);
 		$entered_yes_quantity = (int) $this->input->post('admin_yes_quantity', TRUE);
 		$entered_no_quantity = (int) $this->input->post('admin_no_quantity', TRUE);
 		$status = strtolower(trim((string) $this->input->post('status', TRUE)));
@@ -377,19 +375,20 @@ class Questions extends CI_Controller
 		$trade_breakdown = $this->Category_model->get_question_trade_breakdown($id);
 		$actual_yes_quantity = isset($trade_breakdown['actual_yes_quantity']) ? (int) $trade_breakdown['actual_yes_quantity'] : 0;
 		$actual_no_quantity = isset($trade_breakdown['actual_no_quantity']) ? (int) $trade_breakdown['actual_no_quantity'] : 0;
+		$total_actual_quantity = $actual_yes_quantity + $actual_no_quantity;
 
 		if (!$category) {
 			$this->session->set_flashdata('error', 'Selected category not found.');
 			redirect('admin/questions/edit/' . $id);
 		}
 
-		if ($yes_price < 0 || $no_price < 0) {
-			$this->session->set_flashdata('error', 'Yes price and No price must be zero or greater.');
+		if (!$this->is_valid_price_pair($yes_price, $no_price)) {
+			$this->session->set_flashdata('error', 'YES and NO prices must both be at least Rs 0.50.');
 			redirect('admin/questions/edit/' . $id);
 		}
 
-		if (!$this->is_valid_price_pair($yes_price, $no_price)) {
-			$this->session->set_flashdata('error', 'YES and NO prices must both be greater than zero.');
+		if ($yes_multiplier <= 0 || $no_multiplier <= 0) {
+			$this->session->set_flashdata('error', 'YES and NO multipliers must be greater than zero.');
 			redirect('admin/questions/edit/' . $id);
 		}
 
@@ -410,9 +409,9 @@ class Questions extends CI_Controller
 
 		$update_data = array(
 			'category_id' => $category_id,
-			'question' => $this->input->post('question', TRUE),
-			'yes_price' => $yes_price,
-			'no_price' => $no_price,
+			'question' => $question_text,
+			'base_yes_price' => $yes_price,
+			'base_no_price' => $no_price,
 			'yes_multiplier' => $yes_multiplier,
 			'no_multiplier' => $no_multiplier,
 			'answer_key' => '',
@@ -422,6 +421,11 @@ class Questions extends CI_Controller
 			'result_declared_at' => NULL
 		);
 
+		if ($total_actual_quantity <= 0) {
+			$update_data['yes_price'] = $yes_price;
+			$update_data['no_price'] = $no_price;
+		}
+
 		if ($this->db->field_exists('admin_yes_quantity', 'category_questions')) {
 			$update_data['admin_yes_quantity'] = max(0, $entered_yes_quantity - $actual_yes_quantity);
 		}
@@ -430,7 +434,6 @@ class Questions extends CI_Controller
 			$update_data['admin_no_quantity'] = max(0, $entered_no_quantity - $actual_no_quantity);
 		}
 
-		$question_text = trim((string) $this->input->post('question', TRUE));
 		$current_question_text = trim((string) ($question->question ?? ''));
 		$current_status = strtolower(trim((string) ($question->status ?? '')));
 		$current_start_time = isset($question->start_time) ? (string) $question->start_time : NULL;
@@ -443,8 +446,8 @@ class Questions extends CI_Controller
 		$question_changed = (
 			(int) ($question->category_id ?? 0) !== $category_id ||
 			$current_question_text !== $question_text ||
-			abs((float) ($question->yes_price ?? 0) - $yes_price) > 0.0001 ||
-			abs((float) ($question->no_price ?? 0) - $no_price) > 0.0001 ||
+			abs((float) (($question->base_yes_price ?? $question->yes_price ?? 0)) - $yes_price) > 0.0001 ||
+			abs((float) (($question->base_no_price ?? $question->no_price ?? 0)) - $no_price) > 0.0001 ||
 			abs((float) ($question->yes_multiplier ?? 0) - $yes_multiplier) > 0.0001 ||
 			abs((float) ($question->no_multiplier ?? 0) - $no_multiplier) > 0.0001 ||
 			$current_status !== $status ||
@@ -465,7 +468,11 @@ class Questions extends CI_Controller
 			redirect('admin/questions/edit/' . $id);
 		}
 
-		$this->Category_model->record_price_history($id, $yes_price, $no_price);
+		if ($total_actual_quantity > 0) {
+			$this->Category_model->rebalance_question_prices($id);
+		} else {
+			$this->Category_model->record_price_history($id, $yes_price, $no_price);
+		}
 
 		$this->session->set_flashdata('success', 'Question updated successfully. Please save the answer key again from View Questions.');
 		redirect('admin/questions/detail/' . $id);
@@ -780,7 +787,18 @@ class Questions extends CI_Controller
 
 	private function is_valid_price_pair($yes_price, $no_price)
 	{
-		return (float) $yes_price > 0 && (float) $no_price > 0;
+		return (float) $yes_price >= 0.5 && (float) $no_price >= 0.5;
+	}
+
+	private function normalize_question_text($value)
+	{
+		$value = trim((string) $value);
+		return preg_replace('/\s+/', ' ', $value);
+	}
+
+	private function normalize_market_price($value)
+	{
+		return round(max(0, (float) $value), 2);
 	}
 
 	private function validate_question_window($start_time, $end_time)

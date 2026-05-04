@@ -10,6 +10,10 @@ $question->category_name = isset($question->category_name) ? $question->category
 $question->question = isset($question->question) ? $question->question : '';
 $question->yes_price = isset($question->yes_price) ? (float) $question->yes_price : 0;
 $question->no_price = isset($question->no_price) ? (float) $question->no_price : 0;
+$question->base_yes_price = isset($question->base_yes_price) ? (float) $question->base_yes_price : $question->yes_price;
+$question->base_no_price = isset($question->base_no_price) ? (float) $question->base_no_price : $question->no_price;
+$question->live_yes_price = isset($question->live_yes_price) ? (float) $question->live_yes_price : $question->yes_price;
+$question->live_no_price = isset($question->live_no_price) ? (float) $question->live_no_price : $question->no_price;
 $question->status = isset($question->status) ? $question->status : 'draft';
 $question->start_time = isset($question->start_time) ? $question->start_time : '';
 $question->end_time = isset($question->end_time) ? $question->end_time : '';
@@ -41,11 +45,11 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 			<div class="question-edit-price-box">
 				<div>
 					<label>Yes Price</label>
-					<strong>Rs <?php echo number_format((float) $question->yes_price, 2); ?></strong>
+					<strong>Rs <?php echo number_format((float) $question->base_yes_price, 2); ?></strong>
 				</div>
 				<div>
 					<label>No Price</label>
-					<strong>Rs <?php echo number_format((float) $question->no_price, 2); ?></strong>
+					<strong>Rs <?php echo number_format((float) $question->base_no_price, 2); ?></strong>
 				</div>
 				<div>
 					<label>Yes Quantity</label>
@@ -102,22 +106,26 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 
 				<div class="form-group">
 					<label for="yes_price">Yes Price</label>
-					<input type="number" id="yes_price" name="yes_price" min="0.01" step="0.01" value="<?php echo set_value('yes_price', number_format((float) $question->yes_price, 2, '.', '')); ?>" required>
+					<input type="number" id="yes_price" name="yes_price" min="0.01" step="0.01" value="<?php echo set_value('yes_price', number_format((float) $question->base_yes_price, 2, '.', '')); ?>" required>
+					<small class="question-field-hint">Current live YES price: Rs <?php echo number_format((float) $question->live_yes_price, 2); ?></small>
 				</div>
 
 				<div class="form-group">
 					<label for="no_price">No Price</label>
-					<input type="number" id="no_price" name="no_price" min="0.01" step="0.01" value="<?php echo set_value('no_price', number_format((float) $question->no_price, 2, '.', '')); ?>" required>
+					<input type="number" id="no_price" name="no_price" min="0.01" step="0.01" value="<?php echo set_value('no_price', number_format((float) $question->base_no_price, 2, '.', '')); ?>" required>
+					<small class="question-field-hint">Current live NO price: Rs <?php echo number_format((float) $question->live_no_price, 2); ?></small>
 				</div>
 
 				<div class="form-group">
 					<label for="yes_multiplier">YES Multiplier</label>
 					<input type="number" id="yes_multiplier" name="yes_multiplier" min="0.01" step="0.01" value="<?php echo set_value('yes_multiplier', number_format((float) ($question->yes_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
+					<small class="question-field-hint">Manual value. It will stay as saved.</small>
 				</div>
 
 				<div class="form-group">
 					<label for="no_multiplier">NO Multiplier</label>
 					<input type="number" id="no_multiplier" name="no_multiplier" min="0.01" step="0.01" value="<?php echo set_value('no_multiplier', number_format((float) ($question->no_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
+					<small class="question-field-hint">Manual value. It will stay as saved.</small>
 				</div>
 
 				<div class="form-group">

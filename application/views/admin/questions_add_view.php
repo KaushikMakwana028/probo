@@ -1242,10 +1242,12 @@ foreach ($categories as $category_item) {
 								<div class="form-group" style="margin-bottom: 0;">
 									<label for="yes_price_<?php echo $i; ?>">Yes Price</label>
 									<input type="number" class="js-yes-price" id="yes_price_<?php echo $i; ?>" name="yes_prices[<?php echo $i; ?>]" min="0.01" step="0.01" value="<?php echo set_value('yes_prices[' . $i . ']', '10.00'); ?>" required>
+									<small>Live price changes automatically when users place trades.</small>
 								</div>
 								<div class="form-group" style="margin-bottom: 0;">
 									<label for="no_price_<?php echo $i; ?>">No Price</label>
 									<input type="number" class="js-no-price" id="no_price_<?php echo $i; ?>" name="no_prices[<?php echo $i; ?>]" min="0.01" step="0.01" value="<?php echo set_value('no_prices[' . $i . ']', '10.00'); ?>" required>
+									<small>Live price changes automatically when users place trades.</small>
 								</div>
 								<div class="form-group">
 									<label for="yes_multiplier_<?php echo $i; ?>">YES Multiplier</label>
@@ -1314,8 +1316,8 @@ foreach ($categories as $category_item) {
 			}
 
 			const updateTotal = function() {
-				const yes = parseFloat(yesInput.value || '0');
-				const no = parseFloat(noInput.value || '0');
+				const yes = Math.max(0, parseFloat(yesInput.value || '0'));
+				const no = Math.max(0, parseFloat(noInput.value || '0'));
 				const total = yes + no;
 				totalNode.textContent = 'Rs ' + total.toFixed(2);
 

@@ -10,6 +10,7 @@ $user_answers = isset($user_answers) && is_array($user_answers) ? $user_answers 
 $sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
 $total_users = isset($total_users) ? (int) $total_users : 0;
 $market_is_open = isset($market_is_open) ? (bool) $market_is_open : FALSE;
+$locked_payout_amount = 0.0;
 $answered_count = isset($answered_count) ? (int) $answered_count : 0;
 $correct_count = isset($correct_count) ? (int) $correct_count : 0;
 $wrong_count = isset($wrong_count) ? (int) $wrong_count : 0;
@@ -34,6 +35,20 @@ $is_locked        = $selected_answer_state !== NULL;
 $is_settled       = $is_locked && !empty($selected_answer_state->settled_at);
 $is_sold_trade    = $is_locked && strtolower((string)($selected_answer_state->settlement_type ?? '')) === 'sell';
 $is_correct_ans   = $is_sold_trade || ($is_settled && $selected_answer === strtolower((string)$selected_question->answer_key));
+$result_card_class = $is_settled ? (($is_sold_trade || $is_correct_ans) ? 'tp-result-correct' : 'tp-result-wrong') : 'tp-result-pend';
+$result_tag_text = $is_settled
+	? ($is_sold_trade ? 'Sold trade completed' : ($is_correct_ans ? 'Correct answer' : 'Wrong answer'))
+	: 'Awaiting result';
+$result_message = $is_settled
+	? ($is_sold_trade
+		? 'Your trade was sold early. The sold amount was credited to your wallet.'
+		: ($is_correct_ans
+			? 'Your answer matched the result. Winnings credited to your wallet.'
+			: 'Your answer did not match the result. No payout was made.'))
+	: 'Stake deducted. Payout will be credited once the admin resolves the market.';
+$result_amount_text = $is_settled
+	? (($is_sold_trade || $is_correct_ans) ? '+Rs ' . number_format((float) $selected_answer_state->payout_amount, 2) : 'Rs 0.00')
+	: 'Rs ' . number_format($locked_payout_amount, 2);
 $sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
 $yes_price        = (float)$selected_question->yes_price;
 $no_price         = (float)$selected_question->no_price;
@@ -1434,10 +1449,14 @@ $QTY_MIN          = 1;
 				<div class="tp-card-body">
 
 					<?php if ($is_locked): ?>
-						<div class="tp-result <?php echo $is_settled ? ($is_correct_ans ? 'tp-result-correct' : 'tp-result-wrong') : 'tp-result-pend'; ?>">
+						<div class="tp-result <?php echo $result_card_class; ?>">
 							<div>
 								<div class="tp-result-tag">
-									<?php echo $is_settled ? ($is_correct_ans ? '✓ Correct answer' : '✗ Wrong answer') : '⏳ Awaiting result'; ?>
+									<?php if ($is_sold_trade): ?>
+										Sold trade completed
+									<?php else: ?>
+										<?php echo $is_settled ? ($is_correct_ans ? '✓ Correct answer' : '✗ Wrong answer') : '⏳ Awaiting result'; ?>
+									<?php endif; ?>
 								</div>
 								<h4>You answered <strong><?php echo strtoupper($selected_answer); ?></strong></h4>
 								<?php if (!$is_settled): ?>
@@ -1448,21 +1467,29 @@ $QTY_MIN          = 1;
 									</div>
 								<?php endif; ?>
 								<p>
-									<?php if ($is_settled):
-										echo $is_correct_ans
-											? 'Your answer matched the result. Winnings credited to your wallet.'
-											: 'Your answer did not match the result. No payout was made.';
-									else:
-										echo 'Stake deducted. Payout will be credited once the admin resolves the market.';
-									endif; ?>
+									<?php if ($is_sold_trade): ?>
+										Your trade was sold early. The sold amount was credited to your wallet.
+									<?php else: ?>
+										<?php if ($is_settled):
+											echo $is_correct_ans
+												? 'Your answer matched the result. Winnings credited to your wallet.'
+												: 'Your answer did not match the result. No payout was made.';
+										else:
+											echo 'Stake deducted. Payout will be credited once the admin resolves the market.';
+										endif; ?>
+									<?php endif; ?>
 								</p>
 							</div>
 							<div class="tp-result-amt">
-								<?php if ($is_settled):
-									echo $is_correct_ans ? '+₹' . number_format((float)$selected_answer_state->payout_amount, 2) : '₹0.00';
-								else:
-									echo '₹' . number_format($locked_payout_amount, 2);
-								endif; ?>
+								<?php if ($is_sold_trade): ?>
+									<?php echo '+Rs ' . number_format((float) $selected_answer_state->payout_amount, 2); ?>
+								<?php else: ?>
+									<?php if ($is_settled):
+										echo $is_correct_ans ? '+₹' . number_format((float)$selected_answer_state->payout_amount, 2) : '₹0.00';
+									else:
+										echo '₹' . number_format($locked_payout_amount, 2);
+									endif; ?>
+								<?php endif; ?>
 							</div>
 						</div>
 					<?php endif; ?>
@@ -1726,23 +1753,30 @@ $QTY_MIN          = 1;
 							$question_status = strtolower(trim((string)(isset($qi->status) ? $qi->status : '')));
 							$start_ts = (!empty($qi->start_time) && $qi->start_time !== '0000-00-00 00:00:00') ? strtotime($qi->start_time) : FALSE;
 							$end_ts = (!empty($qi->end_time) && $qi->end_time !== '0000-00-00 00:00:00') ? strtotime($qi->end_time) : FALSE;
-							$is_trade_open = !in_array($question_status, array('draft', 'resolved'), TRUE)
+							$is_trade_open = !in_array($question_status, array('draft', 'resolved', 'closed'), TRUE)
 								&& ($start_ts === FALSE || time() >= $start_ts)
 								&& ($end_ts === FALSE || time() <= $end_ts);
-							if ($la && !empty($la->settled_at)) $qs = strtolower((string)$la->answer) === strtolower((string)$qi->answer_key) ? 'correct' : 'wrong';
+							if ($la && !empty($la->settled_at)) {
+								$is_sold_list_trade = strtolower((string) ($la->settlement_type ?? '')) === 'sell';
+								$qs = ($is_sold_list_trade || strtolower((string)$la->answer) === strtolower((string)$qi->answer_key)) ? 'correct' : 'wrong';
+							}
 							$cls = $ia ? 'q-active' : ($qs ? 'q-' . $qs : '');
 						?>
 							<a class="tp-qitem <?php echo $cls; ?>" href="<?php echo site_url('questions/answer/' . (int)$qi->id); ?>">
 								<div class="tp-qitem-text"><?php echo html_escape($qi->question); ?></div>
 								<div class="tp-qitem-foot">
 									<?php if ($la): ?>
-										<span class="tp-qbadge bq-review">
-											Review question
-										</span>
+										<?php if (!empty($la->settled_at)): ?>
+											<span class="tp-qbadge bq-open">Completed</span>
+										<?php else: ?>
+											<span class="tp-qbadge bq-review">
+												Review question
+											</span>
+										<?php endif; ?>
 									<?php elseif ($is_trade_open): ?>
 										<span class="tp-qbadge bq-open"><span class="tp-qbadge-dot"></span>Open</span>
 									<?php else: ?>
-										<span class="tp-qbadge bq-not-open">Not open</span>
+										<span class="tp-qbadge bq-not-open"><?php echo $question_status === 'draft' ? 'Draft' : 'Not open'; ?></span>
 									<?php endif; ?>
 								</div>
 							</a>
@@ -1764,10 +1798,12 @@ $QTY_MIN          = 1;
 			QMIN = <?php echo $QTY_MIN; ?>;
 		var PMIN = 0.50,
 			PMAX = <?php echo number_format($price_max, 4, '.', ''); ?>;
+		var IS_LOCKED = <?php echo $is_locked ? 'true' : 'false'; ?>;
 		var DYES = <?php echo number_format($yes_price, 4, '.', ''); ?>,
 			DNO = <?php echo number_format($no_price, 4, '.', ''); ?>;
 		var YESMULT = <?php echo number_format($yes_multiplier, 4, '.', ''); ?>,
 			NOMULT = <?php echo number_format($no_multiplier, 4, '.', ''); ?>;
+		var LOCKEDMULT = <?php echo number_format($multiplier, 4, '.', ''); ?>;
 
 		var yR = document.getElementById('tp_yes'),
 			nR = document.getElementById('tp_no');
@@ -1846,6 +1882,9 @@ $QTY_MIN          = 1;
 		}
 
 		function gM() {
+			if (IS_LOCKED) {
+				return LOCKEDMULT;
+			}
 			return (nR && nR.checked) ? NOMULT : YESMULT;
 		}
 
