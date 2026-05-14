@@ -1521,8 +1521,9 @@ $QTY_MIN          = 1;
 							<div class="tp-sell-note"><?php echo html_escape((string) ($sell_trade_summary['message'] ?? '')); ?></div>
 							<div class="tp-sell-actions">
 								<div class="tp-sell-muted">
-									Locked payout Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> · Current price Rs <?php echo number_format((float) ($sell_trade_summary['current_price'] ?? 0), 2); ?>
+									Locked payout Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> · Booked Stake Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?>
 									x <?php echo number_format((float) ($sell_trade_summary['current_multiplier'] ?? 0), 2); ?>
+									= Rs <?php echo number_format((float) ($sell_trade_summary['exit_amount'] ?? 0), 2); ?>
 								</div>
 								<form method="post" action="<?php echo site_url('questions/sell-trade'); ?>" class="js-sell-trade-form">
 									<input type="hidden" name="question_id" value="<?php echo (int) $selected_question->id; ?>">

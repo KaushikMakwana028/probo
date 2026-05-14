@@ -612,83 +612,105 @@ class Questions extends CI_Controller
 			return $summary;
 		}
 
-		$answer_side     = strtolower((string) $answer_state->answer);
-		$current_price   = $answer_side === 'no'
+		$answer_side      = strtolower((string) $answer_state->answer);  // 'yes' or 'no'
+		$current_quantity = max(1, (int) $answer_state->quantity);
+
+		// ── Entry values (what user originally paid / locked in) ──────────────
+		$entry_price      = isset($answer_state->price)        ? (float) $answer_state->price        : 0.0;
+		$stake_amount     = isset($answer_state->stake_amount) ? (float) $answer_state->stake_amount : 0.0;
+
+		// entry_notional is always the real money the user put in
+		$entry_notional   = $stake_amount > 0
+			? $stake_amount
+			: round($entry_price * $current_quantity, 2);
+
+		// entry_multiplier: what multiplier was active when the user placed the trade
+		$entry_multiplier = $this->get_question_multiplier_at_entry($question, $answer_state, $answer_side, $entry_notional);
+
+		// locked_payout: what the user would win if result declared right now at entry multiplier
+		$locked_payout = round($entry_notional * $entry_multiplier, 2);
+
+		// ── Current live values ───────────────────────────────────────────────
+		// Current price for the side the user is on
+		$current_price      = ($answer_side === 'no')
 			? (float) $question->no_price
 			: (float) $question->yes_price;
-		$current_quantity    = max(1, (int) $answer_state->quantity);
-		$entry_price         = isset($answer_state->price) ? (float) $answer_state->price : 0.0;
-		$stake_amount        = isset($answer_state->stake_amount)
-			? (float) $answer_state->stake_amount
+
+		// Current multiplier for the side the user is on
+		$current_multiplier = $this->get_question_multiplier($question, $answer_side);
+
+		// ── Peak tracking (multiplier-only, not price) ────────────────────────
+		// We only track peak MULTIPLIER. Price is irrelevant to unlock logic.
+		$stored_peak_multiplier = isset($answer_state->peak_sell_multiplier)
+			? (float) $answer_state->peak_sell_multiplier
 			: 0.0;
 
-		// The payout locked at entry time
-		$booked_return = (isset($answer_state->entry_payout_amount) && (float) $answer_state->entry_payout_amount > 0)
-			? (float) $answer_state->entry_payout_amount
-			: ((float) $answer_state->payout_amount > 0
-				? (float) $answer_state->payout_amount
-				: $stake_amount);
+		$peak_multiplier = max($stored_peak_multiplier, $current_multiplier);
 
-		$entry_multiplier = 0.0;
-		$entry_notional = $entry_price * $current_quantity;
-		if ($entry_notional > 0 && $booked_return > 0) {
-			$entry_multiplier = round($booked_return / $entry_notional, 4);
-		} elseif ($stake_amount > 0 && $booked_return > 0) {
-			$entry_multiplier = round($booked_return / $stake_amount, 4);
-		}
-		if ($entry_multiplier <= 0) {
-			$entry_multiplier = $this->get_question_multiplier($question, $answer_side);
-		}
-
-		$current_multiplier = $this->get_question_multiplier($question, $answer_side);
-		$stored_peak_price = isset($answer_state->peak_sell_price) ? (float) $answer_state->peak_sell_price : 0.0;
-		$stored_peak_multiplier = isset($answer_state->peak_sell_multiplier) ? (float) $answer_state->peak_sell_multiplier : 0.0;
-		$peak_price = max($stored_peak_price, $current_price, $entry_price);
-		$peak_multiplier = max($stored_peak_multiplier, $current_multiplier, $entry_multiplier);
-
-		// Persist higher admin/live peaks so sell stays available even if reduced later.
+		// Persist peak multiplier if it has grown
 		if (
 			isset($answer_state->id) &&
-			(
-				$peak_price > $stored_peak_price + 0.0001 ||
-				$peak_multiplier > $stored_peak_multiplier + 0.0001
-			)
+			$peak_multiplier > $stored_peak_multiplier + 0.0001
 		) {
 			$this->db->where('id', (int) $answer_state->id);
 			$this->db->where('settled_at IS NULL', NULL, FALSE);
 			$this->db->update('user_question_answers', array(
-				'peak_sell_price' => round($peak_price, 2),
-				'peak_sell_multiplier' => round($peak_multiplier, 2)
+				'peak_sell_multiplier' => round($peak_multiplier, 4)
 			));
 		}
 
-		$effective_price = $peak_price;
-		$effective_multiplier = $peak_multiplier;
-		$exit_amount = round($effective_price * $current_quantity * $effective_multiplier, 2);
+		// ── Calculations ──────────────────────────────────────────────────────
+		// Current Return  = what user gets if they sell NOW at peak multiplier
+		$exit_amount = round($entry_notional * $peak_multiplier, 2);
 
-		// Net profit in sell box should compare current return vs locked payout.
-		$net_profit = round($exit_amount - $booked_return, 2);
+		// Net Profit = Current Return − Booked Stake (how much they actually earn above cost)
+		$net_profit = round($exit_amount - $locked_payout, 2);
 
-		$summary['current_price']      = $effective_price;
-		$summary['current_multiplier'] = $effective_multiplier;
-		$summary['exit_amount']        = $exit_amount;
-		$summary['entry_amount']       = $stake_amount;
-		$summary['booked_return']      = $booked_return;
-		$summary['net_profit']         = $net_profit;
+		$summary['current_price']      = $current_price;
+		$summary['current_multiplier'] = $peak_multiplier;
+		$summary['exit_amount']        = $exit_amount;       // Current Return
+		$summary['entry_amount']       = $entry_notional;    // Booked Stake
+		$summary['booked_return']      = $locked_payout;     // Locked Payout (entry multiplier × stake)
+		$summary['net_profit']         = $net_profit;        // Net Profit vs stake paid
 
-		// ✅ CORRECT unlock condition: user must be in profit vs what they paid
-		$is_higher_than_entry = ($effective_price > $entry_price + 0.0001) || ($effective_multiplier > $entry_multiplier + 0.0001);
+		// ── Unlock condition: multiplier must have STRICTLY improved ──────────
+		// Works correctly for both YES and NO trades.
+		$multiplier_improved = ($peak_multiplier > $entry_multiplier + 0.0001);
 
-		if (!$is_higher_than_entry) {
-			$summary['message'] = 'Sell option will unlock once edited price or multiplier moves above your original trade values.';
+		if (!$multiplier_improved) {
+			$summary['message'] = 'Sell option will unlock once the multiplier moves above your original trade multiplier (×' . number_format($entry_multiplier, 2) . ').';
 			return $summary;
 		}
 
 		$summary['can_sell'] = TRUE;
-		$summary['message']  = 'You can sell this trade now based on the highest edited price/multiplier above your original trade values.';
+		$summary['message']  = 'You can sell this trade now. The multiplier has moved above your original trade values.';
 		return $summary;
 	}
 
+	// Helper: resolve the multiplier that was effective when the user entered the trade
+	private function get_question_multiplier_at_entry($question, $answer_state, $answer_side, $entry_notional)
+	{
+		// 1. Best source: entry_payout_amount stored at trade time
+		if (
+			isset($answer_state->entry_payout_amount) &&
+			(float) $answer_state->entry_payout_amount > 0 &&
+			$entry_notional > 0
+		) {
+			return round((float) $answer_state->entry_payout_amount / $entry_notional, 4);
+		}
+
+		// 2. Fallback: payout_amount
+		if (
+			isset($answer_state->payout_amount) &&
+			(float) $answer_state->payout_amount > 0 &&
+			$entry_notional > 0
+		) {
+			return round((float) $answer_state->payout_amount / $entry_notional, 4);
+		}
+
+		// 3. Last resort: current question multiplier (same side)
+		return $this->get_question_multiplier($question, $answer_side);
+	}
 	private function get_question_multiplier($question, $answer)
 	{
 		$answer_key = strtolower(trim((string) $answer));
