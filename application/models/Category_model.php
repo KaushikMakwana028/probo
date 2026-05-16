@@ -551,10 +551,6 @@ class Category_model extends CI_Model
 			return FALSE;
 		}
 
-		$totals = $this->get_question_trade_totals((int) $question_id);
-		$yes_quantity = (int) $totals['yes_quantity'];
-		$no_quantity = (int) $totals['no_quantity'];
-		$total_quantity = $yes_quantity + $no_quantity;
 		$base_yes_price = isset($question->base_yes_price) && (float) $question->base_yes_price > 0
 			? (float) $question->base_yes_price
 			: (float) $question->yes_price;
@@ -562,30 +558,13 @@ class Category_model extends CI_Model
 			? (float) $question->base_no_price
 			: (float) $question->no_price;
 
-		if ($total_quantity <= 0) {
-			$updated = $this->update_question((int) $question_id, array(
-				'yes_price' => round($base_yes_price, 2),
-				'no_price' => round($base_no_price, 2)
-			));
-
-			if ($updated) {
-				$this->record_price_history((int) $question_id, round($base_yes_price, 2), round($base_no_price, 2));
-			}
-
-			return $updated;
-		}
-
-		$market_total = $this->get_prediction_market_total();
-		$yes_price = round(max(0.5, min($market_total - 0.5, ($yes_quantity / $total_quantity) * $market_total)), 2);
-		$no_price = round($market_total - $yes_price, 2);
-
 		$updated = $this->update_question((int) $question_id, array(
-			'yes_price' => $yes_price,
-			'no_price' => $no_price
+			'yes_price' => round($base_yes_price, 2),
+			'no_price' => round($base_no_price, 2)
 		));
 
 		if ($updated) {
-			$this->record_price_history((int) $question_id, $yes_price, $no_price);
+			$this->record_price_history((int) $question_id, round($base_yes_price, 2), round($base_no_price, 2));
 		}
 
 		return $updated;
@@ -919,17 +898,10 @@ class Category_model extends CI_Model
 		$totals = $this->get_question_trade_totals((int) $question->id);
 		$actual_yes_quantity = (int) $totals['yes_quantity'];
 		$actual_no_quantity = (int) $totals['no_quantity'];
-		$total_quantity = $actual_yes_quantity + $actual_no_quantity;
 		list($base_yes_price, $base_no_price) = $this->resolve_base_prices_for_question($question, $actual_yes_quantity, $actual_no_quantity);
 		$market_total = max(1.0, round($base_yes_price + $base_no_price, 2));
-
-		if ($total_quantity > 0) {
-			$live_yes_price = round(max(0.5, min($market_total - 0.5, ($actual_yes_quantity / $total_quantity) * $market_total)), 2);
-			$live_no_price = round($market_total - $live_yes_price, 2);
-		} else {
-			$live_yes_price = round($base_yes_price, 2);
-			$live_no_price = round($base_no_price, 2);
-		}
+		$live_yes_price = round($base_yes_price, 2);
+		$live_no_price = round($base_no_price, 2);
 
 		$question->base_yes_price = $base_yes_price;
 		$question->base_no_price = $base_no_price;

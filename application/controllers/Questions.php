@@ -274,7 +274,6 @@ class Questions extends CI_Controller
 		}
 
 		$selected_answer = strtolower(trim((string) $this->input->post('answer')));
-		$selected_price = (float) $this->input->post('price');
 		$selected_quantity = (int) $this->input->post('quantity');
 
 		if (!in_array($selected_answer, array('yes', 'no'), TRUE)) {
@@ -282,11 +281,12 @@ class Questions extends CI_Controller
 			redirect('questions/answer/' . $question_id);
 		}
 
-		$market_total = max(1.0, (float) $selected_question->yes_price + (float) $selected_question->no_price);
-		$max_price = max(0.5, $market_total - 0.5);
+		$selected_price = $selected_answer === 'no'
+			? (float) $selected_question->no_price
+			: (float) $selected_question->yes_price;
 
-		if ($selected_price < 0.5 || $selected_price > $max_price || $selected_quantity < 1 || $selected_quantity > 1000) {
-			$this->session->set_flashdata('error', 'Price must stay between Rs 0.50 and Rs ' . number_format($max_price, 2) . ', and quantity must stay between 1 and 1000.');
+		if ($selected_price < 0.5 || $selected_quantity < 1 || $selected_quantity > 1000) {
+			$this->session->set_flashdata('error', 'Trade price is invalid or quantity must stay between 1 and 1000.');
 			redirect('questions/answer/' . $question_id);
 		}
 
@@ -645,7 +645,7 @@ class Questions extends CI_Controller
 			? (float) $answer_state->peak_sell_multiplier
 			: 0.0;
 
-		$peak_multiplier = max($stored_peak_multiplier, $current_multiplier);
+		$peak_multiplier = $current_multiplier;
 
 		// Persist peak multiplier if it has grown
 		if (
@@ -661,13 +661,13 @@ class Questions extends CI_Controller
 
 		// ── Calculations ──────────────────────────────────────────────────────
 		// Current Return  = what user gets if they sell NOW at peak multiplier
-		$exit_amount = round($entry_notional * $peak_multiplier, 2);
+		$exit_amount = round($entry_notional * $current_multiplier, 2);
 
 		// Net Profit = Current Return − Booked Stake (how much they actually earn above cost)
-		$net_profit = round($exit_amount - $locked_payout, 2);
+		$net_profit = round($exit_amount - $entry_notional, 2);
 
 		$summary['current_price']      = $current_price;
-		$summary['current_multiplier'] = $peak_multiplier;
+		$summary['current_multiplier'] = $current_multiplier;
 		$summary['exit_amount']        = $exit_amount;       // Current Return
 		$summary['entry_amount']       = $entry_notional;    // Booked Stake
 		$summary['booked_return']      = $locked_payout;     // Locked Payout (entry multiplier × stake)
@@ -675,7 +675,7 @@ class Questions extends CI_Controller
 
 		// ── Unlock condition: multiplier must have STRICTLY improved ──────────
 		// Works correctly for both YES and NO trades.
-		$multiplier_improved = ($peak_multiplier > $entry_multiplier + 0.0001);
+		$multiplier_improved = ($current_multiplier > $entry_multiplier + 0.0001);
 
 		if (!$multiplier_improved) {
 			$summary['message'] = 'Sell option will unlock once the multiplier moves above your original trade multiplier (×' . number_format($entry_multiplier, 2) . ').';

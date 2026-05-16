@@ -55,26 +55,16 @@ $no_price         = (float)$selected_question->no_price;
 $yes_multiplier   = isset($selected_question->yes_multiplier) && (float)$selected_question->yes_multiplier > 0 ? (float)$selected_question->yes_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
 $no_multiplier    = isset($selected_question->no_multiplier) && (float)$selected_question->no_multiplier > 0 ? (float)$selected_question->no_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
 $market_total     = max(1.0, $yes_price + $no_price);
-$default_price    = $selected_answer_state ? (float)$selected_answer_state->price : ($selected_answer === 'no' ? $no_price : $yes_price);
+$default_price    = $selected_answer === 'no' ? $no_price : $yes_price;
 $default_price    = $default_price > 0 ? $default_price : max($yes_price, $no_price, 0.5);
 $default_quantity = $selected_answer_state ? max(1, min(1000, (int)$selected_answer_state->quantity)) : 1;
 $price_max        = max(0.5, $market_total - 0.5);
 $multiplier       = $selected_answer === 'no' ? $no_multiplier : $yes_multiplier;
-if ($selected_answer_state && $default_price > 0 && $default_quantity > 0) {
-	$locked_preview = isset($selected_answer_state->entry_payout_amount) ? (float)$selected_answer_state->entry_payout_amount : 0;
-	if ($locked_preview > 0) {
-		$multiplier = round($locked_preview / ($default_price * $default_quantity), 4);
-	}
-}
-$winning_preview  = ($selected_answer_state && isset($selected_answer_state->entry_payout_amount) && (float)$selected_answer_state->entry_payout_amount > 0)
-	? (float)$selected_answer_state->entry_payout_amount
-	: round($default_price * $default_quantity * $multiplier, 2);
 $locked_stake_amount = $selected_answer_state ? (float)($selected_answer_state->stake_amount ?? 0) : 0.0;
-$locked_payout_amount = $selected_answer_state
-	? ((isset($selected_answer_state->entry_payout_amount) && (float)$selected_answer_state->entry_payout_amount > 0)
-		? (float)$selected_answer_state->entry_payout_amount
-		: (float)($selected_answer_state->payout_amount ?? 0))
-	: 0.0;
+$winning_preview  = $selected_answer_state && $locked_stake_amount > 0
+	? round($locked_stake_amount * $multiplier, 2)
+	: round($default_price * $default_quantity * $multiplier, 2);
+$locked_payout_amount = $selected_answer_state ? $winning_preview : 0.0;
 $yes_trade_qty    = isset($trade_breakdown['yes_quantity']) ? (int)$trade_breakdown['yes_quantity'] : 0;
 $no_trade_qty     = isset($trade_breakdown['no_quantity'])  ? (int)$trade_breakdown['no_quantity']  : 0;
 $total_trade_qty  = $yes_trade_qty + $no_trade_qty;
@@ -1572,7 +1562,7 @@ $QTY_MIN          = 1;
 						</div>
 					</div>
 
-					<!-- Price & Quantity Controls -->
+					<!-- Quantity Control Only -->
 					<div class="tp-controls">
 						<div class="tp-ctrl">
 							<div class="tp-ctrl-top">
@@ -1810,6 +1800,10 @@ $QTY_MIN          = 1;
 			nR = document.getElementById('tp_no');
 		var sellTradeForm = document.querySelector('.js-sell-trade-form');
 		var heroSub = document.querySelector('.tp-hero-sub');
+		var stakeCard = document.querySelector('.tp-stake');
+		var controlsWrap = document.querySelector('.tp-controls');
+		var priceControl = controlsWrap ? controlsWrap.querySelector('.tp-ctrl:first-child') : null;
+		var chartHost = document.querySelector('[data-chart]');
 		var pR = document.querySelector('.js-prange'),
 			pH = document.querySelector('.js-ph');
 		var pD = document.querySelector('.js-pdisplay'),
@@ -1823,6 +1817,7 @@ $QTY_MIN          = 1;
 		var multEl = document.querySelector('.js-mult'),
 			multLabelEl = document.querySelector('.js-mult-label'),
 			multFormulaEl = document.querySelector('.js-mult-formula');
+		var spentEl = null;
 		var sb = document.getElementById('js-sbtn');
 		var pDec = document.querySelector('.js-pdec'),
 			pInc = document.querySelector('.js-pinc');
@@ -1841,6 +1836,33 @@ $QTY_MIN          = 1;
 
 		if (sb) {
 			sb.textContent = sb.disabled ? 'Market Closed' : 'Place Trade Now';
+		}
+
+		if (priceControl) {
+			priceControl.remove();
+			if (controlsWrap) {
+				controlsWrap.style.gridTemplateColumns = '1fr';
+			}
+		}
+
+		if (chartHost) {
+			var chartCard = chartHost.closest('.tp-card');
+			if (chartCard) {
+				chartCard.remove();
+			}
+		}
+
+		if (stakeCard) {
+			var spentRow = document.createElement('div');
+			spentRow.className = 'tp-stake-row tp-stake-spent';
+			spentRow.innerHTML = '<span>Spend money</span><strong class="js-spent">—</strong>';
+			var winningRow = stakeCard.querySelector('.tp-stake-win');
+			if (winningRow) {
+				stakeCard.insertBefore(spentRow, winningRow);
+			} else {
+				stakeCard.appendChild(spentRow);
+			}
+			spentEl = spentRow.querySelector('.js-spent');
 		}
 
 		if (sellTradeForm) {
@@ -1875,7 +1897,7 @@ $QTY_MIN          = 1;
 		}
 
 		function gP() {
-			return pR ? parseFloat(pR.value) || PMIN : PMIN;
+			return (nR && nR.checked) ? DNO : DYES;
 		}
 
 		function gQ() {
@@ -1907,6 +1929,7 @@ $QTY_MIN          = 1;
 			if (qD) qD.textContent = q;
 			if (fEl) fEl.textContent = fmt(p) + ' × ' + q;
 			if (sEl) sEl.textContent = fmt(stake);
+			if (spentEl) spentEl.textContent = fmt(stake);
 			if (wEl) wEl.textContent = fmt(win);
 			if (wIn) wIn.textContent = fmt(win);
 			if (multEl) multEl.textContent = Number(m).toFixed(2);
@@ -1916,16 +1939,22 @@ $QTY_MIN          = 1;
 		}
 
 		function syncP() {
-			if (!pR) return;
 			var base = (nR && nR.checked) ? DNO : DYES;
-			pR.value = clamp(base > 0 ? base : PMIN, PMIN, PMAX).toFixed(2);
+			if (pR) {
+				pR.value = clamp(base > 0 ? base : PMIN, PMIN, PMAX).toFixed(2);
+			}
 			update();
+		}
+
+		if (fEl && fEl.parentElement) {
+			fEl.parentElement.style.display = 'none';
+		}
+		if (sEl && sEl.parentElement) {
+			sEl.parentElement.style.display = 'none';
 		}
 
 		if (pR && !pR.disabled) {
 			pR.addEventListener('input', update);
-			if (yR) yR.addEventListener('change', syncP);
-			if (nR) nR.addEventListener('change', syncP);
 			if (pDec) pDec.addEventListener('click', function() {
 				pR.value = clamp(parseFloat(pR.value) - 0.50, PMIN, PMAX).toFixed(2);
 				update();
@@ -1935,6 +1964,9 @@ $QTY_MIN          = 1;
 				update();
 			});
 		}
+
+		if (yR) yR.addEventListener('change', syncP);
+		if (nR) nR.addEventListener('change', syncP);
 
 		if (qI && !qI.readOnly) {
 			qI.addEventListener('input', function() {

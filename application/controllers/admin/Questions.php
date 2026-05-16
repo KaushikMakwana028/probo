@@ -858,10 +858,11 @@ class Questions extends CI_Controller
 
 		foreach ($unsettled_answers as $answer) {
 			$is_winner = strtolower((string) $answer->answer) === strtolower((string) $answer_key);
-			$locked_payout = isset($answer->entry_payout_amount) && (float) $answer->entry_payout_amount > 0
-				? (float) $answer->entry_payout_amount
-				: round(((float) $answer->price * (int) $answer->quantity) * $this->get_question_multiplier($question, $answer->answer), 2);
-			$payout_amount = $is_winner ? $locked_payout : 0.00;
+			$stake_amount = isset($answer->stake_amount) && (float) $answer->stake_amount > 0
+				? (float) $answer->stake_amount
+				: round((float) $answer->price * (int) $answer->quantity, 2);
+			$current_payout = round($stake_amount * $this->get_question_multiplier($question, $answer->answer), 2);
+			$payout_amount = $is_winner ? $current_payout : 0.00;
 
 			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at, array(
 				'settlement_type' => 'result',

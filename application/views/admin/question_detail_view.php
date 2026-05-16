@@ -50,8 +50,6 @@ $flow_total   = $yes_qty + $no_qty;
 $spread_total = abs((float) $detail_question->yes_price - (float) $detail_question->no_price);
 $is_saved     = in_array(strtolower((string) $detail_question->answer_key), array('yes', 'no'), TRUE);
 
-$history_points = $this->Category_model->get_question_price_history((int) $detail_question->id, 12);
-
 $start_ts = (!empty($detail_question->start_time) && $detail_question->start_time !== '0000-00-00 00:00:00') ? strtotime($detail_question->start_time) : FALSE;
 $end_ts   = (!empty($detail_question->end_time)   && $detail_question->end_time   !== '0000-00-00 00:00:00') ? strtotime($detail_question->end_time)   : FALSE;
 
@@ -110,8 +108,7 @@ if ($start_ts && $now_ts < $start_ts) {
 	/* ─── shared card surface ───────────────────────────── */
 	.qd-topbar,
 	.qd-main,
-	.qd-answer-box,
-	.qd-chart-shell {
+	.qd-answer-box {
 		background: #fff;
 		border: 0.5px solid rgba(0, 0, 0, .12);
 		border-radius: 12px;
@@ -329,63 +326,6 @@ if ($start_ts && $now_ts < $start_ts) {
 	}
 
 	/* ─── chart ──────────────────────────────────────────── */
-	.qd-chart-section {
-		padding: 20px 0 0;
-	}
-
-	.qd-chart-section h4 {
-		margin: 0 0 3px;
-		font-size: 13px;
-		font-weight: 500;
-	}
-
-	.qd-chart-section p {
-		margin: 0 0 12px;
-		font-size: 11px;
-		color: #64748b;
-	}
-
-	.qd-chart-shell {
-		padding: 14px 10px 10px;
-		background: #f8fafc;
-	}
-
-	.qd-live-chart {
-		min-height: 150px;
-	}
-
-	.qd-chart-legend {
-		display: flex;
-		align-items: center;
-		gap: 14px;
-		margin-top: 10px;
-		justify-content: flex-end;
-	}
-
-	.qd-legend-item {
-		display: flex;
-		align-items: center;
-		gap: 5px;
-		font-size: 11px;
-		color: #64748b;
-	}
-
-	.qd-legend-dot {
-		width: 10px;
-		height: 3px;
-		border-radius: 2px;
-		display: inline-block;
-	}
-
-	.qd-chart-foot {
-		margin-top: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-size: 11px;
-		color: #94a3b8;
-	}
-
 	/* ─── answer key box ─────────────────────────────────── */
 	.qd-answer-box {
 		padding: 18px;
@@ -616,21 +556,6 @@ if ($start_ts && $now_ts < $start_ts) {
 			</div>
 		</div>
 
-		<div class="qd-chart-section">
-			<h4>Live demand snapshot</h4>
-			<p>Pricing history and live trade numbers — auto-refreshes every 12 seconds.</p>
-			<div class="qd-chart-shell">
-				<div class="qd-live-chart" data-history='<?php echo json_encode($history_points); ?>'></div>
-				<div class="qd-chart-legend">
-					<div class="qd-legend-item"><span class="qd-legend-dot" style="background:#378add;"></span>Yes price</div>
-					<div class="qd-legend-item"><span class="qd-legend-dot" style="background:#ef9f27;"></span>No price</div>
-				</div>
-			</div>
-			<div class="qd-chart-foot">
-				<span>Auto-refreshes every 12 s</span>
-			</div>
-		</div>
-
 		<form method="post" action="<?php echo site_url('admin/questions/save-answer-keys'); ?>" class="qd-answer-box">
 			<h4>Save answer key</h4>
 			<p>Choose the correct result. After saving, this question moves to the Completed Questions page.</p>
@@ -672,173 +597,18 @@ if ($start_ts && $now_ts < $start_ts) {
 	(function() {
 		'use strict';
 
-		var categoryId = <?php echo (int) $selected_category->id; ?>;
-		var questionId = <?php echo (int) $detail_question->id; ?>;
-		var card = document.querySelector('[data-question-card]');
-		var chart = card ? card.querySelector('.qd-live-chart') : null;
-
-		function drawChart(container, points) {
-			if (!container) return;
-			points = Array.isArray(points) ? points : [];
-
-			var yesVals = points.map(function(p) {
-				return parseFloat(p.yes_price || 0);
-			});
-			var noVals = points.map(function(p) {
-				return parseFloat(p.no_price || 0);
-			});
-			if (yesVals.length === 1) yesVals = [yesVals[0], yesVals[0]];
-			if (noVals.length === 1) noVals = [noVals[0], noVals[0]];
-
-			if (!yesVals.length) {
-				container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:150px;color:#9ca3af;font-size:13px;">No history recorded yet.</div>';
-				return;
-			}
-
-			var all = yesVals.concat(noVals).concat([0.01]);
-			var minVal = Math.min.apply(null, all);
-			var maxVal = Math.max.apply(null, all);
-			var W = 560,
-				H = 150,
-				pX = 18,
-				pY = 14;
-
-			function sameSeries(a, b) {
-				if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
-					return false;
-				}
-
-				for (var i = 0; i < a.length; i++) {
-					if (Math.abs(Number(a[i] || 0) - Number(b[i] || 0)) > 0.0001) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			var overlapSeries = sameSeries(yesVals, noVals);
-
-			function pointY(v, seriesKey) {
-				var r = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
-				var y = H - pY - r * (H - pY * 2);
-
-				if (overlapSeries) {
-					y += seriesKey === 'yes' ? -8 : 8;
-				}
-
-				return y;
-			}
-
-			function pts(vals, seriesKey) {
-				return vals.map(function(v, i) {
-					var x = vals.length === 1 ? W / 2 : pX + (i / (vals.length - 1)) * (W - pX * 2);
-					var y = pointY(v, seriesKey);
-					return x.toFixed(1) + ',' + y.toFixed(1);
-				}).join(' ');
-			}
-
-			container.innerHTML =
-				'<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="none">' +
-				'<defs>' +
-				'<linearGradient id="qdYes" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#378add"/><stop offset="100%" stop-color="#85b7eb"/></linearGradient>' +
-				'<linearGradient id="qdNo"  x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef9f27"/><stop offset="100%" stop-color="#fac775"/></linearGradient>' +
-				'</defs>' +
-				'<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="6" fill="transparent"/>' +
-				'<line x1="' + pX + '" y1="' + (H - pY) + '" x2="' + (W - pX) + '" y2="' + (H - pY) + '" stroke="rgba(0,0,0,.1)" stroke-width="0.5"/>' +
-				'<line x1="' + pX + '" y1="' + Math.round(H / 2) + '" x2="' + (W - pX) + '" y2="' + Math.round(H / 2) + '" stroke="rgba(0,0,0,.08)" stroke-width="0.5" stroke-dasharray="4 4"/>' +
-				'<polyline fill="none" stroke="url(#qdYes)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(yesVals, 'yes') + '"/>' +
-				'<polyline fill="none" stroke="url(#qdNo)"  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="' + pts(noVals, 'no') + '"/>' +
-				'</svg>';
-		}
-
-		if (chart) {
-			try {
-				drawChart(chart, JSON.parse(chart.getAttribute('data-history') || '[]'));
-			} catch (e) {
-				drawChart(chart, []);
-			}
-		}
-
-		/* answer choice highlight */
 		document.querySelectorAll('.qd-answer-choice input[type="radio"]').forEach(function(radio) {
 			radio.addEventListener('change', function() {
 				var row = this.closest('.qd-answer-row');
 				if (!row) return;
-				row.querySelectorAll('.qd-answer-choice').forEach(function(l) {
-					l.classList.remove('selected-yes', 'selected-no');
+				row.querySelectorAll('.qd-answer-choice').forEach(function(label) {
+					label.classList.remove('selected-yes', 'selected-no');
 				});
-				var lbl = this.closest('.qd-answer-choice');
-				if (lbl) lbl.classList.add(this.value === 'yes' ? 'selected-yes' : 'selected-no');
+				var currentLabel = this.closest('.qd-answer-choice');
+				if (currentLabel) {
+					currentLabel.classList.add(this.value === 'yes' ? 'selected-yes' : 'selected-no');
+				}
 			});
 		});
-
-		/* live refresh */
-		function updateCard(q) {
-			if (!card || !q) return;
-			var yp = Number(q.yes_price || 0).toFixed(2);
-			var np = Number(q.no_price || 0).toFixed(2);
-			var mt = Number(q.market_total || 0).toFixed(2);
-			var yq = q.trade_totals ? Number(q.trade_totals.yes_quantity || 0) : 0;
-			var nq = q.trade_totals ? Number(q.trade_totals.no_quantity || 0) : 0;
-			var ayq = q.trade_totals ? Number(q.trade_totals.actual_yes_quantity || 0) : yq;
-			var anq = q.trade_totals ? Number(q.trade_totals.actual_no_quantity || 0) : nq;
-			var exy = q.trade_totals ? Number(q.trade_totals.admin_yes_quantity || 0) : 0;
-			var exn = q.trade_totals ? Number(q.trade_totals.admin_no_quantity || 0) : 0;
-			var yu = q.trade_totals ? Number(q.trade_totals.yes_users || 0) : 0;
-			var nu = q.trade_totals ? Number(q.trade_totals.no_users || 0) : 0;
-			var ru = Number(q.real_users || 0);
-			var spr = Math.abs(Number(q.yes_price || 0) - Number(q.no_price || 0)).toFixed(2);
-
-			card.querySelectorAll('.js-yes-price').forEach(function(n) {
-				n.textContent = 'Rs ' + yp;
-			});
-			card.querySelectorAll('.js-no-price').forEach(function(n) {
-				n.textContent = 'Rs ' + np;
-			});
-			card.querySelectorAll('.js-market-total').forEach(function(n) {
-				n.textContent = 'Rs ' + mt;
-			});
-			card.querySelectorAll('.js-trade-qty').forEach(function(n) {
-				n.textContent = 'Y ' + yq + ' | N ' + nq;
-			});
-			card.querySelectorAll('.js-flow-total').forEach(function(n) {
-				n.textContent = String(yq + nq);
-			});
-			var tradeFactSmall = card.querySelector('.js-flow-total');
-			if (tradeFactSmall && tradeFactSmall.parentElement) {
-				tradeFactSmall.parentElement.textContent = 'Total flow: ' + (yq + nq) + ' | Actual Y ' + ayq + ' + ' + exy + ' | Actual N ' + anq + ' + ' + exn;
-			}
-			card.querySelectorAll('.js-yes-users').forEach(function(n) {
-				n.textContent = 'YES users: ' + yu;
-			});
-			card.querySelectorAll('.js-no-users').forEach(function(n) {
-				n.textContent = 'NO users: ' + nu;
-			});
-			card.querySelectorAll('.js-real-users').forEach(function(n) {
-				n.textContent = String(ru);
-			});
-			card.querySelectorAll('.js-spread').forEach(function(n) {
-				n.textContent = 'Rs ' + spr;
-			});
-			drawChart(chart, q.price_history || []);
-		}
-
-		async function refreshLive() {
-			try {
-				var res = await fetch('<?php echo site_url('admin/questions/live-stats/'); ?>' + categoryId, {
-					headers: {
-						'X-Requested-With': 'XMLHttpRequest'
-					}
-				});
-				var data = await res.json();
-				if (!data || data.status !== 'ok' || !Array.isArray(data.questions)) return;
-				data.questions.forEach(function(q) {
-					if (Number(q.id) === questionId) updateCard(q);
-				});
-			} catch (e) {}
-		}
-
-		setInterval(refreshLive, 12000);
 	}());
 </script>
