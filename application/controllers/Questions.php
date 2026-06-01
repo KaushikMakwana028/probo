@@ -594,6 +594,7 @@ class Questions extends CI_Controller
 			'exit_amount'        => 0.0,
 			'entry_amount'       => 0.0,
 			'booked_return'      => 0.0,
+			'entry_locked_return'=> 0.0,
 			'net_profit'         => 0.0
 		);
 
@@ -627,8 +628,9 @@ class Questions extends CI_Controller
 		// entry_multiplier: what multiplier was active when the user placed the trade
 		$entry_multiplier = $this->get_question_multiplier_at_entry($question, $answer_state, $answer_side, $entry_notional);
 
-		// locked_payout: what the user would win if result declared right now at entry multiplier
-		$locked_payout = round($entry_notional * $entry_multiplier, 2);
+		// Keep the original entry-based return for reference, but the UI sell card
+		// should show the live payout so it stays aligned with the winning preview.
+		$entry_locked_payout = round($entry_notional * $entry_multiplier, 2);
 
 		// ── Current live values ───────────────────────────────────────────────
 		// Current price for the side the user is on
@@ -668,22 +670,22 @@ class Questions extends CI_Controller
 
 		$summary['current_price']      = $current_price;
 		$summary['current_multiplier'] = $current_multiplier;
-		$summary['exit_amount']        = $exit_amount;       // Current Return
-		$summary['entry_amount']       = $entry_notional;    // Booked Stake
-		$summary['booked_return']      = $locked_payout;     // Locked Payout (entry multiplier × stake)
-		$summary['net_profit']         = $net_profit;        // Net Profit vs stake paid
+		$summary['exit_amount']        = $exit_amount;         // Current live return
+		$summary['entry_amount']       = $entry_notional;      // Booked Stake
+		$summary['booked_return']      = $exit_amount;         // Locked Payout shown in UI
+		$summary['entry_locked_return']= $entry_locked_payout; // Original entry-based return
+		$summary['net_profit']         = $net_profit;          // Net Profit vs stake paid
 
-		// ── Unlock condition: multiplier must have STRICTLY improved ──────────
-		// Works correctly for both YES and NO trades.
-		$multiplier_improved = ($current_multiplier > $entry_multiplier + 0.0001);
-
-		if (!$multiplier_improved) {
-			$summary['message'] = 'Sell option will unlock once the multiplier moves above your original trade multiplier (×' . number_format($entry_multiplier, 2) . ').';
-			return $summary;
-		}
+		// Old unlock condition kept for reference only.
+		// $multiplier_improved = ($current_multiplier > $entry_multiplier + 0.0001);
+		//
+		// if (!$multiplier_improved) {
+		// 	$summary['message'] = 'Sell option will unlock once the multiplier moves above your original trade multiplier (×' . number_format($entry_multiplier, 2) . ').';
+		// 	return $summary;
+		// }
 
 		$summary['can_sell'] = TRUE;
-		$summary['message']  = 'You can sell this trade now. The multiplier has moved above your original trade values.';
+		$summary['message']  = 'You can sell this trade at any time while the market is open.';
 		return $summary;
 	}
 

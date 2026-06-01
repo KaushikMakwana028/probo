@@ -75,6 +75,22 @@ $yes_vol_pct      = $total_trade_qty > 0 ? round($yes_trade_qty / $total_trade_q
 $no_vol_pct       = 100 - $yes_vol_pct;
 $QTY_MAX          = 1000;
 $QTY_MIN          = 1;
+$start_ts         = (!empty($selected_question->start_time) && $selected_question->start_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->start_time) : false;
+$end_ts           = (!empty($selected_question->end_time) && $selected_question->end_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->end_time) : false;
+$now              = time();
+$hero_market_text = 'Market is closed';
+$hero_market_html = '<span class="tp-hero-sub-icon closed"><i class="fa-solid fa-lock"></i></span><span>Market is closed</span>';
+
+if ($start_ts && $now < $start_ts) {
+	$hero_market_text = 'Market starts at ' . date('d M Y, h:i A', $start_ts);
+	$hero_market_html = '<span class="tp-hero-sub-icon pending"><i class="fa-solid fa-clock"></i></span><span>Market starts at <strong>' . date('d M Y, h:i A', $start_ts) . '</strong></span>';
+} elseif ($market_is_open && $end_ts) {
+	$hero_market_text = 'Market closes at ' . date('d M Y, h:i A', $end_ts);
+	$hero_market_html = '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market closes at <strong>' . date('d M Y, h:i A', $end_ts) . '</strong></span>';
+} elseif ($market_is_open) {
+	$hero_market_text = 'Market is open';
+	$hero_market_html = '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market is open</span>';
+}
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -334,6 +350,45 @@ $QTY_MIN          = 1;
 		padding: 20px;
 	}
 
+	.tp-overview {
+		display: grid;
+		gap: 18px;
+	}
+
+	.tp-overview-block {
+		padding: 16px;
+		border-radius: var(--r-md);
+		background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+		border: 1px solid rgba(15, 23, 42, 0.08);
+	}
+
+	.tp-overview-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 10px;
+	}
+
+	.tp-overview-title {
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.tp-overview-total {
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--ink-2);
+		background: rgba(255, 255, 255, 0.92);
+		border: 1px solid rgba(15, 23, 42, 0.08);
+		border-radius: 999px;
+		padding: 6px 10px;
+		white-space: nowrap;
+	}
+
 	/* ─── MARKET OVERVIEW ─── */
 	.tp-bar-labels {
 		display: flex;
@@ -351,52 +406,110 @@ $QTY_MIN          = 1;
 		color: #b91c1c;
 	}
 
+	.tp-bar-labels {
+		align-items: center;
+		gap: 12px;
+		font-weight: 600;
+		margin-bottom: 10px;
+	}
+
+	.tp-bar-side {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.tp-bar-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 999px;
+		flex-shrink: 0;
+	}
+
+	.tp-bar-dot.yes {
+		background: var(--green);
+		box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+	}
+
+	.tp-bar-dot.no {
+		background: var(--red);
+		box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
+	}
+
+	.tp-bar-text {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.tp-bar-name {
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.tp-bar-pct {
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
 	.tp-prob-bar {
-		height: 6px;
+		height: 12px;
 		border-radius: 999px;
 		background: var(--surface-2);
 		display: flex;
 		overflow: hidden;
-		margin-bottom: 18px;
+		margin-bottom: 0;
+		border: 1px solid rgba(15, 23, 42, 0.05);
 	}
 
 	.tp-bar-y {
 		height: 100%;
-		background: var(--green-soft);
-		border-left: 2px solid var(--green);
+		background: linear-gradient(90deg, rgba(34, 197, 94, 0.22), rgba(34, 197, 94, 0.85));
 	}
 
 	.tp-bar-n {
 		height: 100%;
-		background: var(--red-soft);
-		border-right: 2px solid var(--red);
+		background: linear-gradient(90deg, rgba(239, 68, 68, 0.82), rgba(239, 68, 68, 0.18));
 	}
 
 	.tp-mchips {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
 	}
 
 	.tp-chip {
-		background: var(--surface);
-		border: 0.5px solid var(--border);
-		border-radius: var(--r-md);
-		padding: 12px;
-		text-align: center;
+		background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+		border: 1px solid rgba(15, 23, 42, 0.08);
+		border-radius: 14px;
+		padding: 14px;
+		text-align: left;
 	}
 
 	.tp-chip-lbl {
 		font-size: 11px;
 		color: var(--muted);
-		margin-bottom: 4px;
+		margin-bottom: 8px;
 		text-transform: uppercase;
 		letter-spacing: .06em;
+		font-weight: 700;
 	}
 
 	.tp-chip-val {
-		font-size: 18px;
-		font-weight: 500;
+		font-size: 30px;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: -0.03em;
+	}
+
+	.tp-chip-note {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--muted);
 	}
 
 	.mc-yes .tp-chip-val {
@@ -410,35 +523,74 @@ $QTY_MIN          = 1;
 	.tp-vol-row {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-top: 14px;
-		font-size: 12px;
-		font-weight: 500;
+		gap: 12px;
+		margin-top: 16px;
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	.tp-vol-labels {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	.tp-vol-side {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	.tp-vol-count {
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1;
 	}
 
 	.tp-vol-bar {
 		flex: 1;
-		height: 4px;
+		height: 10px;
 		background: var(--surface-2);
 		border-radius: 999px;
 		overflow: hidden;
+		border: 1px solid rgba(15, 23, 42, 0.05);
 	}
 
 	.tp-vol-fill {
 		height: 100%;
 		border-radius: 999px;
-		background: linear-gradient(90deg, var(--green), var(--red));
+		background: linear-gradient(90deg, rgba(34, 197, 94, 0.92), rgba(239, 68, 68, 0.92));
 	}
 
 	.tv-yes {
 		color: #15803d;
+		min-width: 72px;
 	}
 
 	.tv-no {
 		color: #b91c1c;
+		min-width: 72px;
+		text-align: right;
 	}
 
 	/* ─── TRADE PANEL ─── */
+	@media (max-width: 760px) {
+		.tp-mchips {
+			grid-template-columns: 1fr;
+		}
+
+		.tp-overview-head,
+		.tp-bar-labels,
+		.tp-vol-labels {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+
 	.tp-result {
 		border-radius: var(--r-md);
 		padding: 16px 20px;
@@ -897,50 +1049,63 @@ $QTY_MIN          = 1;
 
 	.tp-sell-box {
 		margin-top: 14px;
-		padding: 16px;
-		border-radius: var(--r-md);
-		background: rgba(37, 99, 235, 0.07);
-		border: 1px solid rgba(37, 99, 235, 0.18);
+		padding: 18px;
+		border-radius: 18px;
+		background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0.96));
+		border: 1px solid rgba(37, 99, 235, 0.16);
 		display: grid;
-		gap: 12px;
+		gap: 14px;
 	}
 
 	.tp-sell-head {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		justify-content: space-between;
 		gap: 12px;
 		flex-wrap: wrap;
 	}
 
+	.tp-sell-copy {
+		display: grid;
+		gap: 6px;
+	}
+
 	.tp-sell-title {
-		font-size: 15px;
+		font-size: 20px;
 		font-weight: 700;
 		color: var(--ink);
+	}
+
+	.tp-sell-sub {
+		font-size: 13px;
+		color: var(--muted);
+		line-height: 1.6;
 	}
 
 	.tp-sell-chip {
 		display: inline-flex;
 		align-items: center;
-		padding: 6px 10px;
+		padding: 7px 12px;
 		border-radius: 999px;
 		font-size: 11px;
 		font-weight: 700;
 		background: rgba(34, 197, 94, 0.12);
 		color: #15803d;
+		border: 1px solid rgba(34, 197, 94, 0.18);
 	}
 
 	.tp-sell-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 10px;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
 	}
 
 	.tp-sell-item {
-		padding: 12px;
-		border-radius: 12px;
-		background: var(--white);
-		border: 1px solid var(--border);
+		padding: 14px;
+		border-radius: 16px;
+		background: rgba(255, 255, 255, 0.94);
+		border: 1px solid rgba(15, 23, 42, 0.08);
+		box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
 	}
 
 	.tp-sell-item span {
@@ -954,39 +1119,81 @@ $QTY_MIN          = 1;
 	}
 
 	.tp-sell-item strong {
-		font-size: 18px;
+		font-size: 30px;
 		font-weight: 700;
 		color: var(--ink);
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+	}
+
+	.tp-sell-item.is-profit {
+		background: linear-gradient(180deg, rgba(34, 197, 94, 0.10), rgba(255, 255, 255, 0.96));
+		border-color: rgba(34, 197, 94, 0.18);
+	}
+
+	.tp-sell-item.is-profit strong {
+		color: #15803d;
 	}
 
 	.tp-sell-note {
 		font-size: 13px;
 		color: var(--muted);
 		line-height: 1.6;
+		padding: 0;
 	}
 
 	.tp-sell-actions {
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		flex-wrap: wrap;
+		gap: 14px;
 	}
 
 	.tp-sell-btn {
 		border: none;
-		border-radius: 12px;
-		padding: 12px 18px;
-		background: #2563eb;
+		border-radius: 14px;
+		padding: 14px 22px;
+		background: linear-gradient(135deg, #2563eb, #1d4ed8);
 		color: #fff;
-		font-size: 13px;
+		font-size: 14px;
 		font-weight: 700;
 		cursor: pointer;
+		white-space: nowrap;
+		box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
 	}
 
 	.tp-sell-muted {
 		font-size: 12px;
 		color: var(--hint);
+		line-height: 1.6;
+	}
+
+	.tp-sell-form {
+		margin: 0;
+	}
+
+	@media (max-width: 760px) {
+		.tp-sell-box {
+			padding: 16px;
+			border-radius: 16px;
+		}
+
+		.tp-sell-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.tp-sell-item strong {
+			font-size: 26px;
+		}
+
+		.tp-sell-actions {
+			grid-template-columns: 1fr;
+		}
+
+		.tp-sell-btn,
+		.tp-sell-form {
+			width: 100%;
+		}
 	}
 
 	.tp-inline-note {
@@ -1354,21 +1561,7 @@ $QTY_MIN          = 1;
 	<div class="tp-hero">
 		<div>
 			<div class="tp-hero-q"><?php echo html_escape($selected_question->question); ?></div>
-			<?php
-			$start_ts = (!empty($selected_question->start_time) && $selected_question->start_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->start_time) : false;
-			$end_ts   = (!empty($selected_question->end_time) && $selected_question->end_time !== '0000-00-00 00:00:00') ? strtotime($selected_question->end_time) : false;
-			$now      = time();
-			?>
-
-			<p class="tp-hero-sub">
-				<?php if ($start_ts && $now < $start_ts): ?>
-					⏳ Market starts at <strong><?php echo date('d M Y, h:i A', $start_ts); ?></strong>
-				<?php elseif ($end_ts && $now <= $end_ts): ?>
-					🔴 Market closes at <strong><?php echo date('d M Y, h:i A', $end_ts); ?></strong>
-				<?php else: ?>
-					⚠️ Market is closed
-				<?php endif; ?>
-			</p>
+			<p class="tp-hero-sub"><?php echo $hero_market_text; ?></p>
 		</div>
 		<div class="tp-hero-pills">
 			<span class="tp-pill tp-pill-users">
@@ -1487,7 +1680,10 @@ $QTY_MIN          = 1;
 					<?php if ($is_locked && !$is_sold_trade && !empty($sell_trade_summary) && !empty($sell_trade_summary['can_sell'])): ?>
 						<div class="tp-sell-box">
 							<div class="tp-sell-head">
-								<div class="tp-sell-title">Sell trade and book profit</div>
+								<div class="tp-sell-copy">
+									<div class="tp-sell-title">Sell trade and book profit</div>
+									<div class="tp-sell-sub">Exit this trade early and lock your gain while the market is still open.</div>
+								</div>
 								<span class="tp-sell-chip">Sell Available</span>
 							</div>
 							<div class="tp-sell-grid">
@@ -1499,23 +1695,20 @@ $QTY_MIN          = 1;
 									<span>Locked Payout</span>
 									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?></strong>
 								</div>
-								<div class="tp-sell-item">
-									<span>Current Return</span>
-									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['exit_amount'] ?? 0), 2); ?></strong>
-								</div>
-								<div class="tp-sell-item">
+								<div class="tp-sell-item is-profit">
 									<span>Net Profit</span>
 									<strong>Rs <?php echo number_format((float) ($sell_trade_summary['net_profit'] ?? 0), 2); ?></strong>
 								</div>
 							</div>
 							<div class="tp-sell-note"><?php echo html_escape((string) ($sell_trade_summary['message'] ?? '')); ?></div>
 							<div class="tp-sell-actions">
-								<div class="tp-sell-muted">
-									Locked payout Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> · Booked Stake Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?>
+								<div class="tp-sell-muted">Booked stake Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?>. If you sell now, Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> will be credited and your profit will be Rs <?php echo number_format((float) ($sell_trade_summary['net_profit'] ?? 0), 2); ?>.</div>
+								<div class="tp-sell-muted" style="display:none;">
+									Live payout Rs <?php echo number_format((float) ($sell_trade_summary['booked_return'] ?? 0), 2); ?> · Booked Stake Rs <?php echo number_format((float) ($sell_trade_summary['entry_amount'] ?? 0), 2); ?>
 									x <?php echo number_format((float) ($sell_trade_summary['current_multiplier'] ?? 0), 2); ?>
 									= Rs <?php echo number_format((float) ($sell_trade_summary['exit_amount'] ?? 0), 2); ?>
 								</div>
-								<form method="post" action="<?php echo site_url('questions/sell-trade'); ?>" class="js-sell-trade-form">
+								<form method="post" action="<?php echo site_url('questions/sell-trade'); ?>" class="js-sell-trade-form tp-sell-form">
 									<input type="hidden" name="question_id" value="<?php echo (int) $selected_question->id; ?>">
 									<button type="submit" class="tp-sell-btn">Sell Trade Now</button>
 								</form>
@@ -1825,13 +2018,7 @@ $QTY_MIN          = 1;
 			qInc = document.querySelector('.js-qinc');
 
 		if (heroSub) {
-			heroSub.innerHTML = <?php echo json_encode(
-									($start_ts && $now < $start_ts)
-										? '<span class="tp-hero-sub-icon pending"><i class="fa-solid fa-clock"></i></span><span>Market starts at <strong>' . date('d M Y, h:i A', $start_ts) . '</strong></span>'
-										: (($end_ts && $now <= $end_ts)
-											? '<span class="tp-hero-sub-icon open"><i class="fa-solid fa-bolt"></i></span><span>Market closes at <strong>' . date('d M Y, h:i A', $end_ts) . '</strong></span>'
-											: '<span class="tp-hero-sub-icon closed"><i class="fa-solid fa-lock"></i></span><span>Market is closed</span>')
-								); ?>;
+			heroSub.innerHTML = <?php echo json_encode($hero_market_html); ?>;
 		}
 
 		if (sb) {
