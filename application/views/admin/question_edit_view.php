@@ -117,18 +117,6 @@ $extra_no_quantity = isset($trade_totals['admin_no_quantity']) ? (int) $trade_to
 				</div>
 
 				<div class="form-group">
-					<label for="yes_multiplier">YES Multiplier</label>
-					<input type="number" id="yes_multiplier" name="yes_multiplier" min="0.01" step="0.01" value="<?php echo set_value('yes_multiplier', number_format((float) ($question->yes_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
-					<small class="question-field-hint">Manual value. It will stay as saved.</small>
-				</div>
-
-				<div class="form-group">
-					<label for="no_multiplier">NO Multiplier</label>
-					<input type="number" id="no_multiplier" name="no_multiplier" min="0.01" step="0.01" value="<?php echo set_value('no_multiplier', number_format((float) ($question->no_multiplier ?? $question->multiplier ?? 1.25), 2, '.', '')); ?>" required>
-					<small class="question-field-hint">Manual value. It will stay as saved.</small>
-				</div>
-
-				<div class="form-group">
 					<label for="admin_yes_quantity">Yes Quantity</label>
 					<input type="number" id="admin_yes_quantity" name="admin_yes_quantity" min="0" step="1" value="<?php echo set_value('admin_yes_quantity', $display_yes_quantity); ?>" required>
 					<small class="question-field-hint">Live: <?php echo number_format($actual_yes_quantity); ?> | Extra: <?php echo number_format($extra_yes_quantity); ?></small>

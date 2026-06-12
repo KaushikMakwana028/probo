@@ -300,9 +300,10 @@ class Questions extends CI_Controller
 			redirect('questions/answer/' . $question_id);
 		}
 
+		$yes_price = (float) $selected_question->yes_price;
+		$no_price = (float) $selected_question->no_price;
 		$stake_amount = round($selected_price * $selected_quantity, 2);
-		$multiplier = $this->get_question_multiplier($selected_question, $selected_answer);
-		$winning_amount = round($stake_amount * $multiplier, 2);
+		$winning_amount = round(($yes_price + $no_price) * $selected_quantity, 2);
 
 		if ($stake_amount <= 0) {
 			$this->session->set_flashdata('error', 'Trade amount is invalid.');
@@ -638,8 +639,8 @@ class Questions extends CI_Controller
 			? (float) $question->no_price
 			: (float) $question->yes_price;
 
-		// Current multiplier for the side the user is on
-		$current_multiplier = $this->get_question_multiplier($question, $answer_side);
+		// Current multiplier for the side the user is on (relative to entry price)
+		$current_multiplier = $entry_price > 0 ? ($current_price / $entry_price) : 0.0;
 
 		// ── Peak tracking (multiplier-only, not price) ────────────────────────
 		// We only track peak MULTIPLIER. Price is irrelevant to unlock logic.
@@ -715,25 +716,16 @@ class Questions extends CI_Controller
 	}
 	private function get_question_multiplier($question, $answer)
 	{
-		$answer_key = strtolower(trim((string) $answer));
-		$fallback = 1.25;
-
-		if ($question && isset($question->multiplier) && (float) $question->multiplier > 0) {
-			$fallback = (float) $question->multiplier;
-		}
-
 		if (!$question) {
-			return $fallback;
+			return 1.25;
 		}
+		$yes_price = (float) $question->yes_price;
+		$no_price = (float) $question->no_price;
+		$selected_price = strtolower(trim((string) $answer)) === 'no' ? $no_price : $yes_price;
 
-		if ($answer_key === 'no' && isset($question->no_multiplier) && (float) $question->no_multiplier > 0) {
-			return (float) $question->no_multiplier;
+		if ($selected_price > 0) {
+			return round(($yes_price + $no_price) / $selected_price, 4);
 		}
-
-		if ($answer_key === 'yes' && isset($question->yes_multiplier) && (float) $question->yes_multiplier > 0) {
-			return (float) $question->yes_multiplier;
-		}
-
-		return $fallback;
+		return 1.25;
 	}
 }

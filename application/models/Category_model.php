@@ -514,7 +514,9 @@ class Category_model extends CI_Model
 				'admin_no_quantity' => $admin_no_quantity,
 				'yes_users' => 0,
 				'no_users' => 0,
-				'total_users' => 0
+				'total_users' => 0,
+				'yes_spent' => 0.0,
+				'no_spent' => 0.0
 			);
 		}
 
@@ -530,6 +532,18 @@ class Category_model extends CI_Model
 			$users[$key] = (int) $row->total_users;
 		}
 
+		$spent = array('yes_spent' => 0.0, 'no_spent' => 0.0);
+		$this->db->select('answer, SUM(stake_amount) AS total_spent');
+		$this->db->from($this->answer_table);
+		$this->db->where('question_id', $question_id);
+		$this->db->group_by('answer');
+		$spent_rows = $this->db->get()->result();
+
+		foreach ($spent_rows as $row) {
+			$key = strtolower((string) $row->answer) === 'no' ? 'no_spent' : 'yes_spent';
+			$spent[$key] = (float) $row->total_spent;
+		}
+
 		return array(
 			'yes_quantity' => $display_yes_quantity,
 			'no_quantity' => $display_no_quantity,
@@ -539,7 +553,9 @@ class Category_model extends CI_Model
 			'admin_no_quantity' => $admin_no_quantity,
 			'yes_users' => (int) $users['yes_users'],
 			'no_users' => (int) $users['no_users'],
-			'total_users' => (int) $users['yes_users'] + (int) $users['no_users']
+			'total_users' => (int) $users['yes_users'] + (int) $users['no_users'],
+			'yes_spent' => (float) $spent['yes_spent'],
+			'no_spent' => (float) $spent['no_spent']
 		);
 	}
 

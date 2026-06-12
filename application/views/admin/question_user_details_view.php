@@ -1,10 +1,12 @@
 <?php
 $detail_question  = $selected_question;
 $real_users = isset($detail_question->real_users) ? (int)$detail_question->real_users : 0;
-$yes_qty    = isset($detail_question->trade_totals['yes_quantity']) ? (int)$detail_question->trade_totals['yes_quantity'] : 0;
-$no_qty     = isset($detail_question->trade_totals['no_quantity'])  ? (int)$detail_question->trade_totals['no_quantity']  : 0;
+$yes_qty    = isset($detail_question->trade_totals['actual_yes_quantity']) ? (int)$detail_question->trade_totals['actual_yes_quantity'] : 0;
+$no_qty     = isset($detail_question->trade_totals['actual_no_quantity'])  ? (int)$detail_question->trade_totals['actual_no_quantity']  : 0;
 $yes_users  = isset($detail_question->user_counts['yes_users'])     ? (int)$detail_question->user_counts['yes_users']     : 0;
 $no_users   = isset($detail_question->user_counts['no_users'])      ? (int)$detail_question->user_counts['no_users']      : 0;
+$yes_spent  = isset($detail_question->trade_totals['yes_spent']) ? (float)$detail_question->trade_totals['yes_spent'] : 0.0;
+$no_spent   = isset($detail_question->trade_totals['no_spent'])  ? (float)$detail_question->trade_totals['no_spent']  : 0.0;
 
 $market_total   = (float)$detail_question->yes_price + (float)$detail_question->no_price;
 $spread_total   = abs((float)$detail_question->yes_price - (float)$detail_question->no_price);
@@ -391,8 +393,9 @@ $answer_key_label = !empty($detail_question->answer_key) ? strtoupper((string)$d
 	}
 
 	.qp-di-s {
-		font-size: 10px;
-		color: var(--tx3);
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--tx2);
 	}
 
 	/* ─── SECTION HEADER ───────────────────────────────────── */
@@ -610,6 +613,25 @@ $answer_key_label = !empty($detail_question->answer_key) ? strtoupper((string)$d
 	.qt-w {
 		color: var(--green);
 		font-weight: 600;
+	}
+
+	/* Real Users — highlighted like spend values */
+	.qp-stat--users .qp-stat-v {
+		font-size: 28px;
+		font-weight: 800;
+		color: #2563eb;
+		/* same blue as --blue token */
+		letter-spacing: -.03em;
+	}
+
+	.qp-stat--users {
+		background: #eff6ff;
+		border-color: #bfdbfe;
+	}
+
+	.qp-stat--users .qp-stat-l {
+		color: #2563eb;
+		opacity: .7;
 	}
 
 	/* ─── PILLS ────────────────────────────────────────────── */
@@ -1145,22 +1167,20 @@ $answer_key_label = !empty($detail_question->answer_key) ? strtoupper((string)$d
 					<div class="qp-di-l">Yes Price</div>
 					<div class="qp-di-v yes">₹<?php echo number_format((float)$detail_question->yes_price, 2); ?></div>
 					<div class="qp-di-s"><?php echo $yes_users; ?> users · <?php echo $yes_qty; ?> qty</div>
+					<div class="qp-di-v" style="font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--green);">Total: ₹<?php echo number_format($yes_spent, 2); ?></div>
 				</div>
 				<div class="qp-di">
 					<div class="qp-di-l">No Price</div>
 					<div class="qp-di-v no">₹<?php echo number_format((float)$detail_question->no_price, 2); ?></div>
 					<div class="qp-di-s"><?php echo $no_users; ?> users · <?php echo $no_qty; ?> qty</div>
+					<div class="qp-di-v" style="font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--red);">Total: ₹<?php echo number_format($no_spent, 2); ?></div>
 				</div>
 				<div class="qp-di">
 					<div class="qp-di-l">Market Total</div>
 					<div class="qp-di-v">₹<?php echo number_format($market_total, 2); ?></div>
 					<div class="qp-di-s">Spread ₹<?php echo number_format($spread_total, 2); ?></div>
 				</div>
-				<div class="qp-di">
-					<div class="qp-di-l">Multiplier</div>
-					<div class="qp-di-v">×<?php echo number_format($multiplier_val, 2); ?></div>
-					<div class="qp-di-s">Reward multiplier</div>
-				</div>
+
 				<div class="qp-di">
 					<div class="qp-di-l">Start Time</div>
 					<div class="qp-di-v" style="font-size:12px;letter-spacing:-.01em"><?php echo !empty($detail_question->start_time) ? html_escape($detail_question->start_time) : 'Not set'; ?></div>

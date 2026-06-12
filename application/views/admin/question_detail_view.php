@@ -534,16 +534,7 @@ if ($start_ts && $now_ts < $start_ts) {
 				<strong class="js-market-total">Rs <?php echo number_format($market_total, 2); ?></strong>
 				<small>Spread: <span class="js-spread">Rs <?php echo number_format($spread_total, 2); ?></span></small>
 			</div>
-			<div class="qd-fact">
-				<label>YES Multiplier</label>
-				<strong>×<?php echo number_format((float) ($detail_question->yes_multiplier ?? $detail_question->multiplier ?? 1.25), 2); ?></strong>
-				<small>Current YES reward multiplier</small>
-			</div>
-			<div class="qd-fact">
-				<label>NO Multiplier</label>
-				<strong>×<?php echo number_format((float) ($detail_question->no_multiplier ?? $detail_question->multiplier ?? 1.25), 2); ?></strong>
-				<small>Current NO reward multiplier</small>
-			</div>
+
 			<div class="qd-fact">
 				<label>Start time</label>
 				<strong style="font-size:15px;"><?php echo !empty($detail_question->start_time) ? html_escape($detail_question->start_time) : 'Not set'; ?></strong>

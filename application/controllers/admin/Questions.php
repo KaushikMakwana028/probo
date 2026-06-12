@@ -255,8 +255,8 @@ class Questions extends CI_Controller
 			$question_text = $this->normalize_question_text(isset($questions_input[$i]) ? $questions_input[$i] : '');
 			$yes_price = $this->normalize_market_price(isset($yes_prices[$i]) ? $yes_prices[$i] : 0);
 			$no_price = $this->normalize_market_price(isset($no_prices[$i]) ? $no_prices[$i] : 0);
-			$yes_multiplier = round(max(0, (float) (isset($yes_multipliers[$i]) ? $yes_multipliers[$i] : 0)), 4);
-			$no_multiplier = round(max(0, (float) (isset($no_multipliers[$i]) ? $no_multipliers[$i] : 0)), 4);
+			$yes_multiplier = 1.25;
+			$no_multiplier = 1.25;
 
 			if ($question_text === '') {
 				$this->session->set_flashdata('error', 'Please fill all question textboxes before saving.');
@@ -265,11 +265,6 @@ class Questions extends CI_Controller
 
 			if (!$this->is_valid_price_pair($yes_price, $no_price)) {
 				$this->session->set_flashdata('error', 'YES and NO prices must both be at least Rs 0.50.');
-				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
-			}
-
-			if ($yes_multiplier <= 0 || $no_multiplier <= 0) {
-				$this->session->set_flashdata('error', 'YES and NO multipliers must be greater than zero.');
 				redirect('admin/questions/add?category_id=' . $category_id . '&question_count=' . $question_count);
 			}
 
@@ -347,8 +342,6 @@ class Questions extends CI_Controller
 		$this->form_validation->set_rules('question', 'Question', 'required|trim');
 		$this->form_validation->set_rules('yes_price', 'Yes price', 'required|numeric');
 		$this->form_validation->set_rules('no_price', 'No price', 'required|numeric');
-		$this->form_validation->set_rules('yes_multiplier', 'YES Multiplier', 'required|numeric|greater_than[0]');
-		$this->form_validation->set_rules('no_multiplier', 'NO Multiplier', 'required|numeric|greater_than[0]');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[draft,open,closed]');
 		$this->form_validation->set_rules('admin_yes_quantity', 'Yes quantity', 'required|integer|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('admin_no_quantity', 'No quantity', 'required|integer|greater_than_equal_to[0]');
@@ -363,8 +356,8 @@ class Questions extends CI_Controller
 		$question_text = $this->normalize_question_text($this->input->post('question', TRUE));
 		$yes_price = $this->normalize_market_price($this->input->post('yes_price', TRUE));
 		$no_price = $this->normalize_market_price($this->input->post('no_price', TRUE));
-		$yes_multiplier = round(max(0, (float) $this->input->post('yes_multiplier', TRUE)), 4);
-		$no_multiplier = round(max(0, (float) $this->input->post('no_multiplier', TRUE)), 4);
+		$yes_multiplier = 1.25;
+		$no_multiplier = 1.25;
 		$entered_yes_quantity = (int) $this->input->post('admin_yes_quantity', TRUE);
 		$entered_no_quantity = (int) $this->input->post('admin_no_quantity', TRUE);
 		$status = strtolower(trim((string) $this->input->post('status', TRUE)));
@@ -384,11 +377,6 @@ class Questions extends CI_Controller
 
 		if (!$this->is_valid_price_pair($yes_price, $no_price)) {
 			$this->session->set_flashdata('error', 'YES and NO prices must both be at least Rs 0.50.');
-			redirect('admin/questions/edit/' . $id);
-		}
-
-		if ($yes_multiplier <= 0 || $no_multiplier <= 0) {
-			$this->session->set_flashdata('error', 'YES and NO multipliers must be greater than zero.');
 			redirect('admin/questions/edit/' . $id);
 		}
 
@@ -858,10 +846,8 @@ class Questions extends CI_Controller
 
 		foreach ($unsettled_answers as $answer) {
 			$is_winner = strtolower((string) $answer->answer) === strtolower((string) $answer_key);
-			$stake_amount = isset($answer->stake_amount) && (float) $answer->stake_amount > 0
-				? (float) $answer->stake_amount
-				: round((float) $answer->price * (int) $answer->quantity, 2);
-			$current_payout = round($stake_amount * $this->get_question_multiplier($question, $answer->answer), 2);
+			$market_total = (float) $question->yes_price + (float) $question->no_price;
+			$current_payout = round($market_total * (int) $answer->quantity, 2);
 			$payout_amount = $is_winner ? $current_payout : 0.00;
 
 			$this->Category_model->mark_answer_settlement((int) $answer->id, $payout_amount, $settled_at, array(
@@ -910,25 +896,16 @@ class Questions extends CI_Controller
 
 	private function get_question_multiplier($question, $answer)
 	{
-		$answer_key = strtolower(trim((string) $answer));
-		$fallback = 1.25;
-
-		if ($question && isset($question->multiplier) && (float) $question->multiplier > 0) {
-			$fallback = (float) $question->multiplier;
-		}
-
 		if (!$question) {
-			return $fallback;
+			return 1.25;
 		}
+		$yes_price = (float) $question->yes_price;
+		$no_price = (float) $question->no_price;
+		$selected_price = strtolower(trim((string) $answer)) === 'no' ? $no_price : $yes_price;
 
-		if ($answer_key === 'no' && isset($question->no_multiplier) && (float) $question->no_multiplier > 0) {
-			return (float) $question->no_multiplier;
+		if ($selected_price > 0) {
+			return round(($yes_price + $no_price) / $selected_price, 4);
 		}
-
-		if ($answer_key === 'yes' && isset($question->yes_multiplier) && (float) $question->yes_multiplier > 0) {
-			return (float) $question->yes_multiplier;
-		}
-
-		return $fallback;
+		return 1.25;
 	}
 }

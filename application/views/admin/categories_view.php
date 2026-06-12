@@ -1,741 +1,783 @@
 <?php if ($this->session->flashdata('error')): ?>
-	<div class="message error">
-		<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V13H11V15ZM11 11H9V5H11V11Z" fill="currentColor" />
+	<div class="c-alert c-alert--error">
+		<svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+			<circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2" />
+			<path d="M10 6v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 		</svg>
 		<span><?php echo $this->session->flashdata('error'); ?></span>
-		<button class="message-close" onclick="this.parentElement.remove()">✕</button>
+		<button onclick="this.parentElement.remove()">×</button>
 	</div>
 <?php endif; ?>
-
 <?php if ($this->session->flashdata('success')): ?>
-	<div class="message success">
-		<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="currentColor" />
+	<div class="c-alert c-alert--success">
+		<svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+			<path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-6l5-5-1-1-4 4-2-2-1 1 3 3z" />
 		</svg>
 		<span><?php echo $this->session->flashdata('success'); ?></span>
-		<button class="message-close" onclick="this.parentElement.remove()">✕</button>
+		<button onclick="this.parentElement.remove()">×</button>
 	</div>
 <?php endif; ?>
 
 <style>
-	* {
-		box-sizing: border-box;
+	/* ═══════════════════════════════════════════════
+   TOKENS  (same as questions page)
+═══════════════════════════════════════════════ */
+	:root {
+		--ac: #5b5ef4;
+		--ac-lt: #eeeeff;
+		--ac-dk: #4344d4;
+		--sur: #ffffff;
+		--sur2: #f7f8fc;
+		--bdr: #e4e6ef;
+		--t1: #12131a;
+		--t2: #4b5066;
+		--t3: #9499b0;
+		--green: #12b76a;
+		--green-bg: #edfaf3;
+		--green-bd: #a3e6c7;
+		--red: #e03e3e;
+		--red-bg: #fff1f1;
+		--red-bd: #fcc;
+		--r-sm: 8px;
+		--r-md: 12px;
+		--r-lg: 16px;
+		--sh-sm: 0 1px 3px rgba(18, 19, 26, .06), 0 1px 2px rgba(18, 19, 26, .04);
+		--sh-md: 0 4px 12px rgba(18, 19, 26, .08), 0 2px 4px rgba(18, 19, 26, .04);
 	}
 
-	/* Flash Messages */
-	.message {
+	/* ═══════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════ */
+	.c-alert {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 16px 20px;
-		border-radius: 16px;
-		margin-bottom: 24px;
-		font-weight: 500;
-		animation: slideDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-		position: relative;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		gap: 10px;
+		padding: 13px 16px;
+		border-radius: var(--r-sm);
+		margin-bottom: 16px;
+		font-size: 13px;
+		font-weight: 600;
+		animation: cSlide .3s ease;
 	}
 
-	.message span {
-		flex: 1;
-	}
-
-	.message-close {
-		background: none;
-		border: none;
-		color: inherit;
-		font-size: 18px;
-		cursor: pointer;
-		padding: 4px 8px;
-		border-radius: 6px;
-		opacity: 0.7;
-		transition: all 0.2s ease;
-		line-height: 1;
-	}
-
-	.message-close:hover {
-		opacity: 1;
-		background: rgba(0, 0, 0, 0.1);
-	}
-
-	@keyframes slideDown {
+	@keyframes cSlide {
 		from {
 			opacity: 0;
-			transform: translateY(-20px) scale(0.95);
+			transform: translateY(-8px)
 		}
 
 		to {
 			opacity: 1;
-			transform: translateY(0) scale(1);
+			transform: translateY(0)
 		}
 	}
 
-	.message.error {
-		background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-		border: 2px solid #fecaca;
-		color: #991b1b;
+	.c-alert--error {
+		background: var(--red-bg);
+		border: 1px solid var(--red-bd);
+		color: var(--red);
 	}
 
-	.message.success {
-		background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-		border: 2px solid #bbf7d0;
-		color: #166534;
+	.c-alert--success {
+		background: var(--green-bg);
+		border: 1px solid var(--green-bd);
+		color: #0a6640;
 	}
 
-	/* Admin Stats */
-	.admin-stats {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 24px;
-		margin-bottom: 32px;
+	.c-alert span {
+		flex: 1;
 	}
 
-	.admin-stat-card {
-		padding: 28px;
-		border-radius: 20px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		position: relative;
-		overflow: hidden;
-		transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-		box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
-	}
-
-	.admin-stat-card::before {
-		content: '';
-		position: absolute;
-		top: -50%;
-		right: -50%;
-		width: 200%;
-		height: 200%;
-		background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-		pointer-events: none;
-		transition: transform 0.6s ease;
-	}
-
-	.admin-stat-card::after {
-		content: '';
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		width: 100px;
-		height: 100px;
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 50%;
-		transform: translate(30%, 30%);
-		transition: transform 0.4s ease;
-	}
-
-	.admin-stat-card:hover {
-		transform: translateY(-8px) scale(1.02);
-		box-shadow: 0 16px 40px rgba(102, 126, 234, 0.35);
-	}
-
-	.admin-stat-card:hover::before {
-		transform: rotate(180deg);
-	}
-
-	.admin-stat-card:hover::after {
-		transform: translate(20%, 20%) scale(1.5);
-	}
-
-	.admin-stat-card:nth-child(2) {
-		background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-		box-shadow: 0 8px 24px rgba(245, 87, 108, 0.25);
-	}
-
-	.admin-stat-card:nth-child(2):hover {
-		box-shadow: 0 16px 40px rgba(245, 87, 108, 0.35);
-	}
-
-	.admin-stat-card:nth-child(3) {
-		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-		box-shadow: 0 8px 24px rgba(79, 172, 254, 0.25);
-	}
-
-	.admin-stat-card:nth-child(3):hover {
-		box-shadow: 0 16px 40px rgba(79, 172, 254, 0.35);
-	}
-
-	.admin-stat-label {
-		font-size: 13px;
-		font-weight: 700;
-		opacity: 0.95;
-		margin-bottom: 12px;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		position: relative;
-		z-index: 1;
-	}
-
-	.admin-stat-value {
-		font-size: 48px;
-		font-weight: 900;
-		margin-bottom: 12px;
+	.c-alert button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-size: 18px;
 		line-height: 1;
-		position: relative;
-		z-index: 1;
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		color: inherit;
+		opacity: .55;
+		padding: 0 2px;
 	}
 
-	.admin-stat-note {
-		font-size: 13px;
-		opacity: 0.9;
-		line-height: 1.6;
-		position: relative;
-		z-index: 1;
+	.c-alert button:hover {
+		opacity: 1;
 	}
 
-	.quick-link {
-		color: white;
-		text-decoration: none;
-		font-weight: 700;
-		transition: all 0.3s ease;
+	/* ═══════════════════════════════════════════════
+   STATS STRIP
+═══════════════════════════════════════════════ */
+	.cs-stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 14px;
+		margin-bottom: 22px;
+	}
+
+	.cs-stat {
+		background: var(--sur);
+		border: 1px solid var(--bdr);
+		border-radius: var(--r-md);
+		padding: 18px 20px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		box-shadow: var(--sh-sm);
+		transition: box-shadow .2s, border-color .2s;
+	}
+
+	.cs-stat:hover {
+		box-shadow: var(--sh-md);
+		border-color: #d0d2e0;
+	}
+
+	.cs-stat-icon {
+		width: 46px;
+		height: 46px;
+		border-radius: var(--r-sm);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.cs-stat-icon--indigo {
+		background: #eeeeff;
+	}
+
+	.cs-stat-icon--rose {
+		background: #fff0f3;
+	}
+
+	.cs-stat-icon--teal {
+		background: #e6faf4;
+	}
+
+	.cs-stat-num {
+		font-size: 26px;
+		font-weight: 800;
+		color: var(--t1);
+		line-height: 1;
+		letter-spacing: -.5px;
+	}
+
+	.cs-stat-label {
+		font-size: 12px;
+		color: var(--t3);
+		font-weight: 600;
+		margin-top: 3px;
+		text-transform: uppercase;
+		letter-spacing: .04em;
+	}
+
+	.cs-stat-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 8px 16px;
-		background: rgba(255, 255, 255, 0.15);
-		border-radius: 10px;
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		gap: 4px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--ac);
+		text-decoration: none;
+		margin-top: 2px;
 	}
 
-	.quick-link:hover {
-		background: rgba(255, 255, 255, 0.25);
-		transform: translateX(4px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	.cs-stat-link:hover {
+		text-decoration: underline;
 	}
 
-	/* Page Grid */
-	.category-page-grid {
+	.cs-stat-link svg {
+		transition: transform .2s;
+	}
+
+	.cs-stat-link:hover svg {
+		transform: translateX(3px);
+	}
+
+	/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+	.cs-layout {
 		display: grid;
-		grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
-		gap: 28px;
+		grid-template-columns: 300px 1fr;
+		gap: 20px;
 		align-items: start;
 	}
 
-	/* Form Panel */
-	.form-panel,
-	.admin-panel {
-		padding: 32px;
-		border-radius: 24px;
-		border: 2px solid #e5e7eb;
-		background: #ffffff;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 12px 24px rgba(0, 0, 0, 0.03);
-		transition: all 0.3s ease;
-		position: relative;
+	/* ═══════════════════════════════════════════════
+   CARD SHELL
+═══════════════════════════════════════════════ */
+	.cs-card {
+		background: var(--sur);
+		border: 1px solid var(--bdr);
+		border-radius: var(--r-lg);
+		box-shadow: var(--sh-sm);
 		overflow: hidden;
 	}
 
-	.form-panel::before,
-	.admin-panel::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 4px;
-		background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-		background-size: 200% 100%;
-		animation: shimmer 3s linear infinite;
+	.cs-card--sticky {
+		position: sticky;
+		top: 16px;
 	}
 
-	@keyframes shimmer {
-		0% {
-			background-position: -200% 0;
-		}
-
-		100% {
-			background-position: 200% 0;
-		}
-	}
-
-	.form-panel:hover,
-	.admin-panel:hover {
-		border-color: #d1d5db;
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04), 0 20px 40px rgba(0, 0, 0, 0.06);
-		transform: translateY(-2px);
-	}
-
-	.admin-panel-head {
+	.cs-card-header {
+		padding: 18px 22px 16px;
+		border-bottom: 1px solid var(--bdr);
 		display: flex;
 		align-items: flex-start;
-		justify-content: space-between;
-		gap: 16px;
-		margin-bottom: 28px;
-		padding-bottom: 24px;
-		border-bottom: 2px solid #f3f4f6;
-		position: relative;
+		gap: 12px;
 	}
 
-	.admin-panel-head::after {
-		content: '';
-		position: absolute;
-		bottom: -2px;
-		left: 0;
-		width: 60px;
-		height: 2px;
-		background: linear-gradient(90deg, #667eea, #764ba2);
-		border-radius: 2px;
+	.cs-card-hicon {
+		width: 36px;
+		height: 36px;
+		background: var(--ac-lt);
+		border-radius: var(--r-sm);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-top: 1px;
 	}
 
-	.section-title {
-		font-size: 24px;
-		font-weight: 800;
-		color: #111827;
-		margin: 0 0 8px 0;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	.admin-panel-head p {
-		color: #6b7280;
-		font-size: 14px;
-		margin: 0;
-		line-height: 1.6;
-	}
-
-	/* Form Styles */
-	.form-group {
-		margin-bottom: 24px;
-	}
-
-	.form-group label {
-		display: block;
-		margin-bottom: 10px;
-		font-weight: 700;
-		color: #374151;
-		font-size: 14px;
-		letter-spacing: 0.3px;
-	}
-
-	.form-group input[type="text"] {
-		width: 100%;
-		padding: 16px 18px;
-		border: 2px solid #e5e7eb;
-		border-radius: 14px;
+	.cs-card-htitle {
 		font-size: 15px;
-		transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-		background: #f9fafb;
-		font-weight: 500;
+		font-weight: 700;
+		color: var(--t1);
+		margin: 0 0 3px;
+		letter-spacing: -.1px;
 	}
 
-	.form-group input[type="text"]:focus {
+	.cs-card-hsub {
+		font-size: 12.5px;
+		color: var(--t3);
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.cs-card-body {
+		padding: 20px 22px;
+	}
+
+	/* cancel link in header */
+	.cs-cancel {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-left: auto;
+		flex-shrink: 0;
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--t3);
+		text-decoration: none;
+		padding: 6px 12px;
+		border: 1px solid var(--bdr);
+		border-radius: var(--r-sm);
+		background: var(--sur2);
+		transition: all .15s;
+		white-space: nowrap;
+	}
+
+	.cs-cancel:hover {
+		color: var(--red);
+		border-color: var(--red-bd);
+		background: var(--red-bg);
+	}
+
+	/* ═══════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════ */
+	.cs-field {
+		margin-bottom: 16px;
+	}
+
+	.cs-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--t2);
+		margin-bottom: 7px;
+		letter-spacing: .02em;
+	}
+
+	.cs-label svg {
+		color: var(--t3);
+	}
+
+	.cs-input {
+		width: 100%;
+		padding: 10px 13px;
+		border: 1.5px solid var(--bdr);
+		border-radius: var(--r-sm);
+		font-size: 13.5px;
+		color: var(--t1);
+		background: var(--sur2);
+		font-family: inherit;
+		transition: border-color .15s, background .15s, box-shadow .15s;
+	}
+
+	.cs-input:focus {
 		outline: none;
-		border-color: #667eea;
-		background: #ffffff;
-		box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(102, 126, 234, 0.15);
-		transform: translateY(-2px);
+		border-color: var(--ac);
+		background: var(--sur);
+		box-shadow: 0 0 0 3px rgba(91, 94, 244, .12);
 	}
 
-	.form-group input[type="text"]::placeholder {
-		color: #9ca3af;
-		font-weight: 400;
+	.cs-input::placeholder {
+		color: var(--t3);
+		font-size: 13px;
 	}
 
-	/* Buttons */
-	.btn-primary,
-	.btn-secondary,
-	.btn-danger {
+	/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+	.cs-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		gap: 8px;
-		padding: 14px 24px;
-		border-radius: 14px;
+		padding: 11px 20px;
+		border-radius: var(--r-sm);
+		font-size: 13.5px;
 		font-weight: 700;
-		font-size: 14px;
-		text-decoration: none;
 		cursor: pointer;
-		border: 2px solid transparent;
-		transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-		white-space: nowrap;
-		position: relative;
-		overflow: hidden;
-		letter-spacing: 0.3px;
-	}
-
-	.btn-primary::before,
-	.btn-secondary::before,
-	.btn-danger::before {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 0;
-		height: 0;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.2);
-		transform: translate(-50%, -50%);
-		transition: width 0.6s ease, height 0.6s ease;
-	}
-
-	.btn-primary:hover::before,
-	.btn-secondary:hover::before,
-	.btn-danger:hover::before {
-		width: 300px;
-		height: 300px;
-	}
-
-	.btn-primary {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		width: 100%;
 		border: none;
-		box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+		font-family: inherit;
+		text-decoration: none;
+		white-space: nowrap;
+		transition: all .15s;
+		letter-spacing: .01em;
 	}
 
-	.btn-primary:hover {
-		transform: translateY(-3px) scale(1.02);
-		box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+	.cs-btn--primary {
+		background: var(--ac);
+		color: #fff;
+		box-shadow: 0 2px 6px rgba(91, 94, 244, .3);
 	}
 
-	.btn-primary:active {
-		transform: translateY(-1px) scale(0.98);
+	.cs-btn--primary:hover {
+		background: var(--ac-dk);
+		box-shadow: 0 4px 12px rgba(91, 94, 244, .38);
+		transform: translateY(-1px);
 	}
 
-	.btn-secondary {
-		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-		border-color: #e5e7eb;
-		color: #374151;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	.cs-btn--full {
+		width: 100%;
 	}
 
-	.btn-secondary:hover {
-		background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-		border-color: #d1d5db;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	.cs-btn--ghost {
+		background: var(--sur2);
+		color: var(--t2);
+		border: 1.5px solid var(--bdr);
+		padding: 8px 14px;
+		font-size: 13px;
 	}
 
-	.btn-danger {
-		background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-		border-color: #fecaca;
-		color: #dc2626;
-		box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+	.cs-btn--ghost:hover {
+		border-color: var(--ac);
+		color: var(--ac);
+		background: var(--ac-lt);
 	}
 
-	.btn-danger:hover {
-		background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-		border-color: #fca5a5;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+	.cs-btn--danger {
+		background: var(--red-bg);
+		color: var(--red);
+		border: 1.5px solid var(--red-bd);
+		padding: 8px 14px;
+		font-size: 13px;
 	}
 
-	/* Category List */
-	.category-list {
-		display: grid;
-		gap: 18px;
+	.cs-btn--danger:hover {
+		background: #ffe4e4;
+		border-color: #f8a0a0;
+		transform: translateY(-1px);
 	}
 
-	.category-card {
-		padding: 28px;
-		border-radius: 18px;
-		border: 2px solid #f3f4f6;
-		background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-		transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-		position: relative;
-		overflow: hidden;
-	}
-
-	.category-card::before {
-		content: '';
-		position: absolute;
-		left: 0;
-		top: 0;
-		height: 100%;
-		width: 5px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		transform: scaleY(0);
-		transform-origin: bottom;
-		transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-	}
-
-	.category-card::after {
-		content: '';
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 100px;
-		height: 100px;
-		background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
-		border-radius: 50%;
-		transform: translate(50%, -50%) scale(0);
-		transition: transform 0.4s ease;
-	}
-
-	.category-card:hover {
-		border-color: #667eea;
-		box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
-		transform: translateX(8px) translateY(-4px);
-		background: #ffffff;
-	}
-
-	.category-card:hover::before {
-		transform: scaleY(1);
-		transform-origin: top;
-	}
-
-	.category-card:hover::after {
-		transform: translate(50%, -50%) scale(2);
-	}
-
-	.category-card-head {
+	/* ═══════════════════════════════════════════════
+   CATEGORY LIST
+═══════════════════════════════════════════════ */
+	.cs-list {
 		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 20px;
-		position: relative;
-		z-index: 1;
-	}
-
-	.category-card-head>div:first-child {
-		flex: 1;
-	}
-
-	.category-card h4 {
-		font-size: 20px;
-		font-weight: 800;
-		color: #111827;
-		margin: 0 0 12px 0;
-		letter-spacing: 0.3px;
-		transition: color 0.3s ease;
-	}
-
-	.category-card:hover h4 {
-		color: #667eea;
-	}
-
-	.card-actions {
-		display: flex;
-		flex-wrap: wrap;
+		flex-direction: column;
 		gap: 10px;
 	}
 
-	/* Info Pill */
-	.info-pill {
+	.cs-cat-row {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 14px 18px;
+		border: 1.5px solid var(--bdr);
+		border-radius: var(--r-md);
+		background: var(--sur);
+		box-shadow: var(--sh-sm);
+		transition: border-color .2s, box-shadow .2s, background .2s;
+	}
+
+	.cs-cat-row:hover {
+		border-color: rgba(91, 94, 244, .3);
+		box-shadow: var(--sh-md);
+		background: #fcfcff;
+	}
+
+	.cs-cat-avatar {
+		width: 38px;
+		height: 38px;
+		border-radius: 10px;
+		background: var(--ac-lt);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		font-size: 15px;
+		font-weight: 800;
+		color: var(--ac);
+		text-transform: uppercase;
+		letter-spacing: -.5px;
+		border: 1.5px solid rgba(91, 94, 244, .15);
+	}
+
+	.cs-cat-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.cs-cat-name {
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--t1);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		letter-spacing: -.1px;
+	}
+
+	.cs-cat-meta {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 8px 14px;
+		gap: 5px;
+		margin-top: 4px;
+		font-size: 11.5px;
+		font-weight: 600;
+		color: #5b8fc9;
+		background: #eef5ff;
+		border: 1px solid #c3daf9;
 		border-radius: 999px;
-		background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-		color: #0369a1;
-		font-size: 13px;
-		font-weight: 700;
-		border: 2px solid #bae6fd;
-		transition: all 0.3s ease;
-		box-shadow: 0 2px 8px rgba(3, 105, 161, 0.1);
+		padding: 2px 9px;
 	}
 
-	.category-card:hover .info-pill {
-		background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
-		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(3, 105, 161, 0.2);
+	.cs-cat-actions {
+		display: flex;
+		gap: 8px;
+		flex-shrink: 0;
 	}
 
-	/* Empty State */
-	.empty-state {
-		padding: 60px 32px;
-		border-radius: 20px;
-		background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-		border: 3px dashed #d1d5db;
+	/* ═══════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════ */
+	.cs-empty {
+		padding: 48px 24px;
 		text-align: center;
-		transition: all 0.3s ease;
-		position: relative;
-		overflow: hidden;
+		border: 2px dashed var(--bdr);
+		border-radius: var(--r-md);
+		background: var(--sur2);
 	}
 
-	.empty-state::before {
-		content: '📭';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		font-size: 120px;
-		opacity: 0.05;
-		pointer-events: none;
+	.cs-empty-icon {
+		width: 52px;
+		height: 52px;
+		border-radius: 13px;
+		background: var(--ac-lt);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 14px;
 	}
 
-	.empty-state:hover {
-		border-color: #9ca3af;
-		background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-	}
-
-	.empty-state p {
-		color: #6b7280;
+	.cs-empty-title {
 		font-size: 15px;
-		margin: 0;
-		line-height: 1.8;
-		font-weight: 500;
-		position: relative;
-		z-index: 1;
+		font-weight: 800;
+		color: var(--t1);
+		margin: 0 0 7px;
+		letter-spacing: -.2px;
 	}
 
-	/* Responsive */
-	@media (max-width: 920px) {
-		.category-page-grid {
+	.cs-empty-desc {
+		font-size: 13px;
+		color: var(--t3);
+		max-width: 320px;
+		margin: 0 auto;
+		line-height: 1.65;
+	}
+
+	/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+	@media(max-width:960px) {
+		.cs-layout {
 			grid-template-columns: 1fr;
 		}
 
-		.admin-stats {
-			grid-template-columns: 1fr;
+		.cs-card--sticky {
+			position: static;
 		}
 	}
 
-	@media (max-width: 768px) {
-		.category-card-head {
-			flex-direction: column;
+	@media(max-width:640px) {
+		.cs-stats {
+			grid-template-columns: 1fr 1fr;
 		}
 
-		.card-actions {
+		.cs-stats .cs-stat:last-child {
+			grid-column: span 2;
+		}
+
+		.cs-card-body,
+		.cs-card-header {
+			padding: 16px;
+		}
+
+		.cs-cat-row {
+			flex-wrap: wrap;
+		}
+
+		.cs-cat-actions {
 			width: 100%;
 		}
 
-		.card-actions .btn-secondary,
-		.card-actions .btn-danger {
+		.cs-btn--ghost,
+		.cs-btn--danger {
 			flex: 1;
-		}
-
-		.admin-panel-head {
-			flex-direction: column;
-		}
-
-		.form-panel,
-		.admin-panel {
-			padding: 24px;
-		}
-
-		.admin-stat-card {
-			padding: 24px;
+			justify-content: center;
 		}
 	}
 
-	@media (max-width: 480px) {
-		.admin-stat-value {
-			font-size: 36px;
+	@media(max-width:420px) {
+		.cs-stats {
+			grid-template-columns: 1fr;
 		}
 
-		.section-title {
-			font-size: 20px;
+		.cs-stats .cs-stat:last-child {
+			grid-column: span 1;
 		}
-
-		.form-panel,
-		.admin-panel {
-			padding: 20px;
-		}
-
-		.category-card {
-			padding: 20px;
-		}
-	}
-
-	/* Smooth scrolling */
-	html {
-		scroll-behavior: smooth;
-	}
-
-	/* Selection styling */
-	::selection {
-		background: rgba(102, 126, 234, 0.2);
-		color: #111827;
 	}
 </style>
 
-<section class="admin-stats">
-	<div class="admin-stat-card">
-		<div class="admin-stat-label">Total Categories</div>
-		<div class="admin-stat-value"><?php echo (int) $total_categories; ?></div>
-		<div class="admin-stat-note">Manage and organize your categories</div>
+<!-- ─── STATS ─────────────────────────────────────── -->
+<div class="cs-stats">
+	<div class="cs-stat">
+		<div class="cs-stat-icon cs-stat-icon--indigo">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+				<path d="M4 6h16M4 10h16M4 14h10M4 18h6" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+			</svg>
+		</div>
+		<div>
+			<div class="cs-stat-num"><?php echo (int)$total_categories; ?></div>
+			<div class="cs-stat-label">Categories</div>
+		</div>
 	</div>
-	<div class="admin-stat-card">
-		<div class="admin-stat-label">Total Questions</div>
-		<div class="admin-stat-value"><?php echo (int) $total_questions; ?></div>
-		<div class="admin-stat-note">Across all categories</div>
+
+	<div class="cs-stat">
+		<div class="cs-stat-icon cs-stat-icon--rose">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+				<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="#e05f8e" stroke-width="2" stroke-linecap="round" />
+			</svg>
+		</div>
+		<div>
+			<div class="cs-stat-num"><?php echo (int)$total_questions; ?></div>
+			<div class="cs-stat-label">Total Questions</div>
+		</div>
 	</div>
-	<div class="admin-stat-card">
-		<div class="admin-stat-label">Quick Actions</div>
-		<div class="admin-stat-note">
-			<a class="quick-link" href="<?php echo site_url('admin/questions'); ?>">
-				<span>Manage Questions</span>
-				<span>→</span>
+
+	<div class="cs-stat">
+		<div class="cs-stat-icon cs-stat-icon--teal">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+				<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</div>
+		<div>
+			<div class="cs-stat-label" style="margin-bottom:4px;">Quick Access</div>
+			<a class="cs-stat-link" href="<?php echo site_url('admin/questions'); ?>">
+				Manage Questions
+				<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+					<path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+				</svg>
 			</a>
 		</div>
 	</div>
-</section>
+</div>
 
-<section class="category-page-grid">
-	<section class="form-panel">
-		<div class="admin-panel-head">
-			<div>
-				<h3 class="section-title"><?php echo $edit_category ? '✏️ Edit Category' : '➕ Add Category'; ?></h3>
-				<p><?php echo $edit_category ? 'Update category information below' : 'Create a new category for questions'; ?></p>
+<!-- ─── LAYOUT ────────────────────────────────────── -->
+<div class="cs-layout">
+
+	<!-- LEFT: Add / Edit Form -->
+	<aside class="cs-card cs-card--sticky">
+		<div class="cs-card-header">
+			<div class="cs-card-hicon">
+				<?php if ($edit_category): ?>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+						<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+						<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+					</svg>
+				<?php else: ?>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+						<circle cx="12" cy="12" r="9" stroke="#5b5ef4" stroke-width="2" />
+						<path d="M12 8v8M8 12h8" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+					</svg>
+				<?php endif; ?>
+			</div>
+			<div style="flex:1">
+				<h3 class="cs-card-htitle"><?php echo $edit_category ? 'Edit Category' : 'Add Category'; ?></h3>
+				<p class="cs-card-hsub"><?php echo $edit_category ? 'Update the category name below.' : 'Create a new category for questions.'; ?></p>
 			</div>
 			<?php if ($edit_category): ?>
-				<a class="btn-secondary" href="<?php echo site_url('admin/categories'); ?>">✕ Cancel</a>
+				<a class="cs-cancel" href="<?php echo site_url('admin/categories'); ?>">
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+						<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
+					Cancel
+				</a>
 			<?php endif; ?>
 		</div>
 
-		<form method="post" action="<?php echo $edit_category ? site_url('admin/categories/update/' . $edit_category->id) : site_url('admin/categories/create'); ?>">
-			<div class="form-group">
-				<label for="category_name">Category Name *</label>
-				<input
-					type="text"
-					id="category_name"
-					name="name"
-					value="<?php echo set_value('name', $edit_category ? $edit_category->name : ''); ?>"
-					placeholder="e.g., General Knowledge, Science, History..."
-					required
-					autocomplete="off">
+		<div class="cs-card-body">
+			<form method="post" action="<?php echo $edit_category ? site_url('admin/categories/update/' . $edit_category->id) : site_url('admin/categories/create'); ?>">
+				<div class="cs-field">
+					<label class="cs-label" for="category_name">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+							<path d="M4 6h16M4 10h16M4 14h10M4 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+						</svg>
+						Category Name <span style="color:var(--red);margin-left:2px;">*</span>
+					</label>
+					<input
+						type="text"
+						class="cs-input"
+						id="category_name"
+						name="name"
+						value="<?php echo set_value('name', $edit_category ? $edit_category->name : ''); ?>"
+						placeholder="e.g. Cricket, Science, Politics…"
+						required
+						autocomplete="off">
+				</div>
+
+				<button class="cs-btn cs-btn--primary cs-btn--full" type="submit">
+					<?php if ($edit_category): ?>
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+							<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2" />
+							<polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="2" />
+							<polyline points="7 3 7 8 15 8" stroke="currentColor" stroke-width="2" />
+						</svg>
+						Save Changes
+					<?php else: ?>
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+							<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+							<path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+						</svg>
+						Create Category
+					<?php endif; ?>
+				</button>
+			</form>
+		</div>
+	</aside>
+
+	<!-- RIGHT: Category List -->
+	<section class="cs-card">
+		<div class="cs-card-header">
+			<div class="cs-card-hicon">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+					<path d="M4 6h16M4 10h16M4 14h10M4 18h6" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+				</svg>
 			</div>
-
-			<button class="btn-primary" type="submit">
-				<span><?php echo $edit_category ? '💾 Update Category' : '✓ Create Category'; ?></span>
-			</button>
-		</form>
-	</section>
-
-	<section class="admin-panel">
-		<div class="admin-panel-head">
 			<div>
-				<h3 class="section-title">📋 All Categories</h3>
-				<p>View and manage your question categories</p>
+				<h3 class="cs-card-htitle">All Categories</h3>
+				<p class="cs-card-hsub">View, edit or delete your question categories.</p>
 			</div>
 		</div>
 
-		<div class="category-list">
+		<div class="cs-card-body">
 			<?php if (!empty($categories)): ?>
-				<?php foreach ($categories as $category_item): ?>
-					<article class="category-card">
-						<div class="category-card-head">
-							<div>
-								<h4><?php echo html_escape($category_item->name); ?></h4>
-								<span class="info-pill">
-									<span>📝</span>
-									<span><?php echo count($category_item->questions); ?> question<?php echo count($category_item->questions) != 1 ? 's' : ''; ?></span>
+				<div class="cs-list">
+					<?php foreach ($categories as $cat): ?>
+						<div class="cs-cat-row">
+							<!-- Avatar: first letter of name -->
+							<div class="cs-cat-avatar"><?php echo mb_strtoupper(mb_substr(html_escape($cat->name), 0, 2)); ?></div>
+
+							<div class="cs-cat-info">
+								<div class="cs-cat-name"><?php echo html_escape($cat->name); ?></div>
+								<span class="cs-cat-meta">
+									<svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+										<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+									</svg>
+									<?php $qc = count($cat->questions);
+									echo $qc . ' question' . ($qc !== 1 ? 's' : ''); ?>
 								</span>
 							</div>
 
-							<div class="card-actions">
-								<a class="btn-secondary" href="<?php echo site_url('admin/categories?edit_category=' . (int) $category_item->id); ?>">
-									<span>✏️ Edit</span>
+							<div class="cs-cat-actions">
+								<a class="cs-btn cs-btn--ghost" href="<?php echo site_url('admin/categories?edit_category=' . (int)$cat->id); ?>">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+										<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+										<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+									</svg>
+									Edit
 								</a>
-								<a class="btn-danger" href="<?php echo site_url('admin/categories/delete/' . (int) $category_item->id); ?>" onclick="return confirm('⚠️ Are you sure you want to delete this category and all its questions?\n\nThis action cannot be undone.');">
-									<span>🗑️ Delete</span>
+								<a class="cs-btn cs-btn--danger" href="<?php echo site_url('admin/categories/delete/' . (int)$cat->id); ?>"
+									onclick="return confirm('Delete &quot;<?php echo addslashes(html_escape($cat->name)); ?>&quot; and all its questions?\nThis cannot be undone.');">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+										<polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+										<path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+										<path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+										<path d="M9 6V4h6v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+									</svg>
+									Delete
 								</a>
 							</div>
 						</div>
-					</article>
-				<?php endforeach; ?>
+					<?php endforeach; ?>
+				</div>
+
 			<?php else: ?>
-				<div class="empty-state">
-					<p><strong>📭 No categories found yet.</strong><br>Create your first category using the form on the left.</p>
+				<div class="cs-empty">
+					<div class="cs-empty-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+							<path d="M4 6h16M4 10h16M4 14h10M4 18h6" stroke="#5b5ef4" stroke-width="2" stroke-linecap="round" />
+						</svg>
+					</div>
+					<div class="cs-empty-title">No categories yet</div>
+					<p class="cs-empty-desc">Use the form on the left to create your first category.</p>
 				</div>
 			<?php endif; ?>
 		</div>
 	</section>
-</section>
+
+</div>
+
+<script>
+	(function() {
+		// Alert auto-dismiss
+		document.querySelectorAll('.c-alert').forEach(function(el) {
+			setTimeout(function() {
+				el.style.transition = 'opacity .3s';
+				el.style.opacity = '0';
+				setTimeout(function() {
+					el.remove();
+				}, 300);
+			}, 5000);
+		});
+
+		// Submit guard
+		document.querySelectorAll('form').forEach(function(form) {
+			form.addEventListener('submit', function() {
+				var btn = form.querySelector('button[type="submit"]');
+				if (btn) {
+					btn.disabled = true;
+					btn.style.opacity = '.6';
+					setTimeout(function() {
+						btn.disabled = false;
+						btn.style.opacity = '1';
+					}, 4000);
+				}
+			});
+		});
+	}());
+</script>

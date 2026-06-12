@@ -52,8 +52,8 @@ $result_amount_text = $is_settled
 $sell_trade_summary = isset($sell_trade_summary) && is_array($sell_trade_summary) ? $sell_trade_summary : array();
 $yes_price        = (float)$selected_question->yes_price;
 $no_price         = (float)$selected_question->no_price;
-$yes_multiplier   = isset($selected_question->yes_multiplier) && (float)$selected_question->yes_multiplier > 0 ? (float)$selected_question->yes_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
-$no_multiplier    = isset($selected_question->no_multiplier) && (float)$selected_question->no_multiplier > 0 ? (float)$selected_question->no_multiplier : ((isset($selected_question->multiplier) && (float)$selected_question->multiplier > 0) ? (float)$selected_question->multiplier : 1.25);
+$yes_multiplier   = $yes_price > 0 ? ($yes_price + $no_price) / $yes_price : 1.25;
+$no_multiplier    = $no_price > 0 ? ($yes_price + $no_price) / $no_price : 1.25;
 $market_total     = max(1.0, $yes_price + $no_price);
 $default_price    = $selected_answer === 'no' ? $no_price : $yes_price;
 $default_price    = $default_price > 0 ? $default_price : max($yes_price, $no_price, 0.5);
@@ -61,10 +61,8 @@ $default_quantity = $selected_answer_state ? max(1, min(1000, (int)$selected_ans
 $price_max        = max(0.5, $market_total - 0.5);
 $multiplier       = $selected_answer === 'no' ? $no_multiplier : $yes_multiplier;
 $locked_stake_amount = $selected_answer_state ? (float)($selected_answer_state->stake_amount ?? 0) : 0.0;
-$winning_preview  = $selected_answer_state && $locked_stake_amount > 0
-	? round($locked_stake_amount * $multiplier, 2)
-	: round($default_price * $default_quantity * $multiplier, 2);
-$locked_payout_amount = $selected_answer_state ? $winning_preview : 0.0;
+$winning_preview  = round(($yes_price + $no_price) * $default_quantity, 2);
+$locked_payout_amount = $winning_preview;
 $yes_trade_qty    = isset($trade_breakdown['yes_quantity']) ? (int)$trade_breakdown['yes_quantity'] : 0;
 $no_trade_qty     = isset($trade_breakdown['no_quantity'])  ? (int)$trade_breakdown['no_quantity']  : 0;
 $total_trade_qty  = $yes_trade_qty + $no_trade_qty;
@@ -1732,7 +1730,7 @@ if ($start_ts && $now < $start_ts) {
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">YES</div>
-										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?> per share · ×<?php echo number_format($yes_multiplier, 2); ?></div>
+										<div class="tp-tog-price">₹<?php echo number_format($yes_price, 2); ?> per share</div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">YES</span>
@@ -1747,7 +1745,7 @@ if ($start_ts && $now < $start_ts) {
 									<span class="tp-tog-dot"></span>
 									<div>
 										<div class="tp-tog-name">NO</div>
-										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?> per share · ×<?php echo number_format($no_multiplier, 2); ?></div>
+										<div class="tp-tog-price">₹<?php echo number_format($no_price, 2); ?> per share</div>
 									</div>
 								</div>
 								<span class="tp-tog-badge">NO</span>
@@ -1798,17 +1796,15 @@ if ($start_ts && $now < $start_ts) {
 					<div class="tp-stake">
 						<div class="tp-stake-hd">
 							<span class="tp-stake-hd-lbl">Trade summary</span>
-							<span class="tp-boost">×<span class="js-mult"><?php echo number_format($multiplier, 2); ?></span> boost active</span>
 						</div>
 						<div class="tp-stake-row"><span>Price × Quantity</span><strong class="js-formula">—</strong></div>
 						<div class="tp-stake-row tp-stake-total"><span>Total stake</span><strong class="js-stake">—</strong></div>
-						<div class="tp-stake-row tp-stake-win"><span>Winning preview (×<span class="js-mult-label"><?php echo number_format($multiplier, 2); ?></span>)</span><strong class="js-win">—</strong></div>
+						<div class="tp-stake-row tp-stake-win"><span>Winning preview</span><strong class="js-win">—</strong></div>
 					</div>
 
 					<!-- How it works -->
 					<div class="tp-info">
-						If your answer matches the result, <strong class="js-win-inline">—</strong> will be credited.
-						Formula: Price × Quantity × <span class="js-mult-formula"><?php echo number_format($multiplier, 2); ?></span>. Wrong answer = ₹0.00.
+						If your answer matches the result, <strong class="js-win-inline">—</strong> will be credited. Wrong answer = ₹0.00.
 					</div>
 
 					<?php if ($is_locked): ?>
@@ -2101,7 +2097,6 @@ if ($start_ts && $now < $start_ts) {
 		function update() {
 			var p = clamp(gP(), PMIN, PMAX),
 				q = gQ(),
-				m = gM(),
 				over = q > QMAX;
 			if (over) {
 				q = QMAX;
@@ -2110,7 +2105,8 @@ if ($start_ts && $now < $start_ts) {
 			if (qW) qW.classList.toggle('show', over);
 			q = clamp(q, QMIN, QMAX);
 			var stake = p * q,
-				win = stake * m;
+				win = (DYES + DNO) * q;
+			var m = stake > 0 ? (win / stake) : 1.25;
 			if (pH) pH.value = p.toFixed(2);
 			if (pD) pD.textContent = fmt(p);
 			if (qD) qD.textContent = q;
